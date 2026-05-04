@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "fsatapi-example"
+name = "alpaca-astro-center-backend"
 version = "0.1.0"
 description = ""
 authors = ["vyacheslav <skavik46111@gmail.com>"]
@@ -41,7 +41,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
 venvPath = "/home/slavchina/.cache/pypoetry/virtualenvs"
-venv = "fsatapi-example-xpLShB0C-py3.12"
+venv = "alpaca-astro-center-backend"
 typeCheckingMode = "basic"
 
 [tool.isort]

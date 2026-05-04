@@ -6,38 +6,34 @@ from aiojobs import Scheduler
 from punq import Container
 
 from application.api.lifespan import (
-    close_message_broker,
-    consume_in_background,
-    init_message_broker,
+    close_kafka_broker,
+    init_kafka_broker,
 )
-from application.api.messages.handlers import router as message_router
-from application.api.messages.websockets.messages import router as message_ws_router
+from application.api.system.handlers import router as system_router
+from application.api.telescope.handlers import router as telescope_router
 from logic.init import init_container
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_message_broker()
+    await init_kafka_broker()
 
     container: Container = init_container()
-    scheduler: Scheduler = container.resolve(Scheduler)
-
-    job = await scheduler.spawn(consume_in_background())
+    container.resolve(Scheduler)
 
     yield
-    await close_message_broker()
-    await job.close()
+    await close_kafka_broker()
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title='Simple Kafka Chat',
+        title='Alpaca Astro Center Backend',
         docs_url='/api/docs',
-        description='A simple kafka + ddd example.',
+        description='Local-first DDD backend for ASCOM Alpaca telescope control.',
         debug=True,
         lifespan=lifespan,
     )
-    app.include_router(message_router, prefix='/chats')
-    app.include_router(message_ws_router, prefix='/chats')
+    app.include_router(system_router)
+    app.include_router(telescope_router, prefix='/telescopes')
 
     return app

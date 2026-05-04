@@ -3,14 +3,13 @@ from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
-    mongodb_connection_uri: str = Field(alias='MONGO_DB_CONNECTION_URI')
-    mongodb_chat_database: str = Field(default='chat', alias='MONGODB_CHAT_DATABASE')
-    mongodb_chat_collection: str = Field(default='chat', alias='MONGODB_CHAT_COLLECTION')
-    mongodb_messages_collection: str = Field(default='messages', alias='MONGODB_MESSAGES_COLLECTION')
+    mongodb_connection_uri: str = Field(default='mongodb://localhost:27017', alias='MONGO_DB_CONNECTION_URI')
+    mongodb_database: str = Field(default='alpaca_astro_center', alias='MONGODB_DATABASE')
+    mongodb_telescope_collection: str = Field(default='telescopes', alias='MONGODB_TELESCOPE_COLLECTION')
+    mongodb_operation_collection: str = Field(default='operations', alias='MONGODB_OPERATION_COLLECTION')
 
-    new_message_received_topic: str = Field(default='new-messages')
-    new_chats_event_topic: str = Field(default='new-chats-topic')
-    chat_deleted_topic: str = Field(default='chat-deleted-topic')
-    new_listener_added_topic: str = Field(default='listener-added-topic')
+    telescope_status_topic: str = Field(default='telescope-status')
+    model_inference_request_topic: str = Field(default='model-inference-request')
+    model_inference_result_topic: str = Field(default='model-inference-result')
 
-    kafka_url: str = Field(alias='KAFKA_URL')
+    kafka_url: str = Field(default='localhost:9092', alias='KAFKA_URL')
