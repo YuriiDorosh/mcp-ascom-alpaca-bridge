@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.errors import (
+    OperationFailure,
+    PyMongoError,
+    ServerSelectionTimeoutError,
+)
 
+from domain.exceptions.infrastructure import InfrastructureUnavailableException
 from infra.repositories.operations.base import BaseModelInferenceRepository
 
 
@@ -30,12 +36,38 @@ class MongoDBModelInferenceRepository(BaseModelInferenceRepository):
             'error_message': error_message,
             'finished_at': finished_at,
         }
-        await self._collection.update_one(
-            {'request_id': request_id},
-            {'$set': payload},
-            upsert=True,
-        )
-        return payload
+        try:
+            await self._collection.update_one(
+                {'request_id': request_id},
+                {'$set': payload},
+                upsert=True,
+            )
+            return payload
+        except OperationFailure as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB authorization failed while saving inference result',
+            ) from exc
+        except ServerSelectionTimeoutError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB server is unreachable while saving inference result',
+            ) from exc
+        except PyMongoError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB operation failed while saving inference result',
+            ) from exc
 
     async def get_by_request_id(self, request_id: str) -> dict | None:
-        return await self._collection.find_one({'request_id': request_id}, {'_id': 0})
+        try:
+            return await self._collection.find_one({'request_id': request_id}, {'_id': 0})
+        except OperationFailure as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB authorization failed while reading inference result',
+            ) from exc
+        except ServerSelectionTimeoutError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB server is unreachable while reading inference result',
+            ) from exc
+        except PyMongoError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB operation failed while reading inference result',
+            ) from exc

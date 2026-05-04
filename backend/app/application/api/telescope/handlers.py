@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from fastapi import HTTPException
 
+from domain.exceptions.infrastructure import InfrastructureUnavailableException
 from application.api.telescope.schemas import (
     ModelInferenceEnqueuedSchema,
     ModelInferenceResultSchema,
@@ -21,7 +22,10 @@ router = APIRouter(tags=['telescope'])
 async def get_telescope_status():
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
-    response = await mediator.handle_query(GetTelescopeStatusQuery())
+    try:
+        response = await mediator.handle_query(GetTelescopeStatusQuery())
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
 
     return TelescopeStatusSchema(**response)
 
@@ -39,7 +43,10 @@ async def enqueue_model_inference(schema: ModelInferenceRequestSchema):
 async def get_model_inference_result(request_id: str):
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
-    result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
+    try:
+        result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
 
     if result is None:
         raise HTTPException(status_code=404, detail='Inference result not found')
