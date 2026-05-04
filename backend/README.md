@@ -1,6 +1,6 @@
-# FastAPI + Kafka DDD chat Application w\ MongoDB
+# Alpaca Astro Center Backend
 
-This is a basic template for Django projects configured to use Docker Compose, Makefile, and PostgreSQL.
+Local-first FastAPI backend for ASCOM Alpaca telescope control with DDD architecture, Kafka messaging, and MongoDB persistence.
 
 ## Requirements
 
@@ -13,23 +13,50 @@ This is a basic template for Django projects configured to use Docker Compose, M
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your_username/your_repository.git
-   cd your_repository
+   git clone https://github.com/YuriiDorosh/mcp-ascom-alpaca-bridge.git
+   cd mcp-ascom-alpaca-bridge/backend
+   cp .env.example .env
 
-2. Install all required packages in `Requirements` section.
+2. Adjust `.env` values for your environment if needed.
 
 
 ### Implemented Commands
 
-* `make app` - up application and database/infrastructure
-* `make app-logs` - follow the logs in app container
-* `make app-down` - down application and all infrastructure
-* `make app-shell` - go to contenerized interactive shell (bash)
+- `make app-dev` - build and start backend + Kafka stack in detached mode
+- `make app-dev-logs` - stream logs for the development app compose file
+- `make storages` - start MongoDB services
+- `make ui` - start Mongo Express UI
+- `make down-dev` - stop app-dev + Kafka stack
+- `make down` - stop all compose stacks
+- `make purge` - stop infra stacks and remove volumes
+- `make shell` - open interactive shell in `main-app` container
+- `make test` - run pytest inside `main-app` container
 
-### Most Used Django Specific Commands
+## Recommended Local Startup Order
 
-* `make migrations` - make migrations to models
-* `make migrate` - apply all made migrations
-* `make collectstatic` - collect static
-* `make superuser` - create admin user
-* `make test` - test application with pytest
+```bash
+make storages
+make app-dev
+```
+
+Then verify:
+
+- API docs: <http://localhost:8000/api/docs>
+- Kafka UI: <http://localhost:8090>
+- Mongo Express (if `make ui` was started): <http://localhost:8081>
+
+## Kafka Startup Troubleshooting
+
+If `make app-dev` fails with `container ... kafka ... exited (1)`:
+
+1. Check Kafka logs:
+   ```bash
+   docker compose -f docker_compose/app.dev.yaml -f docker_compose/kafka.yaml --env-file .env logs kafka
+   ```
+2. Ensure Docker daemon is running and healthy.
+3. Ensure ports `29092`, `22181`, and `8090` are free.
+4. Restart stack:
+   ```bash
+   make down-dev
+   make app-dev
+   ```

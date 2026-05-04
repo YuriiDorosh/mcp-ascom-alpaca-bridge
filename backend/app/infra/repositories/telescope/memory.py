@@ -10,3 +10,7 @@ class InMemoryTelescopeRepository(BaseTelescopeRepository):
 
     async def get_primary(self) -> Telescope:
         return self.telescope
+
+    async def save_primary(self, telescope: Telescope) -> Telescope:
+        self.telescope = telescope
+        return self.telescope

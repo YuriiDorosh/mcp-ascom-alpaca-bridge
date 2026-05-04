@@ -7,6 +7,7 @@ from punq import Container
 
 from application.api.lifespan import (
     close_kafka_broker,
+    consume_model_inference_results,
     init_kafka_broker,
 )
 from application.api.system.handlers import router as system_router
@@ -19,9 +20,11 @@ async def lifespan(app: FastAPI):
     await init_kafka_broker()
 
     container: Container = init_container()
-    container.resolve(Scheduler)
+    scheduler: Scheduler = container.resolve(Scheduler)
+    job = await scheduler.spawn(consume_model_inference_results())
 
     yield
+    await job.close()
     await close_kafka_broker()
 
 

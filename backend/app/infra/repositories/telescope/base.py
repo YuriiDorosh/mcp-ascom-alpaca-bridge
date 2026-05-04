@@ -10,3 +10,7 @@ class BaseTelescopeRepository(ABC):
     @abstractmethod
     async def get_primary(self) -> Telescope:
         ...
+
+    @abstractmethod
+    async def save_primary(self, telescope: Telescope) -> Telescope:
+        ...
