@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  main-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+
+    environment:
+      MONGO_DB_CONNECTION_URI: ${MONGO_DB_CONNECTION_URI:?}
+      KAFKA_URL: ${KAFKA_URL:?} 
+
+    container_name: main-app

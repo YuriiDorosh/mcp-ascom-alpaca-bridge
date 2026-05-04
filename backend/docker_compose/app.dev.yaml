@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  main-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+
+    environment:
+      MONGO_DB_CONNECTION_URI: ${MONGO_DB_CONNECTION_URI:?}
+      KAFKA_URL: ${KAFKA_URL:?}
+
+    ports:
+      - "${API_PORT}:8000"
+      - "${DEBUG_PORT}:5678"
+
+    volumes:
+      - ../app/:/app/
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    command: "debugpy --listen 0.0.0.0:5678 -m uvicorn --factory application.api.main:create_app --timeout-graceful-shutdown 2 --host 0.0.0.0 --port 8000 --reload"
