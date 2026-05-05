@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter
+from fastapi import Header
 from fastapi import HTTPException
 from fastapi import Query
 
@@ -39,9 +40,20 @@ from logic.queries.coordinates import GetHorizontalFromIcrsQuery
 from logic.queries.ephemeris import GetSolarSystemBodyIcrsQuery
 from logic.queries.model_inference import GetModelInferenceResultQuery
 from logic.queries.telescope import GetTelescopeStatusQuery
+from settings.config import Config
 
 
 router = APIRouter(tags=['telescope'])
+
+
+def _require_command_auth(x_command_token: str | None):
+    container = init_container()
+    config: Config = container.resolve(Config)
+    expected = config.command_auth_token
+    if expected is None:
+        return
+    if x_command_token != expected:
+        raise HTTPException(status_code=401, detail='Missing or invalid command auth token')
 
 
 @router.get('/status', response_model=TelescopeStatusSchema)
@@ -90,7 +102,11 @@ async def radec_to_altaz(schema: RadecToAltAzRequestSchema):
 
 
 @router.post('/commands/slew-icrs', response_model=TelescopeCommandAckSchema)
-async def slew_mount_to_icrs(body: IcrsHourAngleDecSchema):
+async def slew_mount_to_icrs(
+    body: IcrsHourAngleDecSchema,
+    x_command_token: Annotated[str | None, Header(alias='X-Command-Token')] = None,
+):
+    _require_command_auth(x_command_token)
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
     try:
@@ -104,7 +120,11 @@ async def slew_mount_to_icrs(body: IcrsHourAngleDecSchema):
 
 
 @router.post('/commands/sync-icrs', response_model=TelescopeCommandAckSchema)
-async def sync_mount_to_icrs(body: IcrsHourAngleDecSchema):
+async def sync_mount_to_icrs(
+    body: IcrsHourAngleDecSchema,
+    x_command_token: Annotated[str | None, Header(alias='X-Command-Token')] = None,
+):
+    _require_command_auth(x_command_token)
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
     try:
@@ -118,7 +138,11 @@ async def sync_mount_to_icrs(body: IcrsHourAngleDecSchema):
 
 
 @router.post('/commands/tracking', response_model=TelescopeCommandAckSchema)
-async def set_telescope_tracking(body: SetTelescopeTrackingRequestSchema):
+async def set_telescope_tracking(
+    body: SetTelescopeTrackingRequestSchema,
+    x_command_token: Annotated[str | None, Header(alias='X-Command-Token')] = None,
+):
+    _require_command_auth(x_command_token)
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
     try:

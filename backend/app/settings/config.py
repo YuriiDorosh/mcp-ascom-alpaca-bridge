@@ -32,3 +32,5 @@ class Config(BaseSettings):
 
     ephemeris_enabled: bool = Field(default=False, alias='EPHEMERIS_ENABLED')
     ephemeris_kernel: str = Field(default='de421.bsp', alias='EPHEMERIS_KERNEL')
+
+    command_auth_token: str | None = Field(default=None, alias='COMMAND_AUTH_TOKEN')

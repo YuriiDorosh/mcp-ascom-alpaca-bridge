@@ -57,22 +57,29 @@ class RecordingBroker(BaseMessageBroker):
 
 class StubConfig:
     telescope_operation_topic = 'telescope-operation-events'
+    command_auth_token = None
 
 
 class FakeContainer:
-    def __init__(self, mediator: Mediator):
+    def __init__(self, mediator: Mediator, config: StubConfig):
         self._mediator = mediator
+        self._config = config
 
     def resolve(self, cls):
+        from settings.config import Config
+
         if cls is Mediator:
             return self._mediator
+        if cls is Config:
+            return self._config
         raise KeyError(cls)
 
 
-def _build_test_app(broker: RecordingBroker, monkeypatch) -> FastAPI:
+def _build_test_app(broker: RecordingBroker, monkeypatch, *, command_auth_token: str | None = None) -> FastAPI:
     mediator = Mediator()
     alpaca = RecordingTelescopePort()
     config = StubConfig()
+    config.command_auth_token = command_auth_token
 
     mediator.register_command(
         SlewToIcrsCommand,
@@ -87,7 +94,7 @@ def _build_test_app(broker: RecordingBroker, monkeypatch) -> FastAPI:
         [SetTelescopeTrackingCommandHandler(_mediator=mediator, alpaca_telescope=alpaca, message_broker=broker, config=config)],
     )
 
-    fake_container = FakeContainer(mediator=mediator)
+    fake_container = FakeContainer(mediator=mediator, config=config)
     monkeypatch.setattr(telescope_handlers, 'init_container', lambda: fake_container)
 
     app = FastAPI()
@@ -116,3 +123,19 @@ def test_telescope_commands_publish_operation_events(monkeypatch):
     assert payloads[2]['operation'] == 'set-tracking'
     assert all(payload['schema_version'] == 'v1' for payload in payloads)
     assert all(payload['correlation_id'] == payload['event_id'] for payload in payloads)
+
+
+def test_telescope_command_auth_guard_requires_token_when_configured(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch, command_auth_token='secret-token')
+    client = TestClient(app)
+
+    unauthorized = client.post('/telescopes/commands/tracking', json={'enabled': True})
+    authorized = client.post(
+        '/telescopes/commands/tracking',
+        json={'enabled': True},
+        headers={'X-Command-Token': 'secret-token'},
+    )
+
+    assert unauthorized.status_code == 401
+    assert authorized.status_code == 200
