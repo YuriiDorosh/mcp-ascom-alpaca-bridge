@@ -50,6 +50,7 @@ Core operating model:
 ## Local AI Model Microservice Concept
 
 The local model runtime is a separate FastAPI microservice. It is not embedded directly into the main backend process.
+Phase 4 foundation now includes a dedicated `model-service/` skeleton with Kafka request/result wiring and a deterministic mock runtime.
 
 ### Why separate service
 - Isolates model runtime dependencies from telescope control core.
