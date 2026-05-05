@@ -51,6 +51,13 @@ class ResolvedCatalogIcrsSchema(BaseModel):
     dec_degrees: float
 
 
+class EphemerisIcrsResponseSchema(BaseModel):
+    body: str
+    obstime_utc: str
+    ra_hours: float
+    dec_degrees: float
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 

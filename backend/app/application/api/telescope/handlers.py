@@ -9,8 +9,11 @@ from domain.exceptions.telescope import AlpacaDriverException
 from domain.exceptions.telescope import CatalogLookupDisabledException
 from domain.exceptions.telescope import CatalogLookupTimeoutException
 from domain.exceptions.telescope import CoordinateTransformException
+from domain.exceptions.telescope import EphemerisDisabledException
+from domain.exceptions.telescope import EphemerisUnavailableException
 from domain.exceptions.telescope import UnresolvedObjectNameException
 from application.api.telescope.schemas import (
+    EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
     ModelInferenceEnqueuedSchema,
@@ -32,6 +35,7 @@ from logic.commands.telescope_control import (
 from logic.mediator.base import Mediator
 from logic.queries.catalog import ResolveCommonNameToIcrsQuery
 from logic.queries.coordinates import GetHorizontalFromIcrsQuery
+from logic.queries.ephemeris import GetSolarSystemBodyIcrsQuery
 from logic.queries.model_inference import GetModelInferenceResultQuery
 from logic.queries.telescope import GetTelescopeStatusQuery
 
@@ -130,6 +134,28 @@ async def catalog_resolve_icrs(
         raise HTTPException(status_code=404, detail=exc.message) from exc
 
     return ResolvedCatalogIcrsSchema(**payload)
+
+
+@router.get('/ephemeris/icrs', response_model=EphemerisIcrsResponseSchema)
+async def ephemeris_icrs(
+    body: Annotated[str, Query(min_length=1, description='Solar system target name, e.g. mars.')],
+    obstime_utc_iso: Annotated[str, Query(description='UTC instant in ISO-8601 format.')],
+):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        payload = await mediator.handle_query(
+            GetSolarSystemBodyIcrsQuery(
+                body=body,
+                obstime_utc_iso=obstime_utc_iso,
+            ),
+        )
+    except EphemerisDisabledException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+    except EphemerisUnavailableException as exc:
+        raise HTTPException(status_code=400, detail=exc.message) from exc
+
+    return EphemerisIcrsResponseSchema(**payload)
 
 
 @router.post('/model/inference', response_model=ModelInferenceEnqueuedSchema)

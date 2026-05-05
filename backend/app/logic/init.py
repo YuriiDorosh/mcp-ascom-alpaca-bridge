@@ -17,9 +17,11 @@ from domain.ports.alpaca_client import (
 )
 from domain.ports.catalog_resolve import ICatalogResolveService
 from domain.ports.coordinate_transform import ICoordinateTransformService
+from domain.ports.ephemeris import IEphemerisService
 from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
 from infra.integrations.astroquery.catalog_resolve import SesameBackedCatalogResolveService
 from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
+from infra.integrations.skyfield.ephemeris import SkyfieldEphemerisService
 from infra.message_brokers.base import BaseMessageBroker
 from infra.message_brokers.kafka import KafkaMessageBroker
 from infra.repositories.operations.base import BaseModelInferenceRepository
@@ -47,6 +49,10 @@ from logic.queries.catalog import (
 from logic.queries.coordinates import (
     GetHorizontalFromIcrsQuery,
     GetHorizontalFromIcrsQueryHandler,
+)
+from logic.queries.ephemeris import (
+    GetSolarSystemBodyIcrsQuery,
+    GetSolarSystemBodyIcrsQueryHandler,
 )
 from logic.queries.model_inference import (
     GetModelInferenceResultQuery,
@@ -122,6 +128,11 @@ def _init_container() -> Container:
         factory=lambda: SesameBackedCatalogResolveService(config=config),
         scope=Scope.singleton,
     )
+    container.register(
+        IEphemerisService,
+        factory=lambda: SkyfieldEphemerisService(config=config),
+        scope=Scope.singleton,
+    )
 
     def init_mediator() -> Mediator:
         mediator = Mediator()
@@ -158,6 +169,9 @@ def _init_container() -> Container:
         resolve_name_handler = ResolveCommonNameToIcrsHandler(
             catalog=container.resolve(ICatalogResolveService),
         )
+        get_solar_body_handler = GetSolarSystemBodyIcrsQueryHandler(
+            ephemeris=container.resolve(IEphemerisService),
+        )
 
         mediator.register_query(
             GetTelescopeStatusQuery,
@@ -174,6 +188,10 @@ def _init_container() -> Container:
         mediator.register_query(
             ResolveCommonNameToIcrsQuery,
             resolve_name_handler,
+        )
+        mediator.register_query(
+            GetSolarSystemBodyIcrsQuery,
+            get_solar_body_handler,
         )
 
         mediator.register_command(

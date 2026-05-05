@@ -28,3 +28,6 @@ class Config(BaseSettings):
 
     catalog_lookup_enabled: bool = Field(default=False, alias='CATALOG_LOOKUP_ENABLED')
     catalog_resolve_timeout_seconds: float = Field(default=20.0, alias='CATALOG_RESOLVE_TIMEOUT_SECONDS')
+
+    ephemeris_enabled: bool = Field(default=False, alias='EPHEMERIS_ENABLED')
+    ephemeris_kernel: str = Field(default='de421.bsp', alias='EPHEMERIS_KERNEL')

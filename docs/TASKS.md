@@ -50,7 +50,7 @@
 - [x] Implement RA/Dec to Alt/Az conversion utility with observer location/time inputs (HTTP `/telescopes/coordinates/radec-to-altaz`).
 - [x] Add deterministic tests for coordinate transforms with fixed timestamps.
 - [x] Create `IEphemerisService` interface for Solar System targets (`domain/ports/ephemeris.py`).
-- [ ] Add initial `skyfield` implementation for planetary target coordinates.
+- [x] Add initial `skyfield` implementation for planetary target coordinates (DI-backed `SkyfieldEphemerisService` + `GET /telescopes/ephemeris/icrs`).
 - [x] Create target-resolution abstraction for SIMBAD/VizieR lookups (`domain/ports/catalog_resolve.py`).
 - [x] Add initial catalog object-name adapter with timeouts (`SesameBackedCatalogResolveService` using `SkyCoord.from_name`, `asyncio.wait_for`; HTTP `/telescopes/catalog/icrs`, env `CATALOG_LOOKUP_ENABLED`).
 - [x] Define starter domain telescope/coordinate/ephemeris error types (`AlpacaDriverException`, `CoordinateTransformException`, etc.).

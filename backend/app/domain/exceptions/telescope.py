@@ -31,6 +31,14 @@ class EphemerisUnavailableException(ApplicationException):
 
 
 @dataclass(eq=False)
+class EphemerisDisabledException(ApplicationException):
+
+    @property
+    def message(self) -> str:
+        return 'Ephemeris queries are disabled; set EPHEMERIS_ENABLED=true in the environment.'
+
+
+@dataclass(eq=False)
 class UnresolvedObjectNameException(ApplicationException):
     object_name: str
 
