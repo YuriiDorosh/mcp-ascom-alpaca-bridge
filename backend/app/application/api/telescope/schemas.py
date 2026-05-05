@@ -69,6 +69,20 @@ class EphemerisIcrsResponseSchema(BaseModel):
     dec_degrees: float
 
 
+class McpContextWarningSchema(BaseModel):
+    source: Literal['catalog', 'ephemeris', 'status']
+    code: str
+    message: str
+
+
+class TelescopeMcpContextSchema(BaseModel):
+    capabilities: TelescopeCapabilitiesSchema
+    telescope_status: TelescopeStatusSchema | None = None
+    catalog_target: ResolvedCatalogIcrsSchema | None = None
+    ephemeris_target: EphemerisIcrsResponseSchema | None = None
+    warnings: list[McpContextWarningSchema] = []
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 
