@@ -71,3 +71,8 @@ If `make app-dev` fails with `container ... kafka ... exited (1)`:
    make down-dev
    make app-dev
    ```
+
+## Kafka Contracts and Consumer Safety
+
+- Event contract and versioning policy: `docs/KAFKA_EVENT_POLICY.md`
+- Includes topic naming conventions, schema evolution rules, and restart-safe/idempotent consumer guidance.

@@ -72,8 +72,8 @@
 ## Phase 3 Kickoff Checklist
 
 - [x] Add explicit contract metadata (`schema_version`, `correlation_id`) to Kafka message contracts used by inference and telescope operation events.
-- [ ] Document topic naming/versioning policy and backward-compatibility rules for future event schema changes.
-- [ ] Define restart-safe processing and idempotency strategy for telescope operation consumers.
+- [x] Document topic naming/versioning policy and backward-compatibility rules for future event schema changes (`docs/KAFKA_EVENT_POLICY.md`).
+- [x] Define restart-safe processing and idempotency strategy for telescope operation consumers (`docs/KAFKA_EVENT_POLICY.md`, consumer ledger + offset discipline guidance).
 
 ## Phase 4 Dependency Notes (TODO references)
 
