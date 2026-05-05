@@ -10,6 +10,7 @@
 - [x] Identify all modules under `backend/app` that implement chat/message logic.
 - [x] Remove or deprecate legacy chat API routes from FastAPI router registration.
 - [x] Remove chat websocket endpoints that are tied to chat rooms/messages.
+- [x] Remove leftover websocket/chat legacy manager abstractions from infra/application core.
 - [x] Remove chat-specific Pydantic schemas and DTOs from API layer.
 - [x] Remove chat/message command handlers from application logic.
 - [x] Remove chat/message query handlers from application logic.
@@ -79,5 +80,5 @@
 ## Phase 4 Dependency Notes (TODO references)
 
 - TODO(P4-MCP-TOOLS): Expose telescope command/query capabilities as MCP tools with explicit capability flags (`supports_slew`, `supports_sync`, `supports_tracking`) to prevent unsafe tool execution paths. [DONE-foundation: capability flags surfaced via `/telescopes/status` + `/telescopes/capabilities`]
-- TODO(P4-MCP-AUTH): Define local-network trust/auth strategy for MCP actions that can move hardware (token/session model + audit trail).
+- TODO(P4-MCP-AUTH): Define local-network trust/auth strategy for MCP actions that can move hardware (token/session model + audit trail). [DONE-foundation: optional `COMMAND_AUTH_TOKEN` + `X-Command-Token` guard on `/telescopes/commands/*`]
 - TODO(P4-MCP-CONTEXT): Wire catalog + ephemeris + live telescope status into MCP context assembly so tool-calling agents can reason over target/object/position state before command dispatch.
