@@ -1,9 +1,11 @@
 import pytest
+import orjson
 
 from domain.ports.alpaca_client import (
     AlpacaLiveSnapshot,
     IAlpacaTelescopeClient,
 )
+from infra.message_brokers.base import BaseMessageBroker
 from logic.commands.telescope_control import (
     SetTelescopeTrackingCommand,
     SetTelescopeTrackingCommandHandler,
@@ -36,14 +38,46 @@ class RecordingTelescopePort(IAlpacaTelescopeClient):
         self.tracking_calls.append(enabled)
 
 
+class RecordingBroker(BaseMessageBroker):
+    def __init__(self) -> None:
+        self.messages: list[tuple[bytes, str, bytes]] = []
+
+    async def start(self):
+        return None
+
+    async def close(self):
+        return None
+
+    async def send_message(self, key: str, topic: str, value: bytes):
+        self.messages.append((key, topic, value))
+
+    async def start_consuming(self, topic: str):
+        if False:
+            yield topic
+
+    async def stop_consuming(self, topic: str):
+        return None
+
+
+class StubConfig:
+    telescope_operation_topic = 'telescope-operation-events'
+
+
 @pytest.mark.asyncio
 async def test_command_handlers_invoke_alpaca_port():
     port = RecordingTelescopePort()
+    broker = RecordingBroker()
+    config = StubConfig()
     mediator = Mediator()
 
-    slew_h = SlewToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port)
-    sync_h = SyncMountToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port)
-    track_h = SetTelescopeTrackingCommandHandler(_mediator=mediator, alpaca_telescope=port)
+    slew_h = SlewToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port, message_broker=broker, config=config)
+    sync_h = SyncMountToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port, message_broker=broker, config=config)
+    track_h = SetTelescopeTrackingCommandHandler(
+        _mediator=mediator,
+        alpaca_telescope=port,
+        message_broker=broker,
+        config=config,
+    )
 
     assert await slew_h.handle(SlewToIcrsCommand(ra_hours=5.5, dec_degrees=10.25)) == {'status': 'ok'}
     assert await sync_h.handle(SyncMountToIcrsCommand(ra_hours=5.5, dec_degrees=10.25)) == {'status': 'ok'}
@@ -52,3 +86,11 @@ async def test_command_handlers_invoke_alpaca_port():
     assert port.slew_calls == [(5.5, 10.25)]
     assert port.sync_calls == [(5.5, 10.25)]
     assert port.tracking_calls == [True]
+    assert len(broker.messages) == 3
+    topics = [topic for _key, topic, _value in broker.messages]
+    assert topics == ['telescope-operation-events', 'telescope-operation-events', 'telescope-operation-events']
+
+    payloads = [orjson.loads(value) for _key, _topic, value in broker.messages]
+    assert payloads[0]['operation'] == 'slew-icrs'
+    assert payloads[1]['operation'] == 'sync-icrs'
+    assert payloads[2]['operation'] == 'set-tracking'

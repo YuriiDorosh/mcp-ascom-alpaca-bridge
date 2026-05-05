@@ -15,6 +15,7 @@ class Config(BaseSettings):
     mongodb_operation_collection: str = Field(default='operations', alias='MONGODB_OPERATION_COLLECTION')
 
     telescope_status_topic: str = Field(default='telescope-status')
+    telescope_operation_topic: str = Field(default='telescope-operation-events', alias='TELESCOPE_OPERATION_TOPIC')
     model_inference_request_topic: str = Field(default='model-inference-request')
     model_inference_result_topic: str = Field(default='model-inference-result')
 

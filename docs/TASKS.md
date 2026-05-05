@@ -55,7 +55,7 @@
 - [x] Add initial catalog object-name adapter with timeouts (`SesameBackedCatalogResolveService` using `SkyCoord.from_name`, `asyncio.wait_for`; HTTP `/telescopes/catalog/icrs`, env `CATALOG_LOOKUP_ENABLED`).
 - [x] Define starter domain telescope/coordinate/ephemeris error types (`AlpacaDriverException`, `CoordinateTransformException`, etc.).
 - [x] Ensure telescope command/catalog paths map Alpaca/driver and lookup failures via domain exceptions (`AlpacaDriverException`, `UnresolvedObjectNameException`, etc.) to HTTP statuses in the FastAPI boundary.
-- [ ] Publish telescope operation events to Kafka from domain event handlers.
+- [x] Publish telescope operation events to Kafka from command handlers (topic `telescope-operation-events`, configurable via `TELESCOPE_OPERATION_TOPIC`).
 - [x] Define initial Kafka event schema placeholders for model-service interaction.
 - [x] Create interface contracts for inference request/result events.
 - [ ] Add integration tests for Alpaca adapter against simulator or mocked endpoints.
