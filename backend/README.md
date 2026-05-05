@@ -43,7 +43,9 @@ Then verify:
 
 - API docs: <http://localhost:8000/api/docs>
 - Kafka UI: <http://localhost:8090>
-- Mongo Express (if `make ui` was started): <http://localhost:8081>
+- Telescope status JSON: `GET http://localhost:8000/telescopes/status`
+- RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`
+- Mongo Express (if `make ui` was started): <http://localhost:28081>
 
 ## Kafka Startup Troubleshooting
 

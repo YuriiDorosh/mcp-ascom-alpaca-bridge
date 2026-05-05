@@ -1,8 +1,14 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+)
 
 
 class Config(BaseSettings):
+    model_config = SettingsConfigDict(
+        protected_namespaces=('settings_',),
+    )
     mongodb_connection_uri: str = Field(default='mongodb://localhost:27017', alias='MONGO_DB_CONNECTION_URI')
     mongodb_database: str = Field(default='alpaca_astro_center', alias='MONGODB_DATABASE')
     mongodb_telescope_collection: str = Field(default='telescopes', alias='MONGODB_TELESCOPE_COLLECTION')
@@ -13,3 +19,9 @@ class Config(BaseSettings):
     model_inference_result_topic: str = Field(default='model-inference-result')
 
     kafka_url: str = Field(default='localhost:9092', alias='KAFKA_URL')
+
+    alpaca_enabled: bool = Field(default=False, alias='ALPACA_ENABLED')
+    alpaca_address: str = Field(default='127.0.0.1:11111', alias='ALPACA_ADDRESS')
+    alpaca_device_number: int = Field(default=0, alias='ALPACA_DEVICE_NUMBER')
+    alpaca_protocol: str = Field(default='http', alias='ALPACA_PROTOCOL')
+    alpaca_connect_timeout_seconds: float = Field(default=8.0, alias='ALPACA_CONNECT_TIMEOUT_SECONDS')

@@ -20,6 +20,10 @@ orjson = "^3.10.0"
 websockets = "^12.0"
 aiojobs = "^1.2.1"
 debugpy = "^1.8.7"
+alpyca = "^3.1.2"
+astropy = "^7.1.0"
+skyfield = "^1.53"
+astroquery = "^0.4.11"
 
 
 [tool.poetry.group.lint.dependencies]
@@ -58,7 +62,7 @@ combine_star=true
 skip_gitignore=true
 balanced_wrapping=true
 force_grid_wrap=2
-src_paths=["core", ]
+src_paths=["app"]
 skip_glob=[
     ".git",
     ".idea",
@@ -76,3 +80,8 @@ sections=[
     "FIRSTPARTY",
     "LOCALFOLDER",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["app"]
+testpaths = ["tests"]

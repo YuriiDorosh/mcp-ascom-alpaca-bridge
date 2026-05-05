@@ -15,6 +15,10 @@ from infra.message_brokers.base import BaseMessageBroker
 from infra.message_brokers.kafka import KafkaMessageBroker
 from infra.repositories.operations.base import BaseModelInferenceRepository
 from infra.repositories.operations.mongo import MongoDBModelInferenceRepository
+from domain.ports.alpaca_client import IAlpacaClient
+from domain.ports.coordinate_transform import ICoordinateTransformService
+from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
+from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
 from infra.repositories.telescope.base import BaseTelescopeRepository
 from infra.repositories.telescope.mongo import MongoDBTelescopeRepository
 from logic.commands.model_inference import (
@@ -26,6 +30,10 @@ from logic.mediator.event import EventMediator
 from logic.queries.model_inference import (
     GetModelInferenceResultQuery,
     GetModelInferenceResultQueryHandler,
+)
+from logic.queries.coordinates import (
+    GetHorizontalFromIcrsQuery,
+    GetHorizontalFromIcrsQueryHandler,
 )
 from logic.queries.telescope import (
     GetTelescopeStatusQuery,
@@ -83,12 +91,26 @@ def _init_container() -> Container:
 
     container.register(BaseTelescopeRepository, factory=create_telescope_repository, scope=Scope.singleton)
     container.register(BaseModelInferenceRepository, factory=create_model_inference_repository, scope=Scope.singleton)
+    container.register(
+        IAlpacaClient,
+        factory=lambda: AlpycaTelescopeClient(config=config),
+        scope=Scope.singleton,
+    )
+    container.register(
+        ICoordinateTransformService,
+        instance=AstropyCoordinateTransformService(),
+        scope=Scope.singleton,
+    )
 
     def init_mediator() -> Mediator:
         mediator = Mediator()
 
         get_telescope_status_handler = GetTelescopeStatusQueryHandler(
             telescope_repository=container.resolve(BaseTelescopeRepository),
+            alpaca_client=container.resolve(IAlpacaClient),
+        )
+        get_horizontal_from_icrs_handler = GetHorizontalFromIcrsQueryHandler(
+            transforms=container.resolve(ICoordinateTransformService),
         )
         enqueue_model_inference_handler = EnqueueModelInferenceCommandHandler(
             _mediator=mediator,
@@ -102,6 +124,10 @@ def _init_container() -> Container:
         mediator.register_query(
             GetTelescopeStatusQuery,
             get_telescope_status_handler,
+        )
+        mediator.register_query(
+            GetHorizontalFromIcrsQuery,
+            get_horizontal_from_icrs_handler,
         )
         mediator.register_query(
             GetModelInferenceResultQuery,

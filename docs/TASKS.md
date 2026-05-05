@@ -17,13 +17,14 @@
 - [x] Remove chat/message Mongo repository adapters.
 - [x] Introduce new bounded-context package for telescope domain (`telescope`).
 - [x] Create initial `Telescope` domain entity (identity, capabilities, connection state).
-- [ ] Create initial value objects for coordinates and telescope status snapshots.
+- [x] Create initial value objects for coordinates and telescope status snapshots.
 - [ ] Define domain events for telescope lifecycle transitions.
 - [ ] Define command contracts for telescope control intents.
 - [x] Define query contracts for telescope status retrieval intents.
 - [x] Define `ITelescopeRepository` interface.
-- [ ] Define `IAlpacaClient` interface as an external port.
-- [ ] Define `ICoordinateTransformService` interface as a domain-support port.
+- [x] Define `IAlpacaClient` interface as an external port.
+- [x] Define `ICoordinateTransformService` interface as a domain-support port.
+- [x] Define `IEphemerisService` and `ICatalogResolveService` port stubs (implementations wired later).
 - [x] Update DI container registrations in composition root to remove chat dependencies.
 - [x] Register placeholder/stub telescope services to validate app startup.
 - [x] Ensure app lifespan still initializes Kafka and core dependencies safely.
@@ -34,23 +35,23 @@
 
 ## Phase 2 - Alpyca and Astropy Integration
 
-- [ ] Add required dependencies: `alpyca`, `astropy`, `skyfield`, `astroquery`.
-- [ ] Verify dependency pinning/version policy in `pyproject.toml`.
-- [ ] Create infra adapter implementing `IAlpacaClient` with `alpyca`.
-- [ ] Add Alpaca configuration model (host, port, device number, timeouts).
-- [ ] Implement telescope connection/capability discovery use-case.
-- [ ] Implement query handler for telescope status via `IAlpacaClient`.
+- [x] Add required dependencies: `alpyca`, `astropy`, `skyfield`, `astroquery`.
+- [x] Verify dependency pinning/version policy in `pyproject.toml`.
+- [x] Create infra adapter implementing `IAlpacaClient` with `alpyca` (`AlpycaTelescopeClient` snapshot probe).
+- [x] Add Alpaca configuration model (host, port, device number, timeouts).
+- [x] Implement lightweight Alpaca connectivity snapshot (pollable discovery path for LAN Alpaca servers).
+- [x] Extend telescope status query payload with optional Alpaca snapshot when probing is enabled.
 - [ ] Implement command handler for slew-to-coordinates flow.
 - [ ] Implement command handler for sync flow (where supported).
 - [ ] Implement command handler for tracking on/off.
-- [ ] Create `ICoordinateTransformService` implementation using `astropy`.
-- [ ] Implement RA/Dec to Alt/Az conversion utility with observer location/time inputs.
-- [ ] Add deterministic tests for coordinate transforms with fixed timestamps.
-- [ ] Create `IEphemerisService` interface for Solar System targets.
+- [x] Create `ICoordinateTransformService` implementation using `astropy`.
+- [x] Implement RA/Dec to Alt/Az conversion utility with observer location/time inputs (HTTP `/telescopes/coordinates/radec-to-altaz`).
+- [x] Add deterministic tests for coordinate transforms with fixed timestamps.
+- [x] Create `IEphemerisService` interface for Solar System targets (`domain/ports/ephemeris.py`).
 - [ ] Add initial `skyfield` implementation for planetary target coordinates.
-- [ ] Create target-resolution abstraction for SIMBAD/VizieR lookups.
+- [x] Create target-resolution abstraction for SIMBAD/VizieR lookups (`domain/ports/catalog_resolve.py`).
 - [ ] Add initial `astroquery` adapter with timeout/error handling strategy.
-- [ ] Define domain-level error taxonomy for telescope and coordinate failures.
+- [x] Define starter domain telescope/coordinate/ephemeris error types (`AlpacaDriverException`, `CoordinateTransformException`, etc.).
 - [ ] Ensure command handlers map adapter errors to domain-safe errors.
 - [ ] Publish telescope operation events to Kafka from domain event handlers.
 - [x] Define initial Kafka event schema placeholders for model-service interaction.
