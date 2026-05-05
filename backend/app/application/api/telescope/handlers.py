@@ -28,6 +28,7 @@ from application.api.telescope.schemas import (
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
     TelescopeMcpContextSchema,
+    TelescopeMcpToolManifestSchema,
     TelescopeStatusSchema,
 )
 from logic.init import init_container
@@ -48,6 +49,78 @@ from settings.config import Config
 
 
 router = APIRouter(tags=['telescope'])
+
+
+@router.get('/tools/mcp-manifest', response_model=TelescopeMcpToolManifestSchema)
+async def get_mcp_tool_manifest():
+    container = init_container()
+    config: Config = container.resolve(Config)
+    requires_command_token = bool(config.command_auth_token)
+
+    return TelescopeMcpToolManifestSchema(
+        tools=[
+            {
+                'tool_name': 'telescope.get_status',
+                'description': 'Read current telescope status with optional live Alpaca snapshot and capabilities.',
+                'method': 'GET',
+                'endpoint': '/telescopes/status',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'telescope.get_context',
+                'description': 'Read MCP context aggregate (status/capabilities/catalog/ephemeris warnings).',
+                'method': 'GET',
+                'endpoint': '/telescopes/context/mcp',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'telescope.slew_icrs',
+                'description': 'Move telescope mount to requested ICRS RA/Dec target.',
+                'method': 'POST',
+                'endpoint': '/telescopes/commands/slew-icrs',
+                'requirements': {
+                    'required_capability': 'supports_slew',
+                    'requires_command_token': requires_command_token,
+                },
+            },
+            {
+                'tool_name': 'telescope.sync_icrs',
+                'description': 'Sync telescope mount model to requested ICRS RA/Dec target.',
+                'method': 'POST',
+                'endpoint': '/telescopes/commands/sync-icrs',
+                'requirements': {
+                    'required_capability': 'supports_sync',
+                    'requires_command_token': requires_command_token,
+                },
+            },
+            {
+                'tool_name': 'telescope.set_tracking',
+                'description': 'Enable or disable telescope tracking mode.',
+                'method': 'POST',
+                'endpoint': '/telescopes/commands/tracking',
+                'requirements': {
+                    'required_capability': 'supports_tracking',
+                    'requires_command_token': requires_command_token,
+                },
+            },
+            {
+                'tool_name': 'telescope.get_command_audit',
+                'description': 'Read command audit trail with optional operation/status/source filters.',
+                'method': 'GET',
+                'endpoint': '/telescopes/commands/audit',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+        ],
+    )
 
 
 def _require_command_auth(x_command_token: str | None):
