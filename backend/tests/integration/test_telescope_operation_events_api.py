@@ -60,18 +60,37 @@ class StubConfig:
     command_auth_token = None
 
 
+class RecordingAuditRepository:
+    def __init__(self) -> None:
+        self.records: list[dict] = []
+
+    async def save_command_audit(self, *, operation: str, status: str, details: dict, source: str) -> dict:
+        payload = {
+            'operation': operation,
+            'status': status,
+            'details': details,
+            'source': source,
+        }
+        self.records.append(payload)
+        return payload
+
+
 class FakeContainer:
-    def __init__(self, mediator: Mediator, config: StubConfig):
+    def __init__(self, mediator: Mediator, config: StubConfig, audit_repo: RecordingAuditRepository):
         self._mediator = mediator
         self._config = config
+        self._audit_repo = audit_repo
 
     def resolve(self, cls):
         from settings.config import Config
+        from infra.repositories.operations.base import BaseModelInferenceRepository
 
         if cls is Mediator:
             return self._mediator
         if cls is Config:
             return self._config
+        if cls is BaseModelInferenceRepository:
+            return self._audit_repo
         raise KeyError(cls)
 
 
@@ -79,22 +98,47 @@ def _build_test_app(broker: RecordingBroker, monkeypatch, *, command_auth_token:
     mediator = Mediator()
     alpaca = RecordingTelescopePort()
     config = StubConfig()
+    audit_repo = RecordingAuditRepository()
     config.command_auth_token = command_auth_token
 
     mediator.register_command(
         SlewToIcrsCommand,
-        [SlewToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=alpaca, message_broker=broker, config=config)],
+        [
+            SlewToIcrsCommandHandler(
+                _mediator=mediator,
+                alpaca_telescope=alpaca,
+                message_broker=broker,
+                audit_repository=audit_repo,
+                config=config,
+            ),
+        ],
     )
     mediator.register_command(
         SyncMountToIcrsCommand,
-        [SyncMountToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=alpaca, message_broker=broker, config=config)],
+        [
+            SyncMountToIcrsCommandHandler(
+                _mediator=mediator,
+                alpaca_telescope=alpaca,
+                message_broker=broker,
+                audit_repository=audit_repo,
+                config=config,
+            ),
+        ],
     )
     mediator.register_command(
         SetTelescopeTrackingCommand,
-        [SetTelescopeTrackingCommandHandler(_mediator=mediator, alpaca_telescope=alpaca, message_broker=broker, config=config)],
+        [
+            SetTelescopeTrackingCommandHandler(
+                _mediator=mediator,
+                alpaca_telescope=alpaca,
+                message_broker=broker,
+                audit_repository=audit_repo,
+                config=config,
+            ),
+        ],
     )
 
-    fake_container = FakeContainer(mediator=mediator, config=config)
+    fake_container = FakeContainer(mediator=mediator, config=config, audit_repo=audit_repo)
     monkeypatch.setattr(telescope_handlers, 'init_container', lambda: fake_container)
 
     app = FastAPI()

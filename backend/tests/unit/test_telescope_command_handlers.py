@@ -63,19 +63,48 @@ class StubConfig:
     telescope_operation_topic = 'telescope-operation-events'
 
 
+class RecordingAuditRepository:
+    def __init__(self) -> None:
+        self.records: list[dict] = []
+
+    async def save_command_audit(self, *, operation: str, status: str, details: dict, source: str) -> dict:
+        payload = {
+            'operation': operation,
+            'status': status,
+            'details': details,
+            'source': source,
+        }
+        self.records.append(payload)
+        return payload
+
+
 @pytest.mark.asyncio
 async def test_command_handlers_invoke_alpaca_port():
     port = RecordingTelescopePort()
     broker = RecordingBroker()
+    audit_repo = RecordingAuditRepository()
     config = StubConfig()
     mediator = Mediator()
 
-    slew_h = SlewToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port, message_broker=broker, config=config)
-    sync_h = SyncMountToIcrsCommandHandler(_mediator=mediator, alpaca_telescope=port, message_broker=broker, config=config)
+    slew_h = SlewToIcrsCommandHandler(
+        _mediator=mediator,
+        alpaca_telescope=port,
+        message_broker=broker,
+        audit_repository=audit_repo,
+        config=config,
+    )
+    sync_h = SyncMountToIcrsCommandHandler(
+        _mediator=mediator,
+        alpaca_telescope=port,
+        message_broker=broker,
+        audit_repository=audit_repo,
+        config=config,
+    )
     track_h = SetTelescopeTrackingCommandHandler(
         _mediator=mediator,
         alpaca_telescope=port,
         message_broker=broker,
+        audit_repository=audit_repo,
         config=config,
     )
 
@@ -98,3 +127,4 @@ async def test_command_handlers_invoke_alpaca_port():
     assert payloads[1]['schema_version'] == 'v1'
     assert payloads[2]['schema_version'] == 'v1'
     assert payloads[0]['correlation_id'] == payloads[0]['event_id']
+    assert [record['operation'] for record in audit_repo.records] == ['slew-icrs', 'sync-icrs', 'set-tracking']

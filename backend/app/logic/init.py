@@ -158,18 +158,21 @@ def _init_container() -> Container:
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
             message_broker=container.resolve(BaseMessageBroker),
+            audit_repository=container.resolve(BaseModelInferenceRepository),
             config=config,
         )
         sync_mount_icrs_handler = SyncMountToIcrsCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
             message_broker=container.resolve(BaseMessageBroker),
+            audit_repository=container.resolve(BaseModelInferenceRepository),
             config=config,
         )
         set_tracking_handler = SetTelescopeTrackingCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
             message_broker=container.resolve(BaseMessageBroker),
+            audit_repository=container.resolve(BaseModelInferenceRepository),
             config=config,
         )
         resolve_name_handler = ResolveCommonNameToIcrsHandler(

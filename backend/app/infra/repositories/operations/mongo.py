@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import (
@@ -70,4 +72,37 @@ class MongoDBModelInferenceRepository(BaseModelInferenceRepository):
         except PyMongoError as exc:
             raise InfrastructureUnavailableException(
                 details='MongoDB operation failed while reading inference result',
+            ) from exc
+
+    async def save_command_audit(
+        self,
+        *,
+        operation: str,
+        status: str,
+        details: dict,
+        source: str,
+    ) -> dict:
+        payload = {
+            'record_type': 'command_audit',
+            'audit_id': str(uuid4()),
+            'operation': operation,
+            'status': status,
+            'details': details,
+            'source': source,
+            'recorded_at': datetime.now().isoformat(),
+        }
+        try:
+            await self._collection.insert_one(payload)
+            return {k: v for k, v in payload.items() if k != '_id'}
+        except OperationFailure as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB authorization failed while saving command audit',
+            ) from exc
+        except ServerSelectionTimeoutError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB server is unreachable while saving command audit',
+            ) from exc
+        except PyMongoError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB operation failed while saving command audit',
             ) from exc

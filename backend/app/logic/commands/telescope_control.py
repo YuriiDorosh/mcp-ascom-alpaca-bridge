@@ -5,6 +5,7 @@ import orjson
 from domain.ports.alpaca_client import IAlpacaTelescopeClient
 from infra.message_brokers.base import BaseMessageBroker
 from infra.message_brokers.contracts import TelescopeOperationEventContract
+from infra.repositories.operations.base import BaseModelInferenceRepository
 from logic.commands.base import (
     BaseCommand,
     CommandHandler,
@@ -33,6 +34,7 @@ class SetTelescopeTrackingCommand(BaseCommand):
 class SlewToIcrsCommandHandler(CommandHandler[SlewToIcrsCommand, dict]):
     alpaca_telescope: IAlpacaTelescopeClient
     message_broker: BaseMessageBroker
+    audit_repository: BaseModelInferenceRepository
     config: Config
 
     async def handle(self, command: SlewToIcrsCommand) -> dict:
@@ -47,6 +49,12 @@ class SlewToIcrsCommandHandler(CommandHandler[SlewToIcrsCommand, dict]):
             topic=self.config.telescope_operation_topic,
             value=orjson.dumps(event.__dict__),
         )
+        await self.audit_repository.save_command_audit(
+            operation='slew-icrs',
+            status='ok',
+            details={'ra_hours': command.ra_hours, 'dec_degrees': command.dec_degrees},
+            source='main-backend',
+        )
         return {'status': 'ok'}
 
 
@@ -54,6 +62,7 @@ class SlewToIcrsCommandHandler(CommandHandler[SlewToIcrsCommand, dict]):
 class SyncMountToIcrsCommandHandler(CommandHandler[SyncMountToIcrsCommand, dict]):
     alpaca_telescope: IAlpacaTelescopeClient
     message_broker: BaseMessageBroker
+    audit_repository: BaseModelInferenceRepository
     config: Config
 
     async def handle(self, command: SyncMountToIcrsCommand) -> dict:
@@ -68,6 +77,12 @@ class SyncMountToIcrsCommandHandler(CommandHandler[SyncMountToIcrsCommand, dict]
             topic=self.config.telescope_operation_topic,
             value=orjson.dumps(event.__dict__),
         )
+        await self.audit_repository.save_command_audit(
+            operation='sync-icrs',
+            status='ok',
+            details={'ra_hours': command.ra_hours, 'dec_degrees': command.dec_degrees},
+            source='main-backend',
+        )
         return {'status': 'ok'}
 
 
@@ -75,6 +90,7 @@ class SyncMountToIcrsCommandHandler(CommandHandler[SyncMountToIcrsCommand, dict]
 class SetTelescopeTrackingCommandHandler(CommandHandler[SetTelescopeTrackingCommand, dict]):
     alpaca_telescope: IAlpacaTelescopeClient
     message_broker: BaseMessageBroker
+    audit_repository: BaseModelInferenceRepository
     config: Config
 
     async def handle(self, command: SetTelescopeTrackingCommand) -> dict:
@@ -87,5 +103,11 @@ class SetTelescopeTrackingCommandHandler(CommandHandler[SetTelescopeTrackingComm
             key=event.event_id.encode(),
             topic=self.config.telescope_operation_topic,
             value=orjson.dumps(event.__dict__),
+        )
+        await self.audit_repository.save_command_audit(
+            operation='set-tracking',
+            status='ok',
+            details={'enabled': command.enabled},
+            source='main-backend',
         )
         return {'status': 'ok'}
