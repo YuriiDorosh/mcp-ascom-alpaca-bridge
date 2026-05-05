@@ -20,4 +20,16 @@ class IAlpacaClient(ABC):
 
 
 class IAlpacaTelescopeClient(IAlpacaClient, ABC):
-    """Telescope-focused Alpaca port; extend later for slew/sync/tracking commands."""
+    """Alpaca telescope control (ICRS-equatorial slew/sync plus tracking switches)."""
+
+    @abstractmethod
+    async def slew_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
+        ...
+
+    @abstractmethod
+    async def sync_mount_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
+        ...
+
+    @abstractmethod
+    async def set_tracking_enabled(self, enabled: bool) -> None:
+        ...

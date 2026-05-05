@@ -1,19 +1,36 @@
+from typing import Annotated
+
 from fastapi import APIRouter
 from fastapi import HTTPException
+from fastapi import Query
 
 from domain.exceptions.infrastructure import InfrastructureUnavailableException
+from domain.exceptions.telescope import AlpacaDriverException
+from domain.exceptions.telescope import CatalogLookupDisabledException
+from domain.exceptions.telescope import CatalogLookupTimeoutException
 from domain.exceptions.telescope import CoordinateTransformException
+from domain.exceptions.telescope import UnresolvedObjectNameException
 from application.api.telescope.schemas import (
     HorizontalCoordsResponseSchema,
+    IcrsHourAngleDecSchema,
     ModelInferenceEnqueuedSchema,
     ModelInferenceResultSchema,
     ModelInferenceRequestSchema,
     RadecToAltAzRequestSchema,
+    ResolvedCatalogIcrsSchema,
+    SetTelescopeTrackingRequestSchema,
+    TelescopeCommandAckSchema,
     TelescopeStatusSchema,
 )
 from logic.init import init_container
 from logic.commands.model_inference import EnqueueModelInferenceCommand
+from logic.commands.telescope_control import (
+    SetTelescopeTrackingCommand,
+    SlewToIcrsCommand,
+    SyncMountToIcrsCommand,
+)
 from logic.mediator.base import Mediator
+from logic.queries.catalog import ResolveCommonNameToIcrsQuery
 from logic.queries.coordinates import GetHorizontalFromIcrsQuery
 from logic.queries.model_inference import GetModelInferenceResultQuery
 from logic.queries.telescope import GetTelescopeStatusQuery
@@ -53,6 +70,66 @@ async def radec_to_altaz(schema: RadecToAltAzRequestSchema):
         raise HTTPException(status_code=400, detail=exc.message) from exc
 
     return HorizontalCoordsResponseSchema(**result)
+
+
+@router.post('/commands/slew-icrs', response_model=TelescopeCommandAckSchema)
+async def slew_mount_to_icrs(body: IcrsHourAngleDecSchema):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        await mediator.handle_command(
+            SlewToIcrsCommand(ra_hours=body.ra_hours, dec_degrees=body.dec_degrees),
+        )
+    except AlpacaDriverException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    return TelescopeCommandAckSchema()
+
+
+@router.post('/commands/sync-icrs', response_model=TelescopeCommandAckSchema)
+async def sync_mount_to_icrs(body: IcrsHourAngleDecSchema):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        await mediator.handle_command(
+            SyncMountToIcrsCommand(ra_hours=body.ra_hours, dec_degrees=body.dec_degrees),
+        )
+    except AlpacaDriverException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    return TelescopeCommandAckSchema()
+
+
+@router.post('/commands/tracking', response_model=TelescopeCommandAckSchema)
+async def set_telescope_tracking(body: SetTelescopeTrackingRequestSchema):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        await mediator.handle_command(SetTelescopeTrackingCommand(enabled=body.enabled))
+    except AlpacaDriverException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    return TelescopeCommandAckSchema()
+
+
+@router.get('/catalog/icrs', response_model=ResolvedCatalogIcrsSchema)
+async def catalog_resolve_icrs(
+    designation: Annotated[str, Query(min_length=1, description='Object name Sesame resolves (object catalog).')],
+):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        payload = await mediator.handle_query(
+            ResolveCommonNameToIcrsQuery(designation=designation.strip()),
+        )
+    except CatalogLookupDisabledException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+    except CatalogLookupTimeoutException as exc:
+        raise HTTPException(status_code=504, detail=exc.message) from exc
+    except UnresolvedObjectNameException as exc:
+        raise HTTPException(status_code=404, detail=exc.message) from exc
+
+    return ResolvedCatalogIcrsSchema(**payload)
 
 
 @router.post('/model/inference', response_model=ModelInferenceEnqueuedSchema)

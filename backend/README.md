@@ -2,6 +2,10 @@
 
 Local-first FastAPI backend for ASCOM Alpaca telescope control with DDD architecture, Kafka messaging, and MongoDB persistence.
 
+## Git branching
+
+Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub pull requests instead of committing directly on `main`, so telescope and infra changes stay reviewable before release.
+
 ## Requirements
 
 - [Docker](https://www.docker.com/get-started)
@@ -45,6 +49,8 @@ Then verify:
 - Kafka UI: <http://localhost:8090>
 - Telescope status JSON: `GET http://localhost:8000/telescopes/status`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`
+- slew / sync / tracking (Alpaca HTTP; requires `ALPACA_ENABLED`): `POST /telescopes/commands/slew-icrs`, `POST /telescopes/commands/sync-icrs`, `POST /telescopes/commands/tracking`
+- optional object name → ICRS (Sesame/CDS via Astropy): `GET /telescopes/catalog/icrs` (requires `CATALOG_LOOKUP_ENABLED`)
 - Mongo Express (if `make ui` was started): <http://localhost:28081>
 
 ## Kafka Startup Troubleshooting

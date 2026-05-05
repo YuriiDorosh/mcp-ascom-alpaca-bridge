@@ -25,3 +25,6 @@ class Config(BaseSettings):
     alpaca_device_number: int = Field(default=0, alias='ALPACA_DEVICE_NUMBER')
     alpaca_protocol: str = Field(default='http', alias='ALPACA_PROTOCOL')
     alpaca_connect_timeout_seconds: float = Field(default=8.0, alias='ALPACA_CONNECT_TIMEOUT_SECONDS')
+
+    catalog_lookup_enabled: bool = Field(default=False, alias='CATALOG_LOOKUP_ENABLED')
+    catalog_resolve_timeout_seconds: float = Field(default=20.0, alias='CATALOG_RESOLVE_TIMEOUT_SECONDS')
