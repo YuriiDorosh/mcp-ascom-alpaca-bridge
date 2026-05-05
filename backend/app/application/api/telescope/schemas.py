@@ -8,8 +8,18 @@ class AlpacaLiveStatusSchema(BaseModel):
     reachable: bool
     connected: bool | None = None
     tracking: bool | None = None
+    supports_slew: bool | None = None
+    supports_sync: bool | None = None
+    supports_tracking: bool | None = None
     device_name: str | None = None
     error_hint: str | None = None
+
+
+class TelescopeCapabilitiesSchema(BaseModel):
+    supports_slew: bool
+    supports_sync: bool
+    supports_tracking: bool
+    source: Literal['alpaca-live', 'default-disabled']
 
 
 class TelescopeStatusSchema(BaseModel):
@@ -19,6 +29,7 @@ class TelescopeStatusSchema(BaseModel):
     tracking_enabled: bool
     created_at: str
     alpaca_live: AlpacaLiveStatusSchema | None = None
+    capabilities: TelescopeCapabilitiesSchema
 
 
 class RadecToAltAzRequestSchema(BaseModel):
