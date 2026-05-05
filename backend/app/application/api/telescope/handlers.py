@@ -223,11 +223,18 @@ async def set_telescope_tracking(
 
 
 @router.get('/commands/audit', response_model=list[CommandAuditRecordSchema])
-async def list_command_audits(limit: Annotated[int, Query(ge=1, le=200)] = 50):
+async def list_command_audits(
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    operation: Annotated[str | None, Query(description='Optional operation filter (slew-icrs/sync-icrs/set-tracking).')] = None,
+    status: Annotated[str | None, Query(description='Optional status filter (e.g. ok).')] = None,
+    source: Annotated[str | None, Query(description='Optional source filter (e.g. main-backend).')] = None,
+):
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
     try:
-        items = await mediator.handle_query(ListCommandAuditQuery(limit=limit))
+        items = await mediator.handle_query(
+            ListCommandAuditQuery(limit=limit, operation=operation, status=status, source=source),
+        )
     except InfrastructureUnavailableException as exc:
         raise HTTPException(status_code=503, detail=exc.message) from exc
 

@@ -32,5 +32,12 @@ class BaseModelInferenceRepository(ABC):
         ...
 
     @abstractmethod
-    async def list_command_audits(self, *, limit: int = 50) -> list[dict]:
+    async def list_command_audits(
+        self,
+        *,
+        limit: int = 50,
+        operation: str | None = None,
+        status: str | None = None,
+        source: str | None = None,
+    ) -> list[dict]:
         ...
