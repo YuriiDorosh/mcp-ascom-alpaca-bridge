@@ -157,14 +157,20 @@ def _init_container() -> Container:
         slew_to_icrs_handler = SlewToIcrsCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
+            message_broker=container.resolve(BaseMessageBroker),
+            config=config,
         )
         sync_mount_icrs_handler = SyncMountToIcrsCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
+            message_broker=container.resolve(BaseMessageBroker),
+            config=config,
         )
         set_tracking_handler = SetTelescopeTrackingCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
+            message_broker=container.resolve(BaseMessageBroker),
+            config=config,
         )
         resolve_name_handler = ResolveCommonNameToIcrsHandler(
             catalog=container.resolve(ICatalogResolveService),
