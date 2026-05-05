@@ -11,29 +11,46 @@ from punq import (
     Scope,
 )
 
+from domain.ports.alpaca_client import (
+    IAlpacaClient,
+    IAlpacaTelescopeClient,
+)
+from domain.ports.catalog_resolve import ICatalogResolveService
+from domain.ports.coordinate_transform import ICoordinateTransformService
+from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
+from infra.integrations.astroquery.catalog_resolve import SesameBackedCatalogResolveService
+from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
 from infra.message_brokers.base import BaseMessageBroker
 from infra.message_brokers.kafka import KafkaMessageBroker
 from infra.repositories.operations.base import BaseModelInferenceRepository
 from infra.repositories.operations.mongo import MongoDBModelInferenceRepository
-from domain.ports.alpaca_client import IAlpacaClient
-from domain.ports.coordinate_transform import ICoordinateTransformService
-from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
-from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
 from infra.repositories.telescope.base import BaseTelescopeRepository
 from infra.repositories.telescope.mongo import MongoDBTelescopeRepository
 from logic.commands.model_inference import (
     EnqueueModelInferenceCommand,
     EnqueueModelInferenceCommandHandler,
 )
+from logic.commands.telescope_control import (
+    SetTelescopeTrackingCommand,
+    SetTelescopeTrackingCommandHandler,
+    SlewToIcrsCommand,
+    SlewToIcrsCommandHandler,
+    SyncMountToIcrsCommand,
+    SyncMountToIcrsCommandHandler,
+)
 from logic.mediator.base import Mediator
 from logic.mediator.event import EventMediator
-from logic.queries.model_inference import (
-    GetModelInferenceResultQuery,
-    GetModelInferenceResultQueryHandler,
+from logic.queries.catalog import (
+    ResolveCommonNameToIcrsHandler,
+    ResolveCommonNameToIcrsQuery,
 )
 from logic.queries.coordinates import (
     GetHorizontalFromIcrsQuery,
     GetHorizontalFromIcrsQueryHandler,
+)
+from logic.queries.model_inference import (
+    GetModelInferenceResultQuery,
+    GetModelInferenceResultQueryHandler,
 )
 from logic.queries.telescope import (
     GetTelescopeStatusQuery,
@@ -72,7 +89,6 @@ def _init_container() -> Container:
             ),
         )
 
-    # Infrastructure
     container.register(BaseMessageBroker, factory=create_message_broker, scope=Scope.singleton)
 
     def create_telescope_repository() -> BaseTelescopeRepository:
@@ -91,19 +107,26 @@ def _init_container() -> Container:
 
     container.register(BaseTelescopeRepository, factory=create_telescope_repository, scope=Scope.singleton)
     container.register(BaseModelInferenceRepository, factory=create_model_inference_repository, scope=Scope.singleton)
-    container.register(
-        IAlpacaClient,
-        factory=lambda: AlpycaTelescopeClient(config=config),
-        scope=Scope.singleton,
-    )
+
+    alpaca_telescope_singleton = AlpycaTelescopeClient(config=config)
+    container.register(IAlpacaTelescopeClient, instance=alpaca_telescope_singleton, scope=Scope.singleton)
+    container.register(IAlpacaClient, instance=alpaca_telescope_singleton, scope=Scope.singleton)
+
     container.register(
         ICoordinateTransformService,
         instance=AstropyCoordinateTransformService(),
         scope=Scope.singleton,
     )
+    container.register(
+        ICatalogResolveService,
+        factory=lambda: SesameBackedCatalogResolveService(config=config),
+        scope=Scope.singleton,
+    )
 
     def init_mediator() -> Mediator:
         mediator = Mediator()
+
+        alpaca_telescope = container.resolve(IAlpacaTelescopeClient)
 
         get_telescope_status_handler = GetTelescopeStatusQueryHandler(
             telescope_repository=container.resolve(BaseTelescopeRepository),
@@ -120,6 +143,21 @@ def _init_container() -> Container:
         get_model_inference_result_handler = GetModelInferenceResultQueryHandler(
             repository=container.resolve(BaseModelInferenceRepository),
         )
+        slew_to_icrs_handler = SlewToIcrsCommandHandler(
+            _mediator=mediator,
+            alpaca_telescope=alpaca_telescope,
+        )
+        sync_mount_icrs_handler = SyncMountToIcrsCommandHandler(
+            _mediator=mediator,
+            alpaca_telescope=alpaca_telescope,
+        )
+        set_tracking_handler = SetTelescopeTrackingCommandHandler(
+            _mediator=mediator,
+            alpaca_telescope=alpaca_telescope,
+        )
+        resolve_name_handler = ResolveCommonNameToIcrsHandler(
+            catalog=container.resolve(ICatalogResolveService),
+        )
 
         mediator.register_query(
             GetTelescopeStatusQuery,
@@ -133,10 +171,18 @@ def _init_container() -> Container:
             GetModelInferenceResultQuery,
             get_model_inference_result_handler,
         )
+        mediator.register_query(
+            ResolveCommonNameToIcrsQuery,
+            resolve_name_handler,
+        )
+
         mediator.register_command(
             EnqueueModelInferenceCommand,
             [enqueue_model_inference_handler],
         )
+        mediator.register_command(SlewToIcrsCommand, [slew_to_icrs_handler])
+        mediator.register_command(SyncMountToIcrsCommand, [sync_mount_icrs_handler])
+        mediator.register_command(SetTelescopeTrackingCommand, [set_tracking_handler])
 
         return mediator
 

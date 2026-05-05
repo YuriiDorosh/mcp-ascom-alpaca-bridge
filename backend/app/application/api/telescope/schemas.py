@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -32,6 +34,25 @@ class HorizontalCoordsResponseSchema(BaseModel):
     altitude_deg: float
     azimuth_deg: float
     obstime_utc: str
+
+
+class IcrsHourAngleDecSchema(BaseModel):
+    ra_hours: float = Field(ge=0, lt=24)
+    dec_degrees: float = Field(ge=-90, le=90)
+
+
+class TelescopeCommandAckSchema(BaseModel):
+    status: Literal['ok'] = 'ok'
+
+
+class ResolvedCatalogIcrsSchema(BaseModel):
+    designation: str
+    ra_hours: float
+    dec_degrees: float
+
+
+class SetTelescopeTrackingRequestSchema(BaseModel):
+    enabled: bool
 
 
 class ModelInferenceRequestSchema(BaseModel):
