@@ -106,3 +106,24 @@ class MongoDBModelInferenceRepository(BaseModelInferenceRepository):
             raise InfrastructureUnavailableException(
                 details='MongoDB operation failed while saving command audit',
             ) from exc
+
+    async def list_command_audits(self, *, limit: int = 50) -> list[dict]:
+        try:
+            cursor = (
+                self._collection.find({'record_type': 'command_audit'}, {'_id': 0})
+                .sort('recorded_at', -1)
+                .limit(limit)
+            )
+            return [doc async for doc in cursor]
+        except OperationFailure as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB authorization failed while listing command audits',
+            ) from exc
+        except ServerSelectionTimeoutError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB server is unreachable while listing command audits',
+            ) from exc
+        except PyMongoError as exc:
+            raise InfrastructureUnavailableException(
+                details='MongoDB operation failed while listing command audits',
+            ) from exc

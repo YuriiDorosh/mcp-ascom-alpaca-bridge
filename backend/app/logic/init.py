@@ -46,6 +46,10 @@ from logic.queries.catalog import (
     ResolveCommonNameToIcrsHandler,
     ResolveCommonNameToIcrsQuery,
 )
+from logic.queries.command_audit import (
+    ListCommandAuditQuery,
+    ListCommandAuditQueryHandler,
+)
 from logic.queries.coordinates import (
     GetHorizontalFromIcrsQuery,
     GetHorizontalFromIcrsQueryHandler,
@@ -154,6 +158,9 @@ def _init_container() -> Container:
         get_model_inference_result_handler = GetModelInferenceResultQueryHandler(
             repository=container.resolve(BaseModelInferenceRepository),
         )
+        list_command_audit_handler = ListCommandAuditQueryHandler(
+            repository=container.resolve(BaseModelInferenceRepository),
+        )
         slew_to_icrs_handler = SlewToIcrsCommandHandler(
             _mediator=mediator,
             alpaca_telescope=alpaca_telescope,
@@ -193,6 +200,10 @@ def _init_container() -> Container:
         mediator.register_query(
             GetModelInferenceResultQuery,
             get_model_inference_result_handler,
+        )
+        mediator.register_query(
+            ListCommandAuditQuery,
+            list_command_audit_handler,
         )
         mediator.register_query(
             ResolveCommonNameToIcrsQuery,

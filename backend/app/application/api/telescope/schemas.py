@@ -56,6 +56,15 @@ class TelescopeCommandAckSchema(BaseModel):
     status: Literal['ok'] = 'ok'
 
 
+class CommandAuditRecordSchema(BaseModel):
+    audit_id: str
+    operation: str
+    status: str
+    details: dict
+    source: str
+    recorded_at: str
+
+
 class ResolvedCatalogIcrsSchema(BaseModel):
     designation: str
     ra_hours: float
