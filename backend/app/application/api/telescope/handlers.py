@@ -22,6 +22,7 @@ from application.api.telescope.schemas import (
     RadecToAltAzRequestSchema,
     ResolvedCatalogIcrsSchema,
     SetTelescopeTrackingRequestSchema,
+    TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
     TelescopeStatusSchema,
 )
@@ -53,6 +54,18 @@ async def get_telescope_status():
         raise HTTPException(status_code=503, detail=exc.message) from exc
 
     return TelescopeStatusSchema(**response)
+
+
+@router.get('/capabilities', response_model=TelescopeCapabilitiesSchema)
+async def get_telescope_capabilities():
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        response = await mediator.handle_query(GetTelescopeStatusQuery())
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+
+    return TelescopeCapabilitiesSchema(**response['capabilities'])
 
 
 @router.post('/coordinates/radec-to-altaz', response_model=HorizontalCoordsResponseSchema)

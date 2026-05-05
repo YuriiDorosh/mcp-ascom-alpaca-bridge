@@ -9,6 +9,9 @@ class AlpacaLiveSnapshot:
     reachable: bool
     connected: bool | None = None
     tracking: bool | None = None
+    supports_slew: bool | None = None
+    supports_sync: bool | None = None
+    supports_tracking: bool | None = None
     device_name: str | None = None
     error_hint: str | None = None
 

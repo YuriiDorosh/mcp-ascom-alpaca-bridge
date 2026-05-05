@@ -64,6 +64,9 @@ def _wait_for_connection(driver: Any, timeout_seconds: float) -> None:
 def _snapshot_from_driver(driver: Any) -> AlpacaLiveSnapshot:
     connected = bool(getattr(driver, 'Connected', False))
     tracking = bool(getattr(driver, 'Tracking', False)) if connected else None
+    supports_slew = bool(getattr(driver, 'CanSlew', False))
+    supports_sync = bool(getattr(driver, 'CanSync', False))
+    supports_tracking = bool(getattr(driver, 'CanSetTracking', connected))
     raw_name = getattr(driver, 'Name', None) or getattr(driver, 'Description', None)
     name = None
     if raw_name is not None:
@@ -73,6 +76,9 @@ def _snapshot_from_driver(driver: Any) -> AlpacaLiveSnapshot:
         reachable=True,
         connected=connected,
         tracking=tracking,
+        supports_slew=supports_slew,
+        supports_sync=supports_sync,
+        supports_tracking=supports_tracking,
         device_name=name,
         error_hint=None,
     )

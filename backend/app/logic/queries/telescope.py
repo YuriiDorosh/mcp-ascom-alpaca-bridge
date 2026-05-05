@@ -24,12 +24,28 @@ class GetTelescopeStatusQueryHandler(BaseQueryHandler[GetTelescopeStatusQuery, d
 
         alpaca_live = None
         if live is not None:
+            capabilities = {
+                'supports_slew': bool(live.supports_slew),
+                'supports_sync': bool(live.supports_sync),
+                'supports_tracking': bool(live.supports_tracking),
+                'source': 'alpaca-live',
+            }
             alpaca_live = {
                 'reachable': live.reachable,
                 'connected': live.connected,
                 'tracking': live.tracking,
+                'supports_slew': live.supports_slew,
+                'supports_sync': live.supports_sync,
+                'supports_tracking': live.supports_tracking,
                 'device_name': live.device_name,
                 'error_hint': live.error_hint,
+            }
+        else:
+            capabilities = {
+                'supports_slew': False,
+                'supports_sync': False,
+                'supports_tracking': False,
+                'source': 'default-disabled',
             }
 
         return {
@@ -39,4 +55,5 @@ class GetTelescopeStatusQueryHandler(BaseQueryHandler[GetTelescopeStatusQuery, d
             'tracking_enabled': telescope.tracking_enabled,
             'created_at': telescope.created_at.isoformat(),
             'alpaca_live': alpaca_live,
+            'capabilities': capabilities,
         }
