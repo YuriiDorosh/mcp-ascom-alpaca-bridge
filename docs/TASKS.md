@@ -69,6 +69,12 @@
 - Main backend and model microservice will communicate through Kafka.
 - Model runtime profiles must support NVIDIA, AMD, and CPU-only environments.
 
+## Phase 3 Kickoff Checklist
+
+- [x] Add explicit contract metadata (`schema_version`, `correlation_id`) to Kafka message contracts used by inference and telescope operation events.
+- [ ] Document topic naming/versioning policy and backward-compatibility rules for future event schema changes.
+- [ ] Define restart-safe processing and idempotency strategy for telescope operation consumers.
+
 ## Phase 4 Dependency Notes (TODO references)
 
 - TODO(P4-MCP-TOOLS): Expose telescope command/query capabilities as MCP tools with explicit capability flags (`supports_slew`, `supports_sync`, `supports_tracking`) to prevent unsafe tool execution paths.

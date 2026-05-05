@@ -114,3 +114,5 @@ def test_telescope_commands_publish_operation_events(monkeypatch):
     assert payloads[0]['operation'] == 'slew-icrs'
     assert payloads[1]['operation'] == 'sync-icrs'
     assert payloads[2]['operation'] == 'set-tracking'
+    assert all(payload['schema_version'] == 'v1' for payload in payloads)
+    assert all(payload['correlation_id'] == payload['event_id'] for payload in payloads)

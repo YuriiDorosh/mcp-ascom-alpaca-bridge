@@ -94,3 +94,7 @@ async def test_command_handlers_invoke_alpaca_port():
     assert payloads[0]['operation'] == 'slew-icrs'
     assert payloads[1]['operation'] == 'sync-icrs'
     assert payloads[2]['operation'] == 'set-tracking'
+    assert payloads[0]['schema_version'] == 'v1'
+    assert payloads[1]['schema_version'] == 'v1'
+    assert payloads[2]['schema_version'] == 'v1'
+    assert payloads[0]['correlation_id'] == payloads[0]['event_id']
