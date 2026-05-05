@@ -14,6 +14,7 @@ from domain.exceptions.telescope import EphemerisDisabledException
 from domain.exceptions.telescope import EphemerisUnavailableException
 from domain.exceptions.telescope import UnresolvedObjectNameException
 from application.api.telescope.schemas import (
+    CommandAuditRecordSchema,
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
@@ -40,6 +41,7 @@ from logic.mediator.base import Mediator
 from logic.queries.catalog import ResolveCommonNameToIcrsQuery
 from logic.queries.coordinates import GetHorizontalFromIcrsQuery
 from logic.queries.ephemeris import GetSolarSystemBodyIcrsQuery
+from logic.queries.command_audit import ListCommandAuditQuery
 from logic.queries.model_inference import GetModelInferenceResultQuery
 from logic.queries.telescope import GetTelescopeStatusQuery
 from settings.config import Config
@@ -218,6 +220,18 @@ async def set_telescope_tracking(
         raise HTTPException(status_code=502, detail=exc.message) from exc
 
     return TelescopeCommandAckSchema()
+
+
+@router.get('/commands/audit', response_model=list[CommandAuditRecordSchema])
+async def list_command_audits(limit: Annotated[int, Query(ge=1, le=200)] = 50):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        items = await mediator.handle_query(ListCommandAuditQuery(limit=limit))
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+
+    return [CommandAuditRecordSchema(**item) for item in items]
 
 
 @router.get('/catalog/icrs', response_model=ResolvedCatalogIcrsSchema)
