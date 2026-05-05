@@ -4,6 +4,7 @@ APP_DEV = docker_compose/app.dev.yaml
 KAFKA = docker_compose/kafka.yaml
 MONGO = docker_compose/mongo.yaml
 MONGO_EXPRESS = docker_compose/mongo-express.yaml
+MODEL_SERVICE = docker_compose/model-service.yaml
 APP_SERVICE = main-app
 ENV = --env-file .env
 PYTHON_IMAGE = python:3.12-slim-bookworm
@@ -12,9 +13,17 @@ PYTHON_IMAGE = python:3.12-slim-bookworm
 app-dev:
 	${DC} -f ${APP_DEV} -f ${KAFKA} ${ENV} up --build -d
 
+.PHONY: app-dev-with-model
+app-dev-with-model:
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} up --build -d
+
 .PHONY: app-dev-logs
 app-dev-logs:
 	${DC} -f ${APP_DEV} logs -f
+
+.PHONY: app-dev-with-model-logs
+app-dev-with-model-logs:
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} logs -f
 
 .PHONY: storages
 storages:
@@ -24,9 +33,13 @@ storages:
 down-dev:
 	${DC} -f ${APP_DEV} -f ${KAFKA} ${ENV} down
 
+.PHONY: down-dev-with-model
+down-dev-with-model:
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} down
+
 .PHONY: down
 down:
-	${DC} -f ${APP} -f ${APP_DEV} -f ${KAFKA} -f ${MONGO} -f ${MONGO_EXPRESS} ${ENV} down
+	${DC} -f ${APP} -f ${APP_DEV} -f ${KAFKA} -f ${MONGO} -f ${MONGO_EXPRESS} -f ${MODEL_SERVICE} ${ENV} down
 
 .PHONY: ui
 ui:

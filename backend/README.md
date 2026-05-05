@@ -27,10 +27,13 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 ### Implemented Commands
 
 - `make app-dev` - build and start backend + Kafka stack in detached mode
+- `make app-dev-with-model` - build and start backend + Kafka + local model-service in detached mode
 - `make app-dev-logs` - stream logs for the development app compose file
+- `make app-dev-with-model-logs` - stream logs for backend + Kafka + model-service stack
 - `make storages` - start MongoDB services
 - `make ui` - start Mongo Express UI
 - `make down-dev` - stop app-dev + Kafka stack
+- `make down-dev-with-model` - stop backend + Kafka + model-service stack
 - `make down` - stop all compose stacks
 - `make purge` - stop infra stacks and remove volumes
 - `make shell` - open interactive shell in `main-app` container
@@ -45,13 +48,14 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 
 ```bash
 make storages
-make app-dev
+make app-dev-with-model
 ```
 
 Then verify:
 
 - API docs: <http://localhost:8000/api/docs>
 - Kafka UI: <http://localhost:8090>
+- Model service health: `GET http://localhost:8010/health`
 - Telescope status JSON: `GET http://localhost:8000/telescopes/status`
 - Telescope capability flags (MCP-safe gating surface): `GET http://localhost:8000/telescopes/capabilities`
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
@@ -87,6 +91,7 @@ If `make app-dev` fails with `container ... kafka ... exited (1)`:
 - Event contract and versioning policy: `docs/KAFKA_EVENT_POLICY.md`
 - Includes topic naming conventions, schema evolution rules, and restart-safe/idempotent consumer guidance.
 - Model inference result consumer now skips exact duplicate payloads (same status/output/error/finished_at per `request_id`) before Mongo write.
+- Local model-service compose overlay: `docker_compose/model-service.yaml` (mock runtime now; heavy GPU/CPU model profiles follow in next steps).
 
 ## Testing Guide
 
