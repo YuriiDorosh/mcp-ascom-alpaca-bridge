@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "alpaca-astro-center-model-service"
+version = "0.1.0"
+description = "Local model microservice for Alpaca Astro Center"
+authors = ["Alpaca Astro Center Team"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+aiokafka = "^0.10.0"
+orjson = "^3.10.5"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+pytest-asyncio = "^0.23.7"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["app"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
