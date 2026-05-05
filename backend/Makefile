@@ -6,6 +6,7 @@ MONGO = docker_compose/mongo.yaml
 MONGO_EXPRESS = docker_compose/mongo-express.yaml
 APP_SERVICE = main-app
 ENV = --env-file .env
+PYTHON_IMAGE = python:3.12-slim-bookworm
 
 .PHONY: app-dev
 app-dev:
@@ -41,4 +42,28 @@ shell:
 
 .PHONY: test
 test:
-	${DC} -f ${APP} exec ${APP_SERVICE} pytest
+	${DC} -f ${APP_DEV} exec ${APP_SERVICE} pytest -q
+
+.PHONY: test-all
+test-all:
+	${DC} -f ${APP_DEV} exec ${APP_SERVICE} pytest -q
+
+.PHONY: test-unit
+test-unit:
+	${DC} -f ${APP_DEV} exec ${APP_SERVICE} pytest -q tests/unit
+
+.PHONY: test-integration
+test-integration:
+	${DC} -f ${APP_DEV} exec ${APP_SERVICE} pytest -q tests/integration
+
+.PHONY: test-local
+test-local:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} bash -lc "pip install -q poetry==1.8.2 && poetry install -q --no-interaction && poetry run pytest -q"
+
+.PHONY: test-unit-local
+test-unit-local:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} bash -lc "pip install -q poetry==1.8.2 && poetry install -q --no-interaction && poetry run pytest -q tests/unit"
+
+.PHONY: test-integration-local
+test-integration-local:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} bash -lc "pip install -q poetry==1.8.2 && poetry install -q --no-interaction && poetry run pytest -q tests/integration"
