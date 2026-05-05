@@ -42,3 +42,23 @@ class ModelInferenceResultContract:
             finished_at=datetime.now().isoformat(),
             source=source,
         )
+
+    @classmethod
+    def failed(
+        cls,
+        *,
+        request_id: str,
+        correlation_id: str,
+        error_message: str,
+        source: str,
+    ) -> 'ModelInferenceResultContract':
+        return cls(
+            schema_version='v1',
+            request_id=request_id,
+            correlation_id=correlation_id,
+            status='failed',
+            output_text=None,
+            error_message=error_message,
+            finished_at=datetime.now().isoformat(),
+            source=source,
+        )

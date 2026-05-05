@@ -29,3 +29,5 @@ poetry run uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 1. Consume from `MODEL_INFERENCE_REQUEST_TOPIC` (default `model-inference-request`)
 2. Build mock result text from prompt
 3. Publish to `MODEL_INFERENCE_RESULT_TOPIC` (default `model-inference-result`)
+
+If runtime inference fails for a request, worker publishes `status=failed` with `error_message`, while keeping `request_id`/`correlation_id` for backend traceability.
