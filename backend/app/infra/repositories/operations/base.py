@@ -19,3 +19,14 @@ class BaseModelInferenceRepository(ABC):
     @abstractmethod
     async def get_by_request_id(self, request_id: str) -> dict | None:
         ...
+
+    @abstractmethod
+    async def save_command_audit(
+        self,
+        *,
+        operation: str,
+        status: str,
+        details: dict,
+        source: str,
+    ) -> dict:
+        ...
