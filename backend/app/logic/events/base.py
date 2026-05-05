@@ -11,7 +11,6 @@ from typing import (
 
 from domain.events.base import BaseEvent
 from infra.message_brokers.base import BaseMessageBroker
-from infra.websockets.managers import BaseConnectionManager
 
 
 ET = TypeVar('ET', bound=BaseEvent)
@@ -26,7 +25,6 @@ class IntegrationEvent(BaseEvent, ABC):
 @dataclass
 class EventHandler(ABC, Generic[ET, ER]):
     message_broker: BaseMessageBroker
-    connection_manager: BaseConnectionManager
     broker_topic: str | None = None
 
     @abstractmethod

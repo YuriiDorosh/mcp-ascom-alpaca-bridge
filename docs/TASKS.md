@@ -10,6 +10,7 @@
 - [x] Identify all modules under `backend/app` that implement chat/message logic.
 - [x] Remove or deprecate legacy chat API routes from FastAPI router registration.
 - [x] Remove chat websocket endpoints that are tied to chat rooms/messages.
+- [x] Remove leftover websocket/chat legacy manager abstractions from infra/application core.
 - [x] Remove chat-specific Pydantic schemas and DTOs from API layer.
 - [x] Remove chat/message command handlers from application logic.
 - [x] Remove chat/message query handlers from application logic.
