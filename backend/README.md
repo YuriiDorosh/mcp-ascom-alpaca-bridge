@@ -81,6 +81,7 @@ If `make app-dev` fails with `container ... kafka ... exited (1)`:
 
 - Event contract and versioning policy: `docs/KAFKA_EVENT_POLICY.md`
 - Includes topic naming conventions, schema evolution rules, and restart-safe/idempotent consumer guidance.
+- Model inference result consumer now skips exact duplicate payloads (same status/output/error/finished_at per `request_id`) before Mongo write.
 
 ## Testing Guide
 

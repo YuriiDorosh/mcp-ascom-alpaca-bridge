@@ -74,6 +74,7 @@
 - [x] Add explicit contract metadata (`schema_version`, `correlation_id`) to Kafka message contracts used by inference and telescope operation events.
 - [x] Document topic naming/versioning policy and backward-compatibility rules for future event schema changes (`docs/KAFKA_EVENT_POLICY.md`).
 - [x] Define restart-safe processing and idempotency strategy for telescope operation consumers (`docs/KAFKA_EVENT_POLICY.md`, consumer ledger + offset discipline guidance).
+- [x] Add idempotent duplicate-guard in model-inference result consumer before Mongo writes (`application/api/lifespan.py`) with unit coverage.
 
 ## Phase 4 Dependency Notes (TODO references)
 
