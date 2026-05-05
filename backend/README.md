@@ -34,7 +34,12 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make down` - stop all compose stacks
 - `make purge` - stop infra stacks and remove volumes
 - `make shell` - open interactive shell in `main-app` container
-- `make test` - run pytest inside `main-app` container
+- `make test` / `make test-all` - run full pytest suite inside running `main-app`
+- `make test-unit` - run unit tests only (`tests/unit`)
+- `make test-integration` - run integration tests only (`tests/integration`)
+- `make test-local` - run full suite in ephemeral Python 3.12 container (no running app container needed)
+- `make test-unit-local` - run unit tests in ephemeral Python 3.12 container
+- `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
 
 ## Recommended Local Startup Order
 
@@ -71,3 +76,28 @@ If `make app-dev` fails with `container ... kafka ... exited (1)`:
    make down-dev
    make app-dev
    ```
+
+## Kafka Contracts and Consumer Safety
+
+- Event contract and versioning policy: `docs/KAFKA_EVENT_POLICY.md`
+- Includes topic naming conventions, schema evolution rules, and restart-safe/idempotent consumer guidance.
+
+## Testing Guide
+
+Current backend test layout:
+
+- `tests/unit` - deterministic logic tests (domain events, coordinate math, handlers).
+- `tests/integration` - API/adapter integration tests with mocked Alpaca/broker dependencies (hardware-free).
+
+Recommended flows:
+
+1. If `main-app` is running (`make app-dev`):
+   - `make test-unit`
+   - `make test-integration`
+   - `make test-all`
+2. If app container is not running (CI-like local run):
+   - `make test-unit-local`
+   - `make test-integration-local`
+   - `make test-local`
+
+The project is intentionally testable without telescope hardware while `ALPACA_ENABLED=false`.
