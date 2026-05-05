@@ -20,7 +20,7 @@
 - [x] Introduce new bounded-context package for telescope domain (`telescope`).
 - [x] Create initial `Telescope` domain entity (identity, capabilities, connection state).
 - [x] Create initial value objects for coordinates and telescope status snapshots.
-- [ ] Define domain events for telescope lifecycle transitions.
+- [x] Define domain events for telescope lifecycle transitions (`TelescopeConnectionStateChangedEvent`, `TelescopeTrackingChangedEvent`).
 - [x] Define command contracts for telescope control intents (`SlewToIcrsCommand`, `SyncMountToIcrsCommand`, `SetTelescopeTrackingCommand`).
 - [x] Define query contracts for telescope status retrieval intents.
 - [x] Define `ITelescopeRepository` interface.
@@ -33,7 +33,7 @@
 - [x] Add/adjust health and readiness endpoints for the repurposed backend.
 - [x] Run static import checks and remove dead imports after cleanup.
 - [x] Ensure tests no longer reference removed chat modules.
-- [ ] Add migration notes in docs for template-to-telescope transition.
+- [x] Add migration notes in docs for template-to-telescope transition (`docs/MIGRATION_NOTES.md`).
 
 ## Phase 2 - Alpyca and Astropy Integration
 
@@ -61,10 +61,16 @@
 - [x] Add integration tests for Alpaca adapter against mocked endpoints (`tests/integration/test_alpyca_adapter_mocked.py`).
 - [x] Add integration tests for Kafka publication from telescope operations (`tests/integration/test_telescope_operation_events_api.py` with mocked broker).
 - [x] Document assumptions for hardware-unavailable development mode (`ALPACA_ENABLED` / `CATALOG_LOOKUP_ENABLED` default off for portable stacks — see `backend/README.md` and `backend/.env.example`).
-- [ ] Add TODO references for Phase 4 MCP tool wiring dependencies.
+- [x] Add TODO references for Phase 4 MCP tool wiring dependencies (see Phase 4 dependency notes below).
 
 ## Notes for Upcoming Phases
 
 - The local model runtime will be a separate FastAPI microservice.
 - Main backend and model microservice will communicate through Kafka.
 - Model runtime profiles must support NVIDIA, AMD, and CPU-only environments.
+
+## Phase 4 Dependency Notes (TODO references)
+
+- TODO(P4-MCP-TOOLS): Expose telescope command/query capabilities as MCP tools with explicit capability flags (`supports_slew`, `supports_sync`, `supports_tracking`) to prevent unsafe tool execution paths.
+- TODO(P4-MCP-AUTH): Define local-network trust/auth strategy for MCP actions that can move hardware (token/session model + audit trail).
+- TODO(P4-MCP-CONTEXT): Wire catalog + ephemeris + live telescope status into MCP context assembly so tool-calling agents can reason over target/object/position state before command dispatch.
