@@ -10,6 +10,9 @@ from logic.queries.command_audit import ListCommandAuditQuery
 class FakeMediator:
     async def handle_query(self, query):
         if isinstance(query, ListCommandAuditQuery):
+            assert query.operation == 'set-tracking'
+            assert query.status == 'ok'
+            assert query.source == 'main-backend'
             return [
                 {
                     'audit_id': 'a1',
@@ -36,7 +39,10 @@ def test_command_audit_endpoint_returns_records(monkeypatch):
     app.include_router(telescope_router, prefix='/telescopes')
     client = TestClient(app)
 
-    response = client.get('/telescopes/commands/audit', params={'limit': 10})
+    response = client.get(
+        '/telescopes/commands/audit',
+        params={'limit': 10, 'operation': 'set-tracking', 'status': 'ok', 'source': 'main-backend'},
+    )
     assert response.status_code == 200
     payload = response.json()
     assert len(payload) == 1

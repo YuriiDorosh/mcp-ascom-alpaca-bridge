@@ -107,10 +107,25 @@ class MongoDBModelInferenceRepository(BaseModelInferenceRepository):
                 details='MongoDB operation failed while saving command audit',
             ) from exc
 
-    async def list_command_audits(self, *, limit: int = 50) -> list[dict]:
+    async def list_command_audits(
+        self,
+        *,
+        limit: int = 50,
+        operation: str | None = None,
+        status: str | None = None,
+        source: str | None = None,
+    ) -> list[dict]:
         try:
+            query = {'record_type': 'command_audit'}
+            if operation:
+                query['operation'] = operation
+            if status:
+                query['status'] = status
+            if source:
+                query['source'] = source
+
             cursor = (
-                self._collection.find({'record_type': 'command_audit'}, {'_id': 0})
+                self._collection.find(query, {'_id': 0})
                 .sort('recorded_at', -1)
                 .limit(limit)
             )
