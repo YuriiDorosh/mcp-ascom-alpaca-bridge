@@ -59,7 +59,7 @@
 - [x] Define initial Kafka event schema placeholders for model-service interaction.
 - [x] Create interface contracts for inference request/result events.
 - [ ] Add integration tests for Alpaca adapter against simulator or mocked endpoints.
-- [ ] Add integration tests for Kafka publication from telescope operations.
+- [x] Add integration tests for Kafka publication from telescope operations (`tests/integration/test_telescope_operation_events_api.py` with mocked broker).
 - [x] Document assumptions for hardware-unavailable development mode (`ALPACA_ENABLED` / `CATALOG_LOOKUP_ENABLED` default off for portable stacks — see `backend/README.md` and `backend/.env.example`).
 - [ ] Add TODO references for Phase 4 MCP tool wiring dependencies.
 
