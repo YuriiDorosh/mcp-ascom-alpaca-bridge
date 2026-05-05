@@ -17,6 +17,7 @@ from application.api.telescope.schemas import (
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
+    McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
     ModelInferenceResultSchema,
     ModelInferenceRequestSchema,
@@ -25,6 +26,7 @@ from application.api.telescope.schemas import (
     SetTelescopeTrackingRequestSchema,
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
+    TelescopeMcpContextSchema,
     TelescopeStatusSchema,
 )
 from logic.init import init_container
@@ -78,6 +80,71 @@ async def get_telescope_capabilities():
         raise HTTPException(status_code=503, detail=exc.message) from exc
 
     return TelescopeCapabilitiesSchema(**response['capabilities'])
+
+
+@router.get('/context/mcp', response_model=TelescopeMcpContextSchema)
+async def get_mcp_context(
+    designation: Annotated[str | None, Query(description='Optional catalog object to resolve via Sesame.')] = None,
+    ephemeris_body: Annotated[str | None, Query(description='Optional Solar System body (e.g. mars).')] = None,
+    obstime_utc_iso: Annotated[str | None, Query(description='UTC instant for ephemeris query, required with ephemeris_body.')] = None,
+):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    warnings: list[McpContextWarningSchema] = []
+    telescope_status = None
+    capabilities = TelescopeCapabilitiesSchema(
+        supports_slew=False,
+        supports_sync=False,
+        supports_tracking=False,
+        source='default-disabled',
+    )
+
+    try:
+        status_payload = await mediator.handle_query(GetTelescopeStatusQuery())
+        telescope_status = TelescopeStatusSchema(**status_payload)
+        capabilities = TelescopeCapabilitiesSchema(**status_payload['capabilities'])
+    except InfrastructureUnavailableException as exc:
+        warnings.append(McpContextWarningSchema(source='status', code='infra_unavailable', message=exc.message))
+
+    catalog_target = None
+    if designation is not None and designation.strip():
+        try:
+            catalog_payload = await mediator.handle_query(
+                ResolveCommonNameToIcrsQuery(designation=designation.strip()),
+            )
+            catalog_target = ResolvedCatalogIcrsSchema(**catalog_payload)
+        except (CatalogLookupDisabledException, CatalogLookupTimeoutException, UnresolvedObjectNameException) as exc:
+            warnings.append(McpContextWarningSchema(source='catalog', code='catalog_unavailable', message=exc.message))
+
+    ephemeris_target = None
+    if ephemeris_body is not None and ephemeris_body.strip():
+        if not obstime_utc_iso:
+            warnings.append(
+                McpContextWarningSchema(
+                    source='ephemeris',
+                    code='missing_obstime',
+                    message='obstime_utc_iso is required when ephemeris_body is provided',
+                ),
+            )
+        else:
+            try:
+                ephemeris_payload = await mediator.handle_query(
+                    GetSolarSystemBodyIcrsQuery(
+                        body=ephemeris_body.strip(),
+                        obstime_utc_iso=obstime_utc_iso,
+                    ),
+                )
+                ephemeris_target = EphemerisIcrsResponseSchema(**ephemeris_payload)
+            except (EphemerisDisabledException, EphemerisUnavailableException) as exc:
+                warnings.append(McpContextWarningSchema(source='ephemeris', code='ephemeris_unavailable', message=exc.message))
+
+    return TelescopeMcpContextSchema(
+        capabilities=capabilities,
+        telescope_status=telescope_status,
+        catalog_target=catalog_target,
+        ephemeris_target=ephemeris_target,
+        warnings=warnings,
+    )
 
 
 @router.post('/coordinates/radec-to-altaz', response_model=HorizontalCoordsResponseSchema)
