@@ -72,6 +72,7 @@ Then verify:
   - supports `?include_disabled_commands=false` to return only currently runnable telescope command steps.
   - response includes `applied_filters` to confirm the active filtering mode used to build the plan.
   - response includes `stats.baseline_steps`, `stats.returned_steps`, and `stats.filtered_out_steps` to make filtering impact explicit.
+  - response includes `hardware_smoke_plan` for machine-readable `P5-HW-SMOKE` preflight steps.
 - Hardware readiness trigger (`Seestar` not required yet + next real-device task): `GET http://localhost:8000/telescopes/hardware/readiness`
 - Hardware smoke plan template (machine-readable P5-HW-SMOKE checklist): `GET http://localhost:8000/telescopes/hardware/smoke-plan`
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`

@@ -182,6 +182,7 @@ class TelescopeMcpExecutionPlanSchema(BaseModel):
     applied_filters: McpExecutionPlanAppliedFiltersSchema
     stats: McpExecutionPlanStatsSchema
     hardware_readiness: TelescopeHardwareReadinessSchema
+    hardware_smoke_plan: TelescopeHardwareSmokePlanSchema
     steps: list[McpExecutionPlanStepSchema]
 
 

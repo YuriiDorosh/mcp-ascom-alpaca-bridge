@@ -60,6 +60,8 @@ def test_mcp_execution_plan_marks_capability_gated_steps(monkeypatch):
     assert payload['stats']['baseline_steps'] == payload['stats']['returned_steps']
     assert payload['stats']['filtered_out_steps'] == 0
     assert payload['hardware_readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert len(payload['hardware_smoke_plan']['steps']) >= 4
     steps = {step['tool_name']: step for step in payload['steps']}
     assert 'model.enqueue_inference' in steps
     assert 'model.enqueue_and_wait_inference' not in steps
@@ -81,6 +83,7 @@ def test_mcp_execution_plan_supports_sync_mode(monkeypatch):
     payload = response.json()
     assert payload['mode'] == 'sync'
     steps = {step['tool_name']: step for step in payload['steps']}
+    assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert 'model.enqueue_and_wait_inference' in steps
     assert 'model.enqueue_inference' not in steps
     assert 'model.get_inference_status' not in steps
@@ -99,6 +102,7 @@ def test_mcp_execution_plan_falls_back_to_safe_disabled_command_steps(monkeypatc
     payload = response.json()
 
     steps = {step['tool_name']: step for step in payload['steps']}
+    assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert steps['telescope.get_status']['enabled'] is True
     assert steps['telescope.slew_icrs']['enabled'] is False
     assert steps['telescope.slew_icrs']['skip_reason'] == 'missing_capability:supports_slew'

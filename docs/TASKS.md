@@ -125,6 +125,7 @@
 - TODO(P4-DX-OPS): Add machine-readable hardware smoke plan endpoint so operators and MCP clients can fetch the exact P5-HW-SMOKE checklist before connecting Seestar. [DONE-hardening: added `GET /telescopes/hardware/smoke-plan` with integration test and README docs]
 - TODO(P4-MCP-TOOLS): Include `hardware_smoke_plan` in MCP bootstrap so agents can initialize real-hardware checklist context in the same call as readiness and manifests. [DONE-hardening: `/telescopes/tools/mcp-bootstrap` now returns `hardware_smoke_plan` with integration assertions]
 - TODO(P4-DX-POSTMAN): Extend starter/smoke Postman collections for `hardware/smoke-plan` and bootstrap `hardware_smoke_plan` assertions to keep Seestar preflight contract stable in runner checks. [DONE-hardening: added starter endpoint, smoke request, and bootstrap payload assertions for `hardware_smoke_plan`]
+- TODO(P4-MCP-TOOLS): Include `hardware_smoke_plan` in `mcp-execution-plan` so agents can fetch orchestration steps and real-hardware preflight checklist in one response. [DONE-hardening: `/telescopes/tools/mcp-execution-plan` now returns `hardware_smoke_plan` with integration assertions]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
