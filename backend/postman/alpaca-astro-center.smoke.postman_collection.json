@@ -153,6 +153,10 @@
               "  pm.expect(json.hardware_smoke_plan.trigger_task_id).to.eql('P5-HW-SMOKE');",
               "  pm.expect(Array.isArray(json.hardware_smoke_plan.steps)).to.eql(true);",
               "  pm.expect(json.hardware_smoke_plan.steps.length).to.be.above(0);",
+              "  const smokeStep = json.hardware_smoke_plan.steps[0];",
+              "  pm.expect(smokeStep).to.have.property('step');",
+              "  pm.expect(smokeStep).to.have.property('action');",
+              "  pm.expect(smokeStep).to.have.property('expected_result');",
               "});"
             ]
           }
@@ -206,6 +210,10 @@
               "  pm.expect(json.trigger_task_id).to.eql('P5-HW-SMOKE');",
               "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
               "  pm.expect(json.steps.length).to.be.above(0);",
+              "  const firstStep = json.steps[0];",
+              "  pm.expect(firstStep).to.have.property('step');",
+              "  pm.expect(firstStep).to.have.property('action');",
+              "  pm.expect(firstStep).to.have.property('expected_result');",
               "});"
             ]
           }
