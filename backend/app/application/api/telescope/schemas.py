@@ -154,6 +154,18 @@ class TelescopeHardwareReadinessSchema(BaseModel):
     note: str
 
 
+class TelescopeHardwareSmokePlanStepSchema(BaseModel):
+    step: int
+    action: str
+    expected_result: str
+
+
+class TelescopeHardwareSmokePlanSchema(BaseModel):
+    trigger_task_id: str
+    prerequisite: str
+    steps: list[TelescopeHardwareSmokePlanStepSchema]
+
+
 class McpExecutionPlanAppliedFiltersSchema(BaseModel):
     include_disabled_commands: bool
 

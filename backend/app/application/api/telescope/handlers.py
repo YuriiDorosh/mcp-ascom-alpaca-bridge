@@ -33,6 +33,7 @@ from application.api.telescope.schemas import (
     TelescopeCommandAckSchema,
     TelescopeEffectiveMcpToolManifestSchema,
     TelescopeHardwareReadinessSchema,
+    TelescopeHardwareSmokePlanSchema,
     TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
     TelescopeMcpExecutionPlanSchema,
@@ -219,6 +220,35 @@ def _build_hardware_readiness() -> TelescopeHardwareReadinessSchema:
     )
 
 
+def _build_hardware_smoke_plan() -> TelescopeHardwareSmokePlanSchema:
+    return TelescopeHardwareSmokePlanSchema(
+        trigger_task_id='P5-HW-SMOKE',
+        prerequisite='Charge Seestar S30 Pro and place it on the same local network as the backend host.',
+        steps=[
+            {
+                'step': 1,
+                'action': 'Call GET /telescopes/status and GET /telescopes/capabilities against real Alpaca target.',
+                'expected_result': 'Reachable live status with capability flags that match real hardware behavior.',
+            },
+            {
+                'step': 2,
+                'action': 'Run a low-risk slew smoke command using POST /telescopes/commands/slew-icrs.',
+                'expected_result': 'Command ACK is returned and movement result is observable without driver errors.',
+            },
+            {
+                'step': 3,
+                'action': 'Run POST /telescopes/commands/sync-icrs and POST /telescopes/commands/tracking with safe inputs.',
+                'expected_result': 'Only supported commands succeed; unsupported commands remain capability-gated.',
+            },
+            {
+                'step': 4,
+                'action': 'Inspect GET /telescopes/commands/audit for hardware command records.',
+                'expected_result': 'Audit trail contains operation/status/source entries for executed hardware actions.',
+            },
+        ],
+    )
+
+
 async def _build_effective_mcp_tool_manifest(
     *,
     mediator: Mediator,
@@ -394,6 +424,11 @@ async def get_mcp_execution_plan(
 @router.get('/hardware/readiness', response_model=TelescopeHardwareReadinessSchema)
 async def get_hardware_readiness():
     return _build_hardware_readiness()
+
+
+@router.get('/hardware/smoke-plan', response_model=TelescopeHardwareSmokePlanSchema)
+async def get_hardware_smoke_plan():
+    return _build_hardware_smoke_plan()
 
 
 def _require_command_auth(x_command_token: str | None):
