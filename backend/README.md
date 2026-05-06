@@ -68,6 +68,7 @@ Then verify:
 - optional object name → ICRS (Sesame/CDS via Astropy): `GET /telescopes/catalog/icrs` (requires `CATALOG_LOOKUP_ENABLED`)
 - optional Solar System body → ICRS (Skyfield): `GET /telescopes/ephemeris/icrs` (requires `EPHEMERIS_ENABLED`)
 - inference result wait endpoint (long-poll with timeout): `GET /telescopes/model/inference/{request_id}/wait?timeout_seconds=15&poll_interval_seconds=0.5`
+- inference enqueue-and-wait endpoint (single call enqueue + wait): `POST /telescopes/model/inference/enqueue-and-wait?timeout_seconds=15&poll_interval_seconds=0.5`
 - telescope control ops are published to Kafka topic `TELESCOPE_OPERATION_TOPIC` (default `telescope-operation-events`)
 - Kafka contracts include `schema_version` and `correlation_id` fields for event evolution and traceability.
 - Mongo Express (if `make ui` was started): <http://localhost:28081>
