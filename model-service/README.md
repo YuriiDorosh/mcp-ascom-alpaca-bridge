@@ -23,6 +23,7 @@ poetry run uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 ## API
 
 - `GET /health` - service health probe
+- `GET /runtime/profiles` - active runtime profile and supported profile list
 
 ## Kafka Flow
 
@@ -31,3 +32,11 @@ poetry run uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 3. Publish to `MODEL_INFERENCE_RESULT_TOPIC` (default `model-inference-result`)
 
 If runtime inference fails for a request, worker publishes `status=failed` with `error_message`, while keeping `request_id`/`correlation_id` for backend traceability.
+
+## Runtime Profiles
+
+Current supported `MODEL_RUNTIME_PROFILE` values:
+
+- `cpu`
+- `amd`
+- `nvidia`
