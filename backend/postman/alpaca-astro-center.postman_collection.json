@@ -88,6 +88,14 @@
             "header": [],
             "url": "{{base_url}}/telescopes/hardware/readiness"
           }
+        },
+        {
+          "name": "Hardware Smoke Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/hardware/smoke-plan"
+          }
         }
       ]
     },
