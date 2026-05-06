@@ -20,6 +20,7 @@ from application.api.telescope.schemas import (
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
+    McpExecutionPlanStepSchema,
     McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
     ModelInferenceRequestSchema,
@@ -34,6 +35,7 @@ from application.api.telescope.schemas import (
     TelescopeHardwareReadinessSchema,
     TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
+    TelescopeMcpExecutionPlanSchema,
     TelescopeMcpPlanningGuideSchema,
     TelescopeMcpToolManifestSchema,
     TelescopeStatusSchema,
@@ -310,6 +312,48 @@ async def get_mcp_bootstrap():
         ),
         planning_guide=_build_mcp_planning_guide(),
         hardware_readiness=_build_hardware_readiness(),
+    )
+
+
+@router.get('/tools/mcp-execution-plan', response_model=TelescopeMcpExecutionPlanSchema)
+async def get_mcp_execution_plan():
+    container = init_container()
+    config: Config = container.resolve(Config)
+    mediator: Mediator = container.resolve(Mediator)
+    effective_manifest = await _build_effective_mcp_tool_manifest(
+        mediator=mediator,
+        requires_command_token=bool(config.command_auth_token),
+    )
+    effective_tools = {tool.tool_name: tool for tool in effective_manifest.tools}
+    baseline_flow = [
+        ('telescope.get_status', 'Refresh live status/capability snapshot before planning actions.'),
+        ('telescope.get_context', 'Load optional catalog/ephemeris context and warnings for the target.'),
+        ('model.enqueue_inference', 'Submit planning prompt into async local model pipeline.'),
+        ('model.get_inference_status', 'Track request progress without transient 404 handling.'),
+        ('model.wait_inference_result', 'Wait for bounded completion to obtain deterministic model output.'),
+        ('telescope.get_command_audit', 'Review recent command history before dispatching hardware movement.'),
+        ('telescope.slew_icrs', 'Execute movement command only when capability gate is enabled.'),
+        ('telescope.sync_icrs', 'Sync mount model after validation when capability gate is enabled.'),
+        ('telescope.set_tracking', 'Apply tracking mode change only when capability gate is enabled.'),
+    ]
+    steps: list[McpExecutionPlanStepSchema] = []
+    for index, (tool_name, purpose) in enumerate(baseline_flow, start=1):
+        effective_tool = effective_tools.get(tool_name)
+        enabled = True if effective_tool is None else effective_tool.enabled
+        skip_reason = None if enabled else effective_tool.disabled_reason
+        steps.append(
+            McpExecutionPlanStepSchema(
+                step=index,
+                tool_name=tool_name,
+                purpose=purpose,
+                enabled=enabled,
+                skip_reason=skip_reason,
+            ),
+        )
+    return TelescopeMcpExecutionPlanSchema(
+        objective='Provide a runtime-safe MCP orchestration sequence with capability-aware command gating.',
+        hardware_readiness=_build_hardware_readiness(),
+        steps=steps,
     )
 
 
