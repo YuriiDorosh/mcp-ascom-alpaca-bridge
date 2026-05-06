@@ -58,6 +58,7 @@ def test_mcp_execution_plan_marks_capability_gated_steps(monkeypatch):
     assert payload['mode'] == 'async'
     assert payload['applied_filters']['include_disabled_commands'] is True
     assert payload['stats']['baseline_steps'] == payload['stats']['returned_steps']
+    assert payload['stats']['filtered_out_steps'] == 0
     assert payload['hardware_readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
     steps = {step['tool_name']: step for step in payload['steps']}
     assert 'model.enqueue_inference' in steps
@@ -117,6 +118,7 @@ def test_mcp_execution_plan_can_filter_disabled_command_steps(monkeypatch):
     tool_names = [step['tool_name'] for step in payload['steps']]
     assert payload['applied_filters']['include_disabled_commands'] is False
     assert payload['stats']['returned_steps'] < payload['stats']['baseline_steps']
+    assert payload['stats']['filtered_out_steps'] == payload['stats']['baseline_steps'] - payload['stats']['returned_steps']
     assert 'telescope.slew_icrs' in tool_names
     assert 'telescope.sync_icrs' not in tool_names
     assert 'telescope.set_tracking' not in tool_names

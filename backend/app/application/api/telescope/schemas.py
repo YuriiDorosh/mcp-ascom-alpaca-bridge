@@ -161,6 +161,7 @@ class McpExecutionPlanAppliedFiltersSchema(BaseModel):
 class McpExecutionPlanStatsSchema(BaseModel):
     baseline_steps: int
     returned_steps: int
+    filtered_out_steps: int
 
 
 class TelescopeMcpExecutionPlanSchema(BaseModel):
