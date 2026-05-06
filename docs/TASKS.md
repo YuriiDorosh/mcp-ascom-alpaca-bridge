@@ -134,6 +134,7 @@
 - TODO(P4-DX-OPS): Add a local CLI dry-run for `P5-HW-SMOKE` preflight to validate readiness/plan/status/capabilities/audit flow and persist machine-readable check results. [DONE-hardening: added `backend/scripts/hardware_smoke_runner.py`, `make hardware-smoke-dry-run`, and README guidance]
 - TODO(P4-DX-OPS): Add unit tests for hardware smoke CLI runner to lock contract validators and strict failure exit behavior for CI-safe maintenance. [DONE-hardening: added `tests/unit/test_hardware_smoke_runner.py` coverage for validators, check error mapping, and strict exit code]
 - TODO(P4-DX-OPS): Add machine-readable `P5-HW-VALIDATION` checklist endpoint and Postman coverage so safety-validation steps are available before live hardware phase starts. [DONE-hardening: added `GET /telescopes/hardware/validation-plan`, integration test, starter/smoke Postman requests, and README docs]
+- TODO(P4-MCP-TOOLS): Include `hardware_validation_plan` in MCP bootstrap/execution-plan payloads so MCP clients can consume both P5 checklists without extra round-trips. [DONE-hardening: `mcp-bootstrap` and `mcp-execution-plan` now return `hardware_validation_plan` with integration and smoke assertions]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
