@@ -181,6 +181,7 @@
               "});",
               "pm.test('hardware readiness has trigger task', function () {",
               "  const json = pm.response.json();",
+              "  pm.expect(json.schema_version).to.eql('v1');",
               "  pm.expect(json.requires_real_telescope_now).to.eql(false);",
               "  pm.expect(json.trigger_task_id).to.eql('P5-HW-SMOKE');",
               "});"
@@ -207,6 +208,7 @@
               "});",
               "pm.test('hardware smoke plan has trigger and steps', function () {",
               "  const json = pm.response.json();",
+              "  pm.expect(json.schema_version).to.eql('v1');",
               "  pm.expect(json.trigger_task_id).to.eql('P5-HW-SMOKE');",
               "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
               "  pm.expect(json.steps.length).to.be.above(0);",

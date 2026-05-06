@@ -13,6 +13,7 @@ def test_hardware_readiness_exposes_phase5_trigger():
     assert response.status_code == 200
     payload = response.json()
 
+    assert payload['schema_version'] == 'v1'
     assert payload['requires_real_telescope_now'] is False
     assert payload['trigger_task_id'] == 'P5-HW-SMOKE'
     assert 'Charge and prepare Seestar S30 Pro' in payload['operator_action']

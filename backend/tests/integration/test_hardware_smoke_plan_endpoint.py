@@ -13,6 +13,7 @@ def test_hardware_smoke_plan_exposes_machine_readable_steps():
     assert response.status_code == 200
     payload = response.json()
 
+    assert payload['schema_version'] == 'v1'
     assert payload['trigger_task_id'] == 'P5-HW-SMOKE'
     assert 'Charge Seestar S30 Pro' in payload['prerequisite']
     assert isinstance(payload['steps'], list)

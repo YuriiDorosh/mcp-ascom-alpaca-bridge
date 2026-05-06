@@ -148,6 +148,7 @@ class McpExecutionPlanStepSchema(BaseModel):
 
 
 class TelescopeHardwareReadinessSchema(BaseModel):
+    schema_version: str
     requires_real_telescope_now: bool
     trigger_task_id: str
     operator_action: str
@@ -161,6 +162,7 @@ class TelescopeHardwareSmokePlanStepSchema(BaseModel):
 
 
 class TelescopeHardwareSmokePlanSchema(BaseModel):
+    schema_version: str
     trigger_task_id: str
     prerequisite: str
     steps: list[TelescopeHardwareSmokePlanStepSchema]

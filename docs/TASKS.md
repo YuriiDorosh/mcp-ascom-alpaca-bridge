@@ -130,6 +130,7 @@
 - TODO(P4-DX-POSTMAN): Extend `mcp-execution-plan` `hardware_smoke_plan` smoke assertions to runnable-only mode so all execution-plan variants lock the same preflight contract. [DONE-hardening: smoke checks now assert `hardware_smoke_plan` for default, sync, and runnable execution-plan requests]
 - TODO(P4-DX-POSTMAN): Assert `hardware_smoke_plan.steps[*]` schema fields (`step`, `action`, `expected_result`) in smoke flows so Seestar preflight step contracts remain stable. [DONE-hardening: smoke checks now assert step-level fields in bootstrap-linked and direct hardware smoke-plan responses]
 - TODO(P4-DX-POSTMAN): Assert `hardware_smoke_plan.steps[*]` schema fields in `mcp-execution-plan` smoke flows (default/sync/runnable) so execution-plan variants also lock step-level preflight structure. [DONE-hardening: smoke checks now assert `step`/`action`/`expected_result` in execution-plan hardware smoke payloads for all supported modes]
+- TODO(P4-DX-OPS): Add `schema_version` to hardware readiness/smoke-plan contracts so machine-readable payloads can evolve without ambiguous client parsing. [DONE-hardening: `hardware/readiness` and `hardware/smoke-plan` now return `schema_version=v1` with integration and smoke assertions]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

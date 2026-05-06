@@ -213,6 +213,7 @@ def _build_mcp_planning_guide() -> TelescopeMcpPlanningGuideSchema:
 
 def _build_hardware_readiness() -> TelescopeHardwareReadinessSchema:
     return TelescopeHardwareReadinessSchema(
+        schema_version='v1',
         requires_real_telescope_now=False,
         trigger_task_id='P5-HW-SMOKE',
         operator_action='Charge and prepare Seestar S30 Pro right before starting P5-HW-SMOKE.',
@@ -222,6 +223,7 @@ def _build_hardware_readiness() -> TelescopeHardwareReadinessSchema:
 
 def _build_hardware_smoke_plan() -> TelescopeHardwareSmokePlanSchema:
     return TelescopeHardwareSmokePlanSchema(
+        schema_version='v1',
         trigger_task_id='P5-HW-SMOKE',
         prerequisite='Charge Seestar S30 Pro and place it on the same local network as the backend host.',
         steps=[
