@@ -145,6 +145,13 @@ class TelescopeMcpBootstrapSchema(BaseModel):
     planning_guide: TelescopeMcpPlanningGuideSchema
 
 
+class TelescopeHardwareReadinessSchema(BaseModel):
+    requires_real_telescope_now: bool
+    trigger_task_id: str
+    operator_action: str
+    note: str
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 

@@ -31,6 +31,7 @@ from application.api.telescope.schemas import (
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
     TelescopeEffectiveMcpToolManifestSchema,
+    TelescopeHardwareReadinessSchema,
     TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
     TelescopeMcpPlanningGuideSchema,
@@ -299,6 +300,16 @@ async def get_mcp_bootstrap():
             requires_command_token=bool(config.command_auth_token),
         ),
         planning_guide=_build_mcp_planning_guide(),
+    )
+
+
+@router.get('/hardware/readiness', response_model=TelescopeHardwareReadinessSchema)
+async def get_hardware_readiness():
+    return TelescopeHardwareReadinessSchema(
+        requires_real_telescope_now=False,
+        trigger_task_id='P5-HW-SMOKE',
+        operator_action='Charge and prepare Seestar S30 Pro right before starting P5-HW-SMOKE.',
+        note='Current phase remains mock/local-safe; real telescope is not required yet.',
     )
 
 
