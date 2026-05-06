@@ -190,6 +190,7 @@ class TelescopeMcpBootstrapSchema(BaseModel):
     effective_manifest: TelescopeEffectiveMcpToolManifestSchema
     planning_guide: TelescopeMcpPlanningGuideSchema
     hardware_readiness: TelescopeHardwareReadinessSchema
+    hardware_smoke_plan: TelescopeHardwareSmokePlanSchema
 
 
 class SetTelescopeTrackingRequestSchema(BaseModel):
