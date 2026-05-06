@@ -44,6 +44,8 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make test-unit-local` - run unit tests in ephemeral Python 3.12 container
 - `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
 - `make postman-smoke-local` - run Postman smoke collection via Newman (Docker, host network)
+- `make postman-smoke-up` - start backend + Kafka + model-service and run Newman smoke checks
+- `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
 
 ## Recommended Local Startup Order
 

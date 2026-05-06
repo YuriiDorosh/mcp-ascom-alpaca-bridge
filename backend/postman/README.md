@@ -28,6 +28,9 @@ This folder provides a ready-to-import Postman setup for Alpaca Astro Center bac
    - `cd backend`
    - `make postman-smoke-local`
    - optional base URL override: `BASE_URL=http://127.0.0.1:8000 make postman-smoke-local`
+8. One-command stack bring-up + smoke run:
+   - `make postman-smoke-up` (keeps stack running)
+   - `make postman-smoke-up-clean` (runs smoke and tears stack down)
 
 ## Notes
 

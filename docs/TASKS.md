@@ -95,3 +95,4 @@
 - TODO(P4-DX-POSTMAN): Provide import-ready Postman collection/environment templates for backend API exploration and third-party client development. [DONE-foundation: added `backend/postman/` starter kit with collection, local environment, and README]
 - TODO(P4-DX-POSTMAN): Add collection-runner smoke suite for one-click API sanity checks after local stack startup. [DONE-hardening: added `backend/postman/alpaca-astro-center.smoke.postman_collection.json` with ordered requests and basic assertions]
 - TODO(P4-DX-POSTMAN): Add CLI smoke runner command so API sanity checks can run in Dockerized CI-like flow without opening Postman UI. [DONE-hardening: added `make postman-smoke-local` using Newman container and documented `BASE_URL` override]
+- TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
