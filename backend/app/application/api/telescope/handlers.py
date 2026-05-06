@@ -22,6 +22,7 @@ from application.api.telescope.schemas import (
     McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
     ModelInferenceResultSchema,
+    ModelInferenceStatusSchema,
     ModelInferenceRequestSchema,
     RadecToAltAzRequestSchema,
     ResolvedCatalogIcrsSchema,
@@ -420,6 +421,31 @@ async def get_model_inference_result(request_id: str):
         raise HTTPException(status_code=404, detail='Inference result not found')
 
     return ModelInferenceResultSchema(**result)
+
+
+@router.get('/model/inference/{request_id}/status', response_model=ModelInferenceStatusSchema)
+async def get_model_inference_status(request_id: str):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+
+    if result is None:
+        return ModelInferenceStatusSchema(
+            request_id=request_id,
+            status='pending',
+            result=None,
+        )
+
+    status = str(result.get('status', '')).strip().lower()
+    normalized_status = 'failed' if status == 'failed' else 'completed'
+    return ModelInferenceStatusSchema(
+        request_id=request_id,
+        status=normalized_status,
+        result=ModelInferenceResultSchema(**result),
+    )
 
 
 @router.get('/model/inference/{request_id}/wait', response_model=ModelInferenceResultSchema)

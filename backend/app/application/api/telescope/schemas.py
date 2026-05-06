@@ -128,3 +128,9 @@ class ModelInferenceResultSchema(BaseModel):
     output_text: str | None = None
     error_message: str | None = None
     finished_at: str
+
+
+class ModelInferenceStatusSchema(BaseModel):
+    request_id: str
+    status: Literal['pending', 'completed', 'failed']
+    result: ModelInferenceResultSchema | None = None
