@@ -161,6 +161,32 @@
       }
     },
     {
+      "name": "03d - Hardware Readiness",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('hardware readiness returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('hardware readiness has trigger task', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.requires_real_telescope_now).to.eql(false);",
+              "  pm.expect(json.trigger_task_id).to.eql('P5-HW-SMOKE');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/hardware/readiness"
+      }
+    },
+    {
       "name": "04 - Inference Status",
       "event": [
         {
