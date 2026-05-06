@@ -379,6 +379,7 @@ async def get_mcp_execution_plan(
     return TelescopeMcpExecutionPlanSchema(
         objective='Provide a runtime-safe MCP orchestration sequence with capability-aware command gating.',
         mode='sync' if mode == 'sync' else 'async',
+        applied_filters={'include_disabled_commands': include_disabled_commands},
         hardware_readiness=_build_hardware_readiness(),
         steps=steps,
     )
