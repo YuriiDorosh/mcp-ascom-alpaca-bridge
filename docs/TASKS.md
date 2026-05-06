@@ -101,6 +101,7 @@
 - TODO(P4-MCP-TOOLS): Add one-call MCP bootstrap endpoint that aggregates manifest and planning guide for faster agent startup. [DONE-hardening: added `GET /telescopes/tools/mcp-bootstrap` with integration coverage]
 - TODO(P4-MCP-TOOLS): Add effective MCP manifest endpoint with runtime `enabled`/`disabled_reason` flags so agents can skip unsupported command tools before dispatch. [DONE-hardening: added `GET /telescopes/tools/mcp-manifest/effective` with integration tests]
 - TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to cover newly added MCP planning/bootstrap endpoints for complete discovery flow checks. [DONE-hardening: added `mcp-planning-guide` and `mcp-bootstrap` requests to starter + smoke collections]
+- TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to include `mcp-manifest/effective` checks for runtime availability visibility in client validation loops. [DONE-hardening: added effective-manifest requests to starter + smoke collections]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
