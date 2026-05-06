@@ -112,3 +112,10 @@
 
 - TODO(P6-WEATHER-MCP): Add provider-agnostic weather integration (OpenWeather or alternative) and inject weather context into MCP planning payloads.
 - TODO(P6-WEATHER-SAFETY): Use weather signals (clouds, wind, humidity, visibility, precipitation risk) as advisory guardrails for AI telescope recommendations before command dispatch.
+
+## Phase 5 Hardware Gate (Seestar Trigger)
+
+> **Operator trigger:** before starting tasks in this section, charge and prepare the real telescope (`Seestar S30 Pro`) for live LAN validation.
+
+- TODO(P5-HW-SMOKE): Run first hardware-in-the-loop Alpaca smoke checks (`status/capabilities/slew/sync/tracking`) against Seestar on local network and capture baseline behavior notes.
+- TODO(P5-HW-VALIDATION): Validate command safety path on real hardware (auth guard, capability gating, audit trail writes) and document any hardware-specific constraints.

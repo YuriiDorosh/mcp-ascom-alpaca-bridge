@@ -109,6 +109,7 @@ Provide real-time user-facing interaction and operational observability.
 - Frontend receives real-time updates for ongoing telescope operations.
 - Critical control workflows are testable end-to-end.
 - Documentation provides reproducible local startup and operation steps.
+- Hardware gate passed: Seestar HIL smoke/validation tasks from `docs/TASKS.md` are completed.
 
 ### Risks and Dependencies
 - Real-time state synchronization complexity across backend, Kafka, and UI.
