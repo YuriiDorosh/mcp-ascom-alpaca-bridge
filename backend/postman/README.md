@@ -5,6 +5,7 @@ This folder provides a ready-to-import Postman setup for Alpaca Astro Center bac
 ## Files
 
 - `alpaca-astro-center.postman_collection.json` - request collection with grouped endpoints.
+- `alpaca-astro-center.smoke.postman_collection.json` - ordered smoke-run collection with lightweight assertions.
 - `alpaca-astro-center.local.postman_environment.json` - local environment variables (`base_url`, tokens, and IDs).
 
 ## Quick Start
@@ -20,6 +21,9 @@ This folder provides a ready-to-import Postman setup for Alpaca Astro Center bac
 5. Run requests from top to bottom:
    - `Model / Enqueue Inference` first (stores `request_id` automatically),
    - then use `request_id`-based status/result/wait endpoints.
+6. For quick stack sanity checks, run the dedicated smoke collection:
+   - `alpaca-astro-center.smoke.postman_collection.json`
+   - use Collection Runner in Postman (all requests are pre-ordered and include basic 200-status assertions).
 
 ## Notes
 

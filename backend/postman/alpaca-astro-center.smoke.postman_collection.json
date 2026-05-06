@@ -1,0 +1,149 @@
+{
+  "info": {
+    "_postman_id": "3f742188-0b09-4c6c-a83f-b6da3cf4e724",
+    "name": "Alpaca Astro Center API - Smoke",
+    "description": "Sequential smoke checks for local stack bring-up and quick API sanity validation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Telescope Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/status"
+      }
+    },
+    {
+      "name": "02 - MCP Tool Manifest",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp manifest returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-manifest"
+      }
+    },
+    {
+      "name": "03 - Enqueue Inference",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('enqueue returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "if (json.request_id) {",
+              "  pm.environment.set('request_id', json.request_id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Smoke test: return short acknowledgment\"\n}"
+        },
+        "url": "{{base_url}}/telescopes/model/inference"
+      }
+    },
+    {
+      "name": "04 - Inference Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('inference status returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/model/inference/{{request_id}}/status"
+      }
+    },
+    {
+      "name": "05 - Wait Inference Result",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('inference wait returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/model/inference/{{request_id}}/wait?timeout_seconds=20&poll_interval_seconds=0.5"
+      }
+    },
+    {
+      "name": "06 - Command Audit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('command audit returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/commands/audit?limit=10"
+      }
+    }
+  ]
+}
