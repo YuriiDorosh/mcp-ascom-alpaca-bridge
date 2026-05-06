@@ -1,0 +1,298 @@
+{
+  "info": {
+    "_postman_id": "ea828f9a-4fd8-4d63-a37b-fb6a5c1a3c8f",
+    "name": "Alpaca Astro Center API",
+    "description": "Starter collection for local-first telescope backend testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health & Capabilities",
+      "item": [
+        {
+          "name": "Telescope Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/status"
+          }
+        },
+        {
+          "name": "Telescope Capabilities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/capabilities"
+          }
+        },
+        {
+          "name": "MCP Tool Manifest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-manifest"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coordinates & Context",
+      "item": [
+        {
+          "name": "RA/Dec to Alt/Az",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ra_hours\": 10.684,\n  \"dec_degrees\": 41.269,\n  \"latitude_deg\": 50.4501,\n  \"longitude_deg\": 30.5234,\n  \"elevation_m\": 179,\n  \"obstime_utc_iso\": \"{{obstime_utc_iso}}\"\n}"
+            },
+            "url": "{{base_url}}/telescopes/coordinates/radec-to-altaz"
+          }
+        },
+        {
+          "name": "Catalog Resolve ICRS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/telescopes/catalog/icrs?designation={{designation}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "telescopes",
+                "catalog",
+                "icrs"
+              ],
+              "query": [
+                {
+                  "key": "designation",
+                  "value": "{{designation}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ephemeris ICRS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/telescopes/ephemeris/icrs?body={{ephemeris_body}}&obstime_utc_iso={{obstime_utc_iso}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "telescopes",
+                "ephemeris",
+                "icrs"
+              ],
+              "query": [
+                {
+                  "key": "body",
+                  "value": "{{ephemeris_body}}"
+                },
+                {
+                  "key": "obstime_utc_iso",
+                  "value": "{{obstime_utc_iso}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "MCP Context",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/telescopes/context/mcp?designation={{designation}}&ephemeris_body={{ephemeris_body}}&obstime_utc_iso={{obstime_utc_iso}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "telescopes",
+                "context",
+                "mcp"
+              ],
+              "query": [
+                {
+                  "key": "designation",
+                  "value": "{{designation}}"
+                },
+                {
+                  "key": "ephemeris_body",
+                  "value": "{{ephemeris_body}}"
+                },
+                {
+                  "key": "obstime_utc_iso",
+                  "value": "{{obstime_utc_iso}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telescope Commands",
+      "item": [
+        {
+          "name": "Slew to ICRS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Command-Token",
+                "value": "{{command_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ra_hours\": 10.684,\n  \"dec_degrees\": 41.269\n}"
+            },
+            "url": "{{base_url}}/telescopes/commands/slew-icrs"
+          }
+        },
+        {
+          "name": "Sync to ICRS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Command-Token",
+                "value": "{{command_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ra_hours\": 10.684,\n  \"dec_degrees\": 41.269\n}"
+            },
+            "url": "{{base_url}}/telescopes/commands/sync-icrs"
+          }
+        },
+        {
+          "name": "Set Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Command-Token",
+                "value": "{{command_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true\n}"
+            },
+            "url": "{{base_url}}/telescopes/commands/tracking"
+          }
+        },
+        {
+          "name": "Command Audit",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/commands/audit?limit=50"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Model Inference",
+      "item": [
+        {
+          "name": "Enqueue Inference",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.request_id) {",
+                  "  pm.environment.set('request_id', json.request_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Provide short telescope safety checklist before slewing\"\n}"
+            },
+            "url": "{{base_url}}/telescopes/model/inference"
+          }
+        },
+        {
+          "name": "Inference Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/model/inference/{{request_id}}/status"
+          }
+        },
+        {
+          "name": "Inference Result",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/model/inference/{{request_id}}"
+          }
+        },
+        {
+          "name": "Inference Wait",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/model/inference/{{request_id}}/wait?timeout_seconds=15&poll_interval_seconds=0.5"
+          }
+        },
+        {
+          "name": "Enqueue And Wait",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"List 3 short steps to align telescope before imaging\"\n}"
+            },
+            "url": "{{base_url}}/telescopes/model/inference/enqueue-and-wait?timeout_seconds=15&poll_interval_seconds=0.5"
+          }
+        }
+      ]
+    }
+  ]
+}
