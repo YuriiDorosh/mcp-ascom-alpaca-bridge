@@ -228,6 +228,38 @@
       }
     },
     {
+      "name": "03d2 - Hardware Validation Plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('hardware validation plan returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('hardware validation plan has trigger and steps', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.schema_version).to.eql('v1');",
+              "  pm.expect(json.trigger_task_id).to.eql('P5-HW-VALIDATION');",
+              "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
+              "  pm.expect(json.steps.length).to.be.above(0);",
+              "  const firstStep = json.steps[0];",
+              "  pm.expect(firstStep).to.have.property('step');",
+              "  pm.expect(firstStep).to.have.property('action');",
+              "  pm.expect(firstStep).to.have.property('expected_result');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/hardware/validation-plan"
+      }
+    },
+    {
       "name": "03e - MCP Execution Plan",
       "event": [
         {

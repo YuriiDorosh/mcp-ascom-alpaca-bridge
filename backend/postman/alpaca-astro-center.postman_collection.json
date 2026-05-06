@@ -96,6 +96,14 @@
             "header": [],
             "url": "{{base_url}}/telescopes/hardware/smoke-plan"
           }
+        },
+        {
+          "name": "Hardware Validation Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/hardware/validation-plan"
+          }
         }
       ]
     },

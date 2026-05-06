@@ -168,6 +168,19 @@ class TelescopeHardwareSmokePlanSchema(BaseModel):
     steps: list[TelescopeHardwareSmokePlanStepSchema]
 
 
+class TelescopeHardwareValidationPlanStepSchema(BaseModel):
+    step: int
+    action: str
+    expected_result: str
+
+
+class TelescopeHardwareValidationPlanSchema(BaseModel):
+    schema_version: str
+    trigger_task_id: str
+    prerequisite: str
+    steps: list[TelescopeHardwareValidationPlanStepSchema]
+
+
 class McpExecutionPlanAppliedFiltersSchema(BaseModel):
     include_disabled_commands: bool
 
