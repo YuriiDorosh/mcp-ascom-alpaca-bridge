@@ -92,6 +92,23 @@ class TelescopeMcpContextSchema(BaseModel):
     warnings: list[McpContextWarningSchema] = []
 
 
+class McpToolRequirementSchema(BaseModel):
+    required_capability: Literal['supports_slew', 'supports_sync', 'supports_tracking'] | None = None
+    requires_command_token: bool = False
+
+
+class McpToolManifestItemSchema(BaseModel):
+    tool_name: str
+    description: str
+    method: Literal['GET', 'POST']
+    endpoint: str
+    requirements: McpToolRequirementSchema
+
+
+class TelescopeMcpToolManifestSchema(BaseModel):
+    tools: list[McpToolManifestItemSchema]
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 
