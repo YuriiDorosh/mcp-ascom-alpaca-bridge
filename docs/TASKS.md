@@ -97,6 +97,7 @@
 - TODO(P4-DX-POSTMAN): Add CLI smoke runner command so API sanity checks can run in Dockerized CI-like flow without opening Postman UI. [DONE-hardening: added `make postman-smoke-local` using Newman container and documented `BASE_URL` override]
 - TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
 - TODO(P4-MCP-TOOLS): Extend MCP manifest to include model inference tool surface so agents can orchestrate async model flows from one capability map. [DONE-hardening: `/telescopes/tools/mcp-manifest` now includes enqueue/status/wait/enqueue-and-wait model tools]
+- TODO(P4-MCP-TOOLS): Add MCP planning guide endpoint documenting recommended model inference tool order and timeout bounds for safer agent orchestration. [DONE-hardening: added `GET /telescopes/tools/mcp-planning-guide` with structured flow and integration test]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
