@@ -130,3 +130,21 @@ The following must remain stable during refactor from chat template to telescope
 - Introduce telescope-focused bounded contexts and interfaces.
 - Define Kafka contracts between main backend and model microservice.
 - Keep MongoDB ownership in main backend domain services.
+
+## Future Context Expansion (v2.0+)
+
+After frontend delivery and stabilization, weather-awareness can be added to MCP context assembly so AI tool-calling can consider local observing conditions.
+
+Potential providers:
+- OpenWeather
+- Other weather APIs or local observatory weather feeds
+
+Potential MCP context fields:
+- cloud cover
+- wind speed / gusts
+- humidity
+- visibility
+- precipitation probability
+
+Intended outcome:
+- safer and more adaptive telescope-control suggestions from AI agents (especially for movement and session planning under uncertain weather).
