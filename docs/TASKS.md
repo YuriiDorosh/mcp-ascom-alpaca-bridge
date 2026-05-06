@@ -107,6 +107,7 @@
 - TODO(P4-DX-POSTMAN): Add payload contract assertions for `mcp-manifest/effective` in smoke collection to verify `enabled` and `disabled_reason` fields remain stable. [DONE-hardening: smoke tests now assert `enabled` and `disabled_reason` keys in effective manifest tools]
 - TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to cover newly added MCP planning/bootstrap endpoints for complete discovery flow checks. [DONE-hardening: added `mcp-planning-guide` and `mcp-bootstrap` requests to starter + smoke collections]
 - TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to include `mcp-manifest/effective` checks for runtime availability visibility in client validation loops. [DONE-hardening: added effective-manifest requests to starter + smoke collections]
+- TODO(P4-DX-OPS): Add machine-readable hardware readiness endpoint so operators can see whether real telescope is required now and what trigger task starts HIL checks. [DONE-hardening: added `GET /telescopes/hardware/readiness` + integration test]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
