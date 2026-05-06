@@ -139,11 +139,25 @@ class TelescopeMcpPlanningGuideSchema(BaseModel):
     timeout_policy: McpInferenceTimeoutPolicySchema
 
 
+class McpExecutionPlanStepSchema(BaseModel):
+    step: int
+    tool_name: str
+    purpose: str
+    enabled: bool
+    skip_reason: str | None = None
+
+
 class TelescopeHardwareReadinessSchema(BaseModel):
     requires_real_telescope_now: bool
     trigger_task_id: str
     operator_action: str
     note: str
+
+
+class TelescopeMcpExecutionPlanSchema(BaseModel):
+    objective: str
+    hardware_readiness: TelescopeHardwareReadinessSchema
+    steps: list[McpExecutionPlanStepSchema]
 
 
 class TelescopeMcpBootstrapSchema(BaseModel):
