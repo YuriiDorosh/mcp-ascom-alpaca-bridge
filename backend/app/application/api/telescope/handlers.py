@@ -208,6 +208,15 @@ def _build_mcp_planning_guide() -> TelescopeMcpPlanningGuideSchema:
     )
 
 
+def _build_hardware_readiness() -> TelescopeHardwareReadinessSchema:
+    return TelescopeHardwareReadinessSchema(
+        requires_real_telescope_now=False,
+        trigger_task_id='P5-HW-SMOKE',
+        operator_action='Charge and prepare Seestar S30 Pro right before starting P5-HW-SMOKE.',
+        note='Current phase remains mock/local-safe; real telescope is not required yet.',
+    )
+
+
 async def _build_effective_mcp_tool_manifest(
     *,
     mediator: Mediator,
@@ -300,17 +309,13 @@ async def get_mcp_bootstrap():
             requires_command_token=bool(config.command_auth_token),
         ),
         planning_guide=_build_mcp_planning_guide(),
+        hardware_readiness=_build_hardware_readiness(),
     )
 
 
 @router.get('/hardware/readiness', response_model=TelescopeHardwareReadinessSchema)
 async def get_hardware_readiness():
-    return TelescopeHardwareReadinessSchema(
-        requires_real_telescope_now=False,
-        trigger_task_id='P5-HW-SMOKE',
-        operator_action='Charge and prepare Seestar S30 Pro right before starting P5-HW-SMOKE.',
-        note='Current phase remains mock/local-safe; real telescope is not required yet.',
-    )
+    return _build_hardware_readiness()
 
 
 def _require_command_auth(x_command_token: str | None):
