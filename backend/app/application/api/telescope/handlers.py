@@ -52,6 +52,26 @@ from settings.config import Config
 router = APIRouter(tags=['telescope'])
 
 
+async def _wait_for_inference_result(
+    mediator: Mediator,
+    *,
+    request_id: str,
+    timeout_seconds: float,
+    poll_interval_seconds: float,
+) -> ModelInferenceResultSchema:
+    deadline = asyncio.get_running_loop().time() + timeout_seconds
+    while True:
+        result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
+        if result is not None:
+            return ModelInferenceResultSchema(**result)
+        if asyncio.get_running_loop().time() >= deadline:
+            raise HTTPException(
+                status_code=504,
+                detail=f'Inference result timeout exceeded for request_id={request_id}; retry with larger timeout_seconds or poll /model/inference/{request_id}',
+            )
+        await asyncio.sleep(poll_interval_seconds)
+
+
 @router.get('/tools/mcp-manifest', response_model=TelescopeMcpToolManifestSchema)
 async def get_mcp_tool_manifest():
     container = init_container()
@@ -366,6 +386,27 @@ async def enqueue_model_inference(schema: ModelInferenceRequestSchema):
     return ModelInferenceEnqueuedSchema(**result[0])
 
 
+@router.post('/model/inference/enqueue-and-wait', response_model=ModelInferenceResultSchema)
+async def enqueue_and_wait_model_inference(
+    schema: ModelInferenceRequestSchema,
+    timeout_seconds: Annotated[float, Query(gt=0, le=60)] = 15.0,
+    poll_interval_seconds: Annotated[float, Query(gt=0, le=2)] = 0.5,
+):
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        result = await mediator.handle_command(EnqueueModelInferenceCommand(prompt=schema.prompt))
+        request_id = result[0]['request_id']
+        return await _wait_for_inference_result(
+            mediator,
+            request_id=request_id,
+            timeout_seconds=timeout_seconds,
+            poll_interval_seconds=poll_interval_seconds,
+        )
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+
+
 @router.get('/model/inference/{request_id}', response_model=ModelInferenceResultSchema)
 async def get_model_inference_result(request_id: str):
     container = init_container()
@@ -389,21 +430,12 @@ async def wait_model_inference_result(
 ):
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
-    deadline = asyncio.get_running_loop().time() + timeout_seconds
-
-    while True:
-        try:
-            result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
-        except InfrastructureUnavailableException as exc:
-            raise HTTPException(status_code=503, detail=exc.message) from exc
-
-        if result is not None:
-            return ModelInferenceResultSchema(**result)
-
-        if asyncio.get_running_loop().time() >= deadline:
-            raise HTTPException(
-                status_code=504,
-                detail='Inference result timeout exceeded; retry with larger timeout_seconds or poll /model/inference/{request_id}',
-            )
-
-        await asyncio.sleep(poll_interval_seconds)
+    try:
+        return await _wait_for_inference_result(
+            mediator,
+            request_id=request_id,
+            timeout_seconds=timeout_seconds,
+            poll_interval_seconds=poll_interval_seconds,
+        )
+    except InfrastructureUnavailableException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
