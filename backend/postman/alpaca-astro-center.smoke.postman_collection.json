@@ -218,6 +218,37 @@
       }
     },
     {
+      "name": "03f - MCP Execution Plan Sync Mode",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp execution plan sync returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('mcp execution plan sync mode uses single-call inference step', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.mode).to.eql('sync');",
+              "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
+              "  const names = json.steps.map((item) => item.tool_name);",
+              "  pm.expect(names).to.include('model.enqueue_and_wait_inference');",
+              "  pm.expect(names).to.not.include('model.enqueue_inference');",
+              "  pm.expect(names).to.not.include('model.get_inference_status');",
+              "  pm.expect(names).to.not.include('model.wait_inference_result');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-execution-plan?mode=sync"
+      }
+    },
+    {
       "name": "04 - Inference Status",
       "event": [
         {

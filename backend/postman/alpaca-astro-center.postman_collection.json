@@ -66,6 +66,14 @@
           }
         },
         {
+          "name": "MCP Execution Plan (Sync Mode)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-execution-plan?mode=sync"
+          }
+        },
+        {
           "name": "Hardware Readiness",
           "request": {
             "method": "GET",
