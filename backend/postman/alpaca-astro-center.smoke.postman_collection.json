@@ -92,6 +92,14 @@
             "exec": [
               "pm.test('mcp effective manifest returns 200', function () {",
               "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('mcp effective manifest has enabled and disabled_reason fields', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(Array.isArray(json.tools)).to.eql(true);",
+              "  pm.expect(json.tools.length).to.be.above(0);",
+              "  const first = json.tools[0];",
+              "  pm.expect(first).to.have.property('enabled');",
+              "  pm.expect(first).to.have.property('disabled_reason');",
               "});"
             ]
           }
