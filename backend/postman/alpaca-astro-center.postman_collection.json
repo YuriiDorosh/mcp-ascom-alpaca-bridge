@@ -56,6 +56,14 @@
             "header": [],
             "url": "{{base_url}}/telescopes/tools/mcp-bootstrap"
           }
+        },
+        {
+          "name": "Hardware Readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/hardware/readiness"
+          }
         }
       ]
     },
