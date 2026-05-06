@@ -93,3 +93,7 @@ postman-smoke-up:
 .PHONY: postman-smoke-up-clean
 postman-smoke-up-clean:
 	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} up --build -d && ${MAKE} postman-smoke-local && ${MAKE} down-dev-with-model
+
+.PHONY: hardware-smoke-dry-run
+hardware-smoke-dry-run:
+	docker run --rm --network host -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --strict
