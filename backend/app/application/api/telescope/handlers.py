@@ -207,6 +207,43 @@ def _build_mcp_planning_guide() -> TelescopeMcpPlanningGuideSchema:
     )
 
 
+async def _build_effective_mcp_tool_manifest(
+    *,
+    mediator: Mediator,
+    requires_command_token: bool,
+) -> TelescopeEffectiveMcpToolManifestSchema:
+    manifest = _build_mcp_tool_manifest(requires_command_token=requires_command_token)
+    capabilities = TelescopeCapabilitiesSchema(
+        supports_slew=False,
+        supports_sync=False,
+        supports_tracking=False,
+        source='default-disabled',
+    )
+    try:
+        status_payload = await mediator.handle_query(GetTelescopeStatusQuery())
+        capabilities = TelescopeCapabilitiesSchema(**status_payload['capabilities'])
+    except InfrastructureUnavailableException:
+        pass
+
+    tools: list[EffectiveMcpToolManifestItemSchema] = []
+    for item in manifest.tools:
+        capability_key = item.requirements.required_capability
+        if capability_key is None:
+            tools.append(EffectiveMcpToolManifestItemSchema(**item.model_dump(), enabled=True, disabled_reason=None))
+            continue
+
+        enabled = bool(getattr(capabilities, capability_key))
+        tools.append(
+            EffectiveMcpToolManifestItemSchema(
+                **item.model_dump(),
+                enabled=enabled,
+                disabled_reason=None if enabled else f'missing_capability:{capability_key}',
+            ),
+        )
+
+    return TelescopeEffectiveMcpToolManifestSchema(tools=tools)
+
+
 async def _wait_for_inference_result(
     mediator: Mediator,
     *,
@@ -239,36 +276,10 @@ async def get_effective_mcp_tool_manifest():
     container = init_container()
     config: Config = container.resolve(Config)
     mediator: Mediator = container.resolve(Mediator)
-    manifest = _build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token))
-    capabilities = TelescopeCapabilitiesSchema(
-        supports_slew=False,
-        supports_sync=False,
-        supports_tracking=False,
-        source='default-disabled',
+    return await _build_effective_mcp_tool_manifest(
+        mediator=mediator,
+        requires_command_token=bool(config.command_auth_token),
     )
-    try:
-        status_payload = await mediator.handle_query(GetTelescopeStatusQuery())
-        capabilities = TelescopeCapabilitiesSchema(**status_payload['capabilities'])
-    except InfrastructureUnavailableException:
-        pass
-
-    tools: list[EffectiveMcpToolManifestItemSchema] = []
-    for item in manifest.tools:
-        capability_key = item.requirements.required_capability
-        if capability_key is None:
-            tools.append(EffectiveMcpToolManifestItemSchema(**item.model_dump(), enabled=True, disabled_reason=None))
-            continue
-
-        enabled = bool(getattr(capabilities, capability_key))
-        tools.append(
-            EffectiveMcpToolManifestItemSchema(
-                **item.model_dump(),
-                enabled=enabled,
-                disabled_reason=None if enabled else f'missing_capability:{capability_key}',
-            ),
-        )
-
-    return TelescopeEffectiveMcpToolManifestSchema(tools=tools)
 
 
 @router.get('/tools/mcp-planning-guide', response_model=TelescopeMcpPlanningGuideSchema)
@@ -280,8 +291,13 @@ async def get_mcp_planning_guide():
 async def get_mcp_bootstrap():
     container = init_container()
     config: Config = container.resolve(Config)
+    mediator: Mediator = container.resolve(Mediator)
     return TelescopeMcpBootstrapSchema(
         manifest=_build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token)),
+        effective_manifest=await _build_effective_mcp_tool_manifest(
+            mediator=mediator,
+            requires_command_token=bool(config.command_auth_token),
+        ),
         planning_guide=_build_mcp_planning_guide(),
     )
 
