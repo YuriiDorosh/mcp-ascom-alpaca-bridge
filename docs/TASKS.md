@@ -128,6 +128,7 @@
 - TODO(P4-MCP-TOOLS): Include `hardware_smoke_plan` in `mcp-execution-plan` so agents can fetch orchestration steps and real-hardware preflight checklist in one response. [DONE-hardening: `/telescopes/tools/mcp-execution-plan` now returns `hardware_smoke_plan` with integration assertions]
 - TODO(P4-DX-POSTMAN): Add `mcp-execution-plan` smoke assertions for `hardware_smoke_plan` so preflight checklist contract is locked in default and sync runner flows. [DONE-hardening: smoke checks now assert `hardware_smoke_plan` for default and sync execution-plan requests]
 - TODO(P4-DX-POSTMAN): Extend `mcp-execution-plan` `hardware_smoke_plan` smoke assertions to runnable-only mode so all execution-plan variants lock the same preflight contract. [DONE-hardening: smoke checks now assert `hardware_smoke_plan` for default, sync, and runnable execution-plan requests]
+- TODO(P4-DX-POSTMAN): Assert `hardware_smoke_plan.steps[*]` schema fields (`step`, `action`, `expected_result`) in smoke flows so Seestar preflight step contracts remain stable. [DONE-hardening: smoke checks now assert step-level fields in bootstrap-linked and direct hardware smoke-plan responses]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
