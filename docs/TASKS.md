@@ -96,6 +96,7 @@
 - TODO(P4-DX-POSTMAN): Add collection-runner smoke suite for one-click API sanity checks after local stack startup. [DONE-hardening: added `backend/postman/alpaca-astro-center.smoke.postman_collection.json` with ordered requests and basic assertions]
 - TODO(P4-DX-POSTMAN): Add CLI smoke runner command so API sanity checks can run in Dockerized CI-like flow without opening Postman UI. [DONE-hardening: added `make postman-smoke-local` using Newman container and documented `BASE_URL` override]
 - TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
+- TODO(P4-MCP-TOOLS): Extend MCP manifest to include model inference tool surface so agents can orchestrate async model flows from one capability map. [DONE-hardening: `/telescopes/tools/mcp-manifest` now includes enqueue/status/wait/enqueue-and-wait model tools]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

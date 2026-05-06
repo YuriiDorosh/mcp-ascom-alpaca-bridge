@@ -62,6 +62,7 @@ Then verify:
 - Telescope status JSON: `GET http://localhost:8000/telescopes/status`
 - Telescope capability flags (MCP-safe gating surface): `GET http://localhost:8000/telescopes/capabilities`
 - MCP tool manifest (tool definitions + capability/auth requirements): `GET http://localhost:8000/telescopes/tools/mcp-manifest`
+  - now includes both telescope tools and model inference tools for MCP planning.
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`
 - slew / sync / tracking (Alpaca HTTP; requires `ALPACA_ENABLED`): `POST /telescopes/commands/slew-icrs`, `POST /telescopes/commands/sync-icrs`, `POST /telescopes/commands/tracking`

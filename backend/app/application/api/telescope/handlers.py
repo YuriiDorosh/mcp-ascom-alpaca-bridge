@@ -141,6 +141,46 @@ async def get_mcp_tool_manifest():
                     'requires_command_token': False,
                 },
             },
+            {
+                'tool_name': 'model.enqueue_inference',
+                'description': 'Enqueue an inference request for asynchronous model processing.',
+                'method': 'POST',
+                'endpoint': '/telescopes/model/inference',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'model.get_inference_status',
+                'description': 'Read inference status as pending/completed/failed without 404 while pending.',
+                'method': 'GET',
+                'endpoint': '/telescopes/model/inference/{request_id}/status',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'model.wait_inference_result',
+                'description': 'Wait for inference completion with timeout and poll interval controls.',
+                'method': 'GET',
+                'endpoint': '/telescopes/model/inference/{request_id}/wait',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'model.enqueue_and_wait_inference',
+                'description': 'Enqueue an inference request and wait for completion in a single call.',
+                'method': 'POST',
+                'endpoint': '/telescopes/model/inference/enqueue-and-wait',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
         ],
     )
 

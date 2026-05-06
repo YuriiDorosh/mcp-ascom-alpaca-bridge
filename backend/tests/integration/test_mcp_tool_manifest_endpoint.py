@@ -44,6 +44,13 @@ def test_mcp_tool_manifest_exposes_capability_and_auth_requirements(monkeypatch)
         'required_capability': None,
         'requires_command_token': False,
     }
+    assert tools['model.enqueue_inference']['requirements'] == {
+        'required_capability': None,
+        'requires_command_token': False,
+    }
+    assert tools['model.get_inference_status']['endpoint'] == '/telescopes/model/inference/{request_id}/status'
+    assert tools['model.wait_inference_result']['endpoint'] == '/telescopes/model/inference/{request_id}/wait'
+    assert tools['model.enqueue_and_wait_inference']['endpoint'] == '/telescopes/model/inference/enqueue-and-wait'
 
 
 def test_mcp_tool_manifest_marks_command_token_optional_when_not_configured(monkeypatch):
@@ -58,3 +65,4 @@ def test_mcp_tool_manifest_marks_command_token_optional_when_not_configured(monk
     payload = response.json()
     tools = {tool['tool_name']: tool for tool in payload['tools']}
     assert tools['telescope.slew_icrs']['requirements']['requires_command_token'] is False
+    assert tools['model.enqueue_inference']['requirements']['requires_command_token'] is False
