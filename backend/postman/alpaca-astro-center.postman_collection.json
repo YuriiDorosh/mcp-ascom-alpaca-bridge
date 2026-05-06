@@ -74,6 +74,14 @@
           }
         },
         {
+          "name": "MCP Execution Plan (Runnable Commands Only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-execution-plan?include_disabled_commands=false"
+          }
+        },
+        {
           "name": "Hardware Readiness",
           "request": {
             "method": "GET",

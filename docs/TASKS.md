@@ -115,6 +115,7 @@
 - TODO(P4-MCP-TOOLS): Support execution-plan mode profiles (`async` polling vs `sync` enqueue-and-wait) so MCP clients can request orchestration shape explicitly. [DONE-hardening: `GET /telescopes/tools/mcp-execution-plan?mode=async|sync` with integration coverage]
 - TODO(P4-DX-POSTMAN): Add `mcp-execution-plan?mode=sync` smoke coverage to lock single-call inference flow contract in collection runner checks. [DONE-hardening: added starter request and smoke assertions for sync execution-plan mode]
 - TODO(P4-MCP-TOOLS): Add `include_disabled_commands` execution-plan filter so clients can request a pre-filtered runnable command sequence from capability-gated plans. [DONE-hardening: `GET /telescopes/tools/mcp-execution-plan?include_disabled_commands=false` with integration coverage]
+- TODO(P4-DX-POSTMAN): Add runnable-only execution-plan smoke coverage (`include_disabled_commands=false`) to lock filtered command-step behavior in collection runner checks. [DONE-hardening: added starter request and smoke assertions for runnable command filtering]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
