@@ -72,6 +72,10 @@ def test_mcp_bootstrap_aggregates_manifest_and_planning_guide(monkeypatch):
     assert smoke_plan['trigger_task_id'] == 'P5-HW-SMOKE'
     assert len(smoke_plan['steps']) >= 4
     assert smoke_plan['steps'][0]['step'] == 1
+    validation_plan = payload['hardware_validation_plan']
+    assert validation_plan['trigger_task_id'] == 'P5-HW-VALIDATION'
+    assert len(validation_plan['steps']) >= 4
+    assert validation_plan['steps'][0]['step'] == 1
 
 
 def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavailable(monkeypatch):
@@ -92,3 +96,4 @@ def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavail
     assert effective_tools['telescope.get_status']['enabled'] is True
     assert payload['hardware_readiness']['requires_real_telescope_now'] is False
     assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'

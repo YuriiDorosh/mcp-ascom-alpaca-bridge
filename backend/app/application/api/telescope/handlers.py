@@ -376,6 +376,7 @@ async def get_mcp_bootstrap():
         planning_guide=_build_mcp_planning_guide(),
         hardware_readiness=_build_hardware_readiness(),
         hardware_smoke_plan=_build_hardware_smoke_plan(),
+        hardware_validation_plan=_build_hardware_validation_plan(),
     )
 
 
@@ -452,6 +453,7 @@ async def get_mcp_execution_plan(
         },
         hardware_readiness=_build_hardware_readiness(),
         hardware_smoke_plan=_build_hardware_smoke_plan(),
+        hardware_validation_plan=_build_hardware_validation_plan(),
         steps=steps,
     )
 
