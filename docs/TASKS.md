@@ -109,6 +109,7 @@
 - TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to include `mcp-manifest/effective` checks for runtime availability visibility in client validation loops. [DONE-hardening: added effective-manifest requests to starter + smoke collections]
 - TODO(P4-DX-OPS): Add machine-readable hardware readiness endpoint so operators can see whether real telescope is required now and what trigger task starts HIL checks. [DONE-hardening: added `GET /telescopes/hardware/readiness` + integration test]
 - TODO(P4-DX-POSTMAN): Add `hardware/readiness` endpoint coverage to starter and smoke Postman collections so Seestar trigger visibility is part of routine validation. [DONE-hardening: added hardware readiness request + smoke assertions for trigger task]
+- TODO(P4-MCP-TOOLS): Include `hardware_readiness` inside MCP bootstrap payload so tool clients can initialize readiness and trigger-task context in one request. [DONE-hardening: `/telescopes/tools/mcp-bootstrap` now includes `hardware_readiness`]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

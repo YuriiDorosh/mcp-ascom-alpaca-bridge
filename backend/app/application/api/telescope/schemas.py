@@ -139,17 +139,18 @@ class TelescopeMcpPlanningGuideSchema(BaseModel):
     timeout_policy: McpInferenceTimeoutPolicySchema
 
 
-class TelescopeMcpBootstrapSchema(BaseModel):
-    manifest: TelescopeMcpToolManifestSchema
-    effective_manifest: TelescopeEffectiveMcpToolManifestSchema
-    planning_guide: TelescopeMcpPlanningGuideSchema
-
-
 class TelescopeHardwareReadinessSchema(BaseModel):
     requires_real_telescope_now: bool
     trigger_task_id: str
     operator_action: str
     note: str
+
+
+class TelescopeMcpBootstrapSchema(BaseModel):
+    manifest: TelescopeMcpToolManifestSchema
+    effective_manifest: TelescopeEffectiveMcpToolManifestSchema
+    planning_guide: TelescopeMcpPlanningGuideSchema
+    hardware_readiness: TelescopeHardwareReadinessSchema
 
 
 class SetTelescopeTrackingRequestSchema(BaseModel):

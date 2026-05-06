@@ -65,6 +65,9 @@ def test_mcp_bootstrap_aggregates_manifest_and_planning_guide(monkeypatch):
     planning_guide = payload['planning_guide']
     assert planning_guide['objective']
     assert planning_guide['inference_flow'][0]['tool_name'] == 'model.enqueue_inference'
+    hardware_readiness = payload['hardware_readiness']
+    assert hardware_readiness['requires_real_telescope_now'] is False
+    assert hardware_readiness['trigger_task_id'] == 'P5-HW-SMOKE'
 
 
 def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavailable(monkeypatch):
@@ -83,3 +86,4 @@ def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavail
     assert effective_tools['telescope.sync_icrs']['enabled'] is False
     assert effective_tools['telescope.set_tracking']['enabled'] is False
     assert effective_tools['telescope.get_status']['enabled'] is True
+    assert payload['hardware_readiness']['requires_real_telescope_now'] is False
