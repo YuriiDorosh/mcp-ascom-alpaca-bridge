@@ -141,6 +141,7 @@ class TelescopeMcpPlanningGuideSchema(BaseModel):
 
 class TelescopeMcpBootstrapSchema(BaseModel):
     manifest: TelescopeMcpToolManifestSchema
+    effective_manifest: TelescopeEffectiveMcpToolManifestSchema
     planning_guide: TelescopeMcpPlanningGuideSchema
 
 
