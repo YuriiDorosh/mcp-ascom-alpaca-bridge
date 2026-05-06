@@ -130,6 +130,11 @@ class TelescopeMcpPlanningGuideSchema(BaseModel):
     timeout_policy: McpInferenceTimeoutPolicySchema
 
 
+class TelescopeMcpBootstrapSchema(BaseModel):
+    manifest: TelescopeMcpToolManifestSchema
+    planning_guide: TelescopeMcpPlanningGuideSchema
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 
