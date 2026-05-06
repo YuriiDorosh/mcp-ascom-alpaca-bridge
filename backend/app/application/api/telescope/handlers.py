@@ -19,6 +19,7 @@ from application.api.telescope.schemas import (
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
+    TelescopeMcpBootstrapSchema,
     McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
     ModelInferenceResultSchema,
@@ -54,32 +55,7 @@ from settings.config import Config
 router = APIRouter(tags=['telescope'])
 
 
-async def _wait_for_inference_result(
-    mediator: Mediator,
-    *,
-    request_id: str,
-    timeout_seconds: float,
-    poll_interval_seconds: float,
-) -> ModelInferenceResultSchema:
-    deadline = asyncio.get_running_loop().time() + timeout_seconds
-    while True:
-        result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
-        if result is not None:
-            return ModelInferenceResultSchema(**result)
-        if asyncio.get_running_loop().time() >= deadline:
-            raise HTTPException(
-                status_code=504,
-                detail=f'Inference result timeout exceeded for request_id={request_id}; retry with larger timeout_seconds or poll /model/inference/{request_id}',
-            )
-        await asyncio.sleep(poll_interval_seconds)
-
-
-@router.get('/tools/mcp-manifest', response_model=TelescopeMcpToolManifestSchema)
-async def get_mcp_tool_manifest():
-    container = init_container()
-    config: Config = container.resolve(Config)
-    requires_command_token = bool(config.command_auth_token)
-
+def _build_mcp_tool_manifest(*, requires_command_token: bool) -> TelescopeMcpToolManifestSchema:
     return TelescopeMcpToolManifestSchema(
         tools=[
             {
@@ -186,8 +162,7 @@ async def get_mcp_tool_manifest():
     )
 
 
-@router.get('/tools/mcp-planning-guide', response_model=TelescopeMcpPlanningGuideSchema)
-async def get_mcp_planning_guide():
+def _build_mcp_planning_guide() -> TelescopeMcpPlanningGuideSchema:
     return TelescopeMcpPlanningGuideSchema(
         objective='Provide a deterministic MCP-safe model inference orchestration guide for local agents.',
         safety_notes=[
@@ -227,6 +202,48 @@ async def get_mcp_planning_guide():
             'default_poll_interval_seconds': 0.5,
             'max_poll_interval_seconds': 2.0,
         },
+    )
+
+
+async def _wait_for_inference_result(
+    mediator: Mediator,
+    *,
+    request_id: str,
+    timeout_seconds: float,
+    poll_interval_seconds: float,
+) -> ModelInferenceResultSchema:
+    deadline = asyncio.get_running_loop().time() + timeout_seconds
+    while True:
+        result = await mediator.handle_query(GetModelInferenceResultQuery(request_id=request_id))
+        if result is not None:
+            return ModelInferenceResultSchema(**result)
+        if asyncio.get_running_loop().time() >= deadline:
+            raise HTTPException(
+                status_code=504,
+                detail=f'Inference result timeout exceeded for request_id={request_id}; retry with larger timeout_seconds or poll /model/inference/{request_id}',
+            )
+        await asyncio.sleep(poll_interval_seconds)
+
+
+@router.get('/tools/mcp-manifest', response_model=TelescopeMcpToolManifestSchema)
+async def get_mcp_tool_manifest():
+    container = init_container()
+    config: Config = container.resolve(Config)
+    return _build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token))
+
+
+@router.get('/tools/mcp-planning-guide', response_model=TelescopeMcpPlanningGuideSchema)
+async def get_mcp_planning_guide():
+    return _build_mcp_planning_guide()
+
+
+@router.get('/tools/mcp-bootstrap', response_model=TelescopeMcpBootstrapSchema)
+async def get_mcp_bootstrap():
+    container = init_container()
+    config: Config = container.resolve(Config)
+    return TelescopeMcpBootstrapSchema(
+        manifest=_build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token)),
+        planning_guide=_build_mcp_planning_guide(),
     )
 
 

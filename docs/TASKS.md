@@ -98,6 +98,7 @@
 - TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
 - TODO(P4-MCP-TOOLS): Extend MCP manifest to include model inference tool surface so agents can orchestrate async model flows from one capability map. [DONE-hardening: `/telescopes/tools/mcp-manifest` now includes enqueue/status/wait/enqueue-and-wait model tools]
 - TODO(P4-MCP-TOOLS): Add MCP planning guide endpoint documenting recommended model inference tool order and timeout bounds for safer agent orchestration. [DONE-hardening: added `GET /telescopes/tools/mcp-planning-guide` with structured flow and integration test]
+- TODO(P4-MCP-TOOLS): Add one-call MCP bootstrap endpoint that aggregates manifest and planning guide for faster agent startup. [DONE-hardening: added `GET /telescopes/tools/mcp-bootstrap` with integration coverage]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
