@@ -1,0 +1,2 @@
+# Local secrets (never commit). Named env templates like `.env.example` stay tracked.
+.env

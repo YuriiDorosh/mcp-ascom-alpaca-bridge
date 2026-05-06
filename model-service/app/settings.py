@@ -1,13 +1,22 @@
 from typing import Literal
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+)
 
 RuntimeProfile = Literal['cpu', 'amd', 'nvidia']
 SUPPORTED_RUNTIME_PROFILES: tuple[RuntimeProfile, ...] = ('cpu', 'amd', 'nvidia')
 
 
 class Config(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        extra='ignore',
+    )
+
     kafka_url: str = Field(default='localhost:9092', alias='KAFKA_URL')
     model_inference_request_topic: str = Field(default='model-inference-request', alias='MODEL_INFERENCE_REQUEST_TOPIC')
     model_inference_result_topic: str = Field(default='model-inference-result', alias='MODEL_INFERENCE_RESULT_TOPIC')

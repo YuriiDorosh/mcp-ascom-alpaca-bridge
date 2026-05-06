@@ -10,12 +10,29 @@ Local FastAPI microservice that consumes inference requests from Kafka and publi
 
 ## Environment
 
-Copy `.env.example` to `.env` and adjust values if needed.
+Copy `.env.example` to `.env` and adjust values if needed. The file is gitignored and stays on your machine only.
 
-## Run Locally
+## Run with Docker (recommended for full stack)
+
+The model service is built and run together with the main backend and Kafka from the `backend/` tree:
+
+```bash
+cd ../backend
+cp .env.example .env   # once; edit KAFKA_URL, MODEL_*, etc.
+make app-dev-with-model
+```
+
+Compose reads environment from **`backend/.env`**, not from `model-service/.env`. Variables under `environment:` in `backend/docker_compose/model-service.yaml` are injected into the container (Kafka URL, topics, runtime profile, port mapping).
+
+After startup: `GET http://localhost:8010/health` and `GET http://localhost:8010/runtime/profiles`.
+
+## Run Locally (Poetry, without Compose)
+
+Use this when developing the model service in isolation; then `model-service/.env` **is** loaded for local runs (via Pydantic settings / shell env):
 
 ```bash
 cd model-service
+cp .env.example .env
 poetry install
 poetry run uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 ```
