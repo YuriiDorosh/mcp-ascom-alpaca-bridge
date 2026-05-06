@@ -85,3 +85,11 @@ test-integration-local:
 .PHONY: postman-smoke-local
 postman-smoke-local:
 	docker run --rm --network host -v ${PWD}/postman:/etc/newman ${NEWMAN_IMAGE} run /etc/newman/alpaca-astro-center.smoke.postman_collection.json -e /etc/newman/alpaca-astro-center.local.postman_environment.json --env-var base_url=$${BASE_URL:-http://127.0.0.1:8000}
+
+.PHONY: postman-smoke-up
+postman-smoke-up:
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} up --build -d && ${MAKE} postman-smoke-local
+
+.PHONY: postman-smoke-up-clean
+postman-smoke-up-clean:
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} up --build -d && ${MAKE} postman-smoke-local && ${MAKE} down-dev-with-model
