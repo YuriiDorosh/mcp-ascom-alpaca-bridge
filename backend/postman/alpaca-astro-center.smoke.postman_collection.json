@@ -149,6 +149,10 @@
               "  pm.expect(json.effective_manifest).to.have.property('tools');",
               "  pm.expect(Array.isArray(json.effective_manifest.tools)).to.eql(true);",
               "  pm.expect(json.effective_manifest.tools.length).to.be.above(0);",
+              "  pm.expect(json).to.have.property('hardware_smoke_plan');",
+              "  pm.expect(json.hardware_smoke_plan.trigger_task_id).to.eql('P5-HW-SMOKE');",
+              "  pm.expect(Array.isArray(json.hardware_smoke_plan.steps)).to.eql(true);",
+              "  pm.expect(json.hardware_smoke_plan.steps.length).to.be.above(0);",
               "});"
             ]
           }
@@ -184,6 +188,33 @@
         "method": "GET",
         "header": [],
         "url": "{{base_url}}/telescopes/hardware/readiness"
+      }
+    },
+    {
+      "name": "03d1 - Hardware Smoke Plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('hardware smoke plan returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('hardware smoke plan has trigger and steps', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.trigger_task_id).to.eql('P5-HW-SMOKE');",
+              "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
+              "  pm.expect(json.steps.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/hardware/smoke-plan"
       }
     },
     {

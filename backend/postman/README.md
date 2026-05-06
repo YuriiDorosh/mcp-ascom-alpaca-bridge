@@ -7,7 +7,7 @@ This folder provides a ready-to-import Postman setup for Alpaca Astro Center bac
 - `alpaca-astro-center.postman_collection.json` - request collection with grouped endpoints.
 - `alpaca-astro-center.smoke.postman_collection.json` - ordered smoke-run collection with lightweight assertions.
 - `alpaca-astro-center.local.postman_environment.json` - local environment variables (`base_url`, tokens, and IDs).
-- The collections include MCP discovery endpoints: `mcp-manifest`, `mcp-manifest/effective`, `mcp-planning-guide`, `mcp-bootstrap`, `mcp-execution-plan` (including `mode=sync`, `include_disabled_commands=false`, and contract checks for `applied_filters` + `stats`, including `stats.filtered_out_steps`), and `hardware/readiness`.
+- The collections include MCP discovery endpoints: `mcp-manifest`, `mcp-manifest/effective`, `mcp-planning-guide`, `mcp-bootstrap` (including `hardware_smoke_plan` contract checks), `mcp-execution-plan` (including `mode=sync`, `include_disabled_commands=false`, and contract checks for `applied_filters` + `stats`, including `stats.filtered_out_steps`), plus `hardware/readiness` and `hardware/smoke-plan`.
 
 ## Quick Start
 
