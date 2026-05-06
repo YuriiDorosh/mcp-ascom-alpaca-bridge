@@ -16,20 +16,22 @@ from domain.exceptions.telescope import EphemerisUnavailableException
 from domain.exceptions.telescope import UnresolvedObjectNameException
 from application.api.telescope.schemas import (
     CommandAuditRecordSchema,
+    EffectiveMcpToolManifestItemSchema,
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
-    TelescopeMcpBootstrapSchema,
     McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
+    ModelInferenceRequestSchema,
     ModelInferenceResultSchema,
     ModelInferenceStatusSchema,
-    ModelInferenceRequestSchema,
     RadecToAltAzRequestSchema,
     ResolvedCatalogIcrsSchema,
     SetTelescopeTrackingRequestSchema,
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
+    TelescopeEffectiveMcpToolManifestSchema,
+    TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
     TelescopeMcpPlanningGuideSchema,
     TelescopeMcpToolManifestSchema,
@@ -230,6 +232,43 @@ async def get_mcp_tool_manifest():
     container = init_container()
     config: Config = container.resolve(Config)
     return _build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token))
+
+
+@router.get('/tools/mcp-manifest/effective', response_model=TelescopeEffectiveMcpToolManifestSchema)
+async def get_effective_mcp_tool_manifest():
+    container = init_container()
+    config: Config = container.resolve(Config)
+    mediator: Mediator = container.resolve(Mediator)
+    manifest = _build_mcp_tool_manifest(requires_command_token=bool(config.command_auth_token))
+    capabilities = TelescopeCapabilitiesSchema(
+        supports_slew=False,
+        supports_sync=False,
+        supports_tracking=False,
+        source='default-disabled',
+    )
+    try:
+        status_payload = await mediator.handle_query(GetTelescopeStatusQuery())
+        capabilities = TelescopeCapabilitiesSchema(**status_payload['capabilities'])
+    except InfrastructureUnavailableException:
+        pass
+
+    tools: list[EffectiveMcpToolManifestItemSchema] = []
+    for item in manifest.tools:
+        capability_key = item.requirements.required_capability
+        if capability_key is None:
+            tools.append(EffectiveMcpToolManifestItemSchema(**item.model_dump(), enabled=True, disabled_reason=None))
+            continue
+
+        enabled = bool(getattr(capabilities, capability_key))
+        tools.append(
+            EffectiveMcpToolManifestItemSchema(
+                **item.model_dump(),
+                enabled=enabled,
+                disabled_reason=None if enabled else f'missing_capability:{capability_key}',
+            ),
+        )
+
+    return TelescopeEffectiveMcpToolManifestSchema(tools=tools)
 
 
 @router.get('/tools/mcp-planning-guide', response_model=TelescopeMcpPlanningGuideSchema)

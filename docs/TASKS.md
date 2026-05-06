@@ -99,6 +99,7 @@
 - TODO(P4-MCP-TOOLS): Extend MCP manifest to include model inference tool surface so agents can orchestrate async model flows from one capability map. [DONE-hardening: `/telescopes/tools/mcp-manifest` now includes enqueue/status/wait/enqueue-and-wait model tools]
 - TODO(P4-MCP-TOOLS): Add MCP planning guide endpoint documenting recommended model inference tool order and timeout bounds for safer agent orchestration. [DONE-hardening: added `GET /telescopes/tools/mcp-planning-guide` with structured flow and integration test]
 - TODO(P4-MCP-TOOLS): Add one-call MCP bootstrap endpoint that aggregates manifest and planning guide for faster agent startup. [DONE-hardening: added `GET /telescopes/tools/mcp-bootstrap` with integration coverage]
+- TODO(P4-MCP-TOOLS): Add effective MCP manifest endpoint with runtime `enabled`/`disabled_reason` flags so agents can skip unsupported command tools before dispatch. [DONE-hardening: added `GET /telescopes/tools/mcp-manifest/effective` with integration tests]
 - TODO(P4-DX-POSTMAN): Extend Postman starter and smoke collections to cover newly added MCP planning/bootstrap endpoints for complete discovery flow checks. [DONE-hardening: added `mcp-planning-guide` and `mcp-bootstrap` requests to starter + smoke collections]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)

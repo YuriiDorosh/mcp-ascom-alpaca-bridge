@@ -109,6 +109,15 @@ class TelescopeMcpToolManifestSchema(BaseModel):
     tools: list[McpToolManifestItemSchema]
 
 
+class EffectiveMcpToolManifestItemSchema(McpToolManifestItemSchema):
+    enabled: bool
+    disabled_reason: str | None = None
+
+
+class TelescopeEffectiveMcpToolManifestSchema(BaseModel):
+    tools: list[EffectiveMcpToolManifestItemSchema]
+
+
 class McpInferenceFlowStepSchema(BaseModel):
     step: int
     tool_name: str
