@@ -43,6 +43,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make test-local` - run full suite in ephemeral Python 3.12 container (no running app container needed)
 - `make test-unit-local` - run unit tests in ephemeral Python 3.12 container
 - `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
+- `make postman-smoke-local` - run Postman smoke collection via Newman (Docker, host network)
 
 ## Recommended Local Startup Order
 

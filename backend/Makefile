@@ -8,6 +8,7 @@ MODEL_SERVICE = docker_compose/model-service.yaml
 APP_SERVICE = main-app
 ENV = --env-file .env
 PYTHON_IMAGE = python:3.12-slim-bookworm
+NEWMAN_IMAGE = postman/newman:alpine
 
 .PHONY: app-dev
 app-dev:
@@ -80,3 +81,7 @@ test-unit-local:
 .PHONY: test-integration-local
 test-integration-local:
 	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} bash -lc "pip install -q poetry==1.8.2 && poetry install -q --no-interaction && poetry run pytest -q tests/integration"
+
+.PHONY: postman-smoke-local
+postman-smoke-local:
+	docker run --rm --network host -v ${PWD}/postman:/etc/newman ${NEWMAN_IMAGE} run /etc/newman/alpaca-astro-center.smoke.postman_collection.json -e /etc/newman/alpaca-astro-center.local.postman_environment.json --env-var base_url=$${BASE_URL:-http://127.0.0.1:8000}

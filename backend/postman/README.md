@@ -24,6 +24,10 @@ This folder provides a ready-to-import Postman setup for Alpaca Astro Center bac
 6. For quick stack sanity checks, run the dedicated smoke collection:
    - `alpaca-astro-center.smoke.postman_collection.json`
    - use Collection Runner in Postman (all requests are pre-ordered and include basic 200-status assertions).
+7. CLI alternative (without opening Postman UI):
+   - `cd backend`
+   - `make postman-smoke-local`
+   - optional base URL override: `BASE_URL=http://127.0.0.1:8000 make postman-smoke-local`
 
 ## Notes
 
