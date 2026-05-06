@@ -117,6 +117,7 @@
 - TODO(P4-MCP-TOOLS): Add `include_disabled_commands` execution-plan filter so clients can request a pre-filtered runnable command sequence from capability-gated plans. [DONE-hardening: `GET /telescopes/tools/mcp-execution-plan?include_disabled_commands=false` with integration coverage]
 - TODO(P4-DX-POSTMAN): Add runnable-only execution-plan smoke coverage (`include_disabled_commands=false`) to lock filtered command-step behavior in collection runner checks. [DONE-hardening: added starter request and smoke assertions for runnable command filtering]
 - TODO(P4-MCP-TOOLS): Include `applied_filters` in execution-plan response so clients can confirm active filtering knobs from API payload alone. [DONE-hardening: `mcp-execution-plan` now returns `applied_filters.include_disabled_commands`]
+- TODO(P4-DX-POSTMAN): Add smoke assertions for `mcp-execution-plan` `applied_filters` contract so default and runnable-only filter states are validated in collection runs. [DONE-hardening: smoke checks now assert `applied_filters.include_disabled_commands` for both default and filtered requests]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
