@@ -30,6 +30,7 @@ from application.api.telescope.schemas import (
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
     TelescopeMcpContextSchema,
+    TelescopeMcpPlanningGuideSchema,
     TelescopeMcpToolManifestSchema,
     TelescopeStatusSchema,
 )
@@ -182,6 +183,50 @@ async def get_mcp_tool_manifest():
                 },
             },
         ],
+    )
+
+
+@router.get('/tools/mcp-planning-guide', response_model=TelescopeMcpPlanningGuideSchema)
+async def get_mcp_planning_guide():
+    return TelescopeMcpPlanningGuideSchema(
+        objective='Provide a deterministic MCP-safe model inference orchestration guide for local agents.',
+        safety_notes=[
+            'Prefer read-only status checks before long waits to avoid unnecessary blocking.',
+            'Treat pending status as expected for async Kafka workflows; do not retry enqueue immediately.',
+            'Use enqueue-and-wait only when synchronous UX is required and timeout budget is known.',
+        ],
+        inference_flow=[
+            {
+                'step': 1,
+                'tool_name': 'model.enqueue_inference',
+                'purpose': 'Submit prompt into async Kafka inference pipeline.',
+                'when_to_use': 'Use for non-blocking flows where polling is acceptable.',
+            },
+            {
+                'step': 2,
+                'tool_name': 'model.get_inference_status',
+                'purpose': 'Check pending/completed/failed state without 404 transitions.',
+                'when_to_use': 'Use for periodic progress checks in planners or UIs.',
+            },
+            {
+                'step': 3,
+                'tool_name': 'model.wait_inference_result',
+                'purpose': 'Block until completion or timeout with bounded polling interval.',
+                'when_to_use': 'Use when caller can spend a bounded waiting window.',
+            },
+            {
+                'step': 4,
+                'tool_name': 'model.enqueue_and_wait_inference',
+                'purpose': 'Combine enqueue and wait in one round-trip for simple clients.',
+                'when_to_use': 'Use for single-shot tasks where a synchronous answer is preferred.',
+            },
+        ],
+        timeout_policy={
+            'default_timeout_seconds': 15.0,
+            'max_timeout_seconds': 60.0,
+            'default_poll_interval_seconds': 0.5,
+            'max_poll_interval_seconds': 2.0,
+        },
     )
 
 

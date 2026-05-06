@@ -109,6 +109,27 @@ class TelescopeMcpToolManifestSchema(BaseModel):
     tools: list[McpToolManifestItemSchema]
 
 
+class McpInferenceFlowStepSchema(BaseModel):
+    step: int
+    tool_name: str
+    purpose: str
+    when_to_use: str
+
+
+class McpInferenceTimeoutPolicySchema(BaseModel):
+    default_timeout_seconds: float
+    max_timeout_seconds: float
+    default_poll_interval_seconds: float
+    max_poll_interval_seconds: float
+
+
+class TelescopeMcpPlanningGuideSchema(BaseModel):
+    objective: str
+    safety_notes: list[str]
+    inference_flow: list[McpInferenceFlowStepSchema]
+    timeout_policy: McpInferenceTimeoutPolicySchema
+
+
 class SetTelescopeTrackingRequestSchema(BaseModel):
     enabled: bool
 
