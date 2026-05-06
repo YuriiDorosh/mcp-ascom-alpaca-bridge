@@ -318,6 +318,10 @@ async def get_mcp_bootstrap():
 @router.get('/tools/mcp-execution-plan', response_model=TelescopeMcpExecutionPlanSchema)
 async def get_mcp_execution_plan(
     mode: Annotated[str, Query(pattern='^(async|sync)$', description='Execution mode: async polling flow or sync single-call flow.')] = 'async',
+    include_disabled_commands: Annotated[
+        bool,
+        Query(description='When false, capability-disabled telescope command steps are omitted from the plan.'),
+    ] = True,
 ):
     container = init_container()
     config: Config = container.resolve(Config)
@@ -356,6 +360,13 @@ async def get_mcp_execution_plan(
         effective_tool = effective_tools.get(tool_name)
         enabled = True if effective_tool is None else effective_tool.enabled
         skip_reason = None if enabled else effective_tool.disabled_reason
+        if (
+            include_disabled_commands is False
+            and tool_name.startswith('telescope.')
+            and tool_name in {'telescope.slew_icrs', 'telescope.sync_icrs', 'telescope.set_tracking'}
+            and enabled is False
+        ):
+            continue
         steps.append(
             McpExecutionPlanStepSchema(
                 step=index,
