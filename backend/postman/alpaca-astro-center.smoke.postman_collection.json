@@ -187,6 +187,37 @@
       }
     },
     {
+      "name": "03e - MCP Execution Plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp execution plan returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('mcp execution plan includes steps and readiness', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('hardware_readiness');",
+              "  pm.expect(json).to.have.property('steps');",
+              "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
+              "  pm.expect(json.steps.length).to.be.above(0);",
+              "  const first = json.steps[0];",
+              "  pm.expect(first).to.have.property('enabled');",
+              "  pm.expect(first).to.have.property('skip_reason');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-execution-plan"
+      }
+    },
+    {
       "name": "04 - Inference Status",
       "event": [
         {

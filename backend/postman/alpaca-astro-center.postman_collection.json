@@ -58,6 +58,14 @@
           }
         },
         {
+          "name": "MCP Execution Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-execution-plan"
+          }
+        },
+        {
           "name": "Hardware Readiness",
           "request": {
             "method": "GET",
