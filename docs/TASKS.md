@@ -116,6 +116,7 @@
 - TODO(P4-DX-POSTMAN): Add `mcp-execution-plan?mode=sync` smoke coverage to lock single-call inference flow contract in collection runner checks. [DONE-hardening: added starter request and smoke assertions for sync execution-plan mode]
 - TODO(P4-MCP-TOOLS): Add `include_disabled_commands` execution-plan filter so clients can request a pre-filtered runnable command sequence from capability-gated plans. [DONE-hardening: `GET /telescopes/tools/mcp-execution-plan?include_disabled_commands=false` with integration coverage]
 - TODO(P4-DX-POSTMAN): Add runnable-only execution-plan smoke coverage (`include_disabled_commands=false`) to lock filtered command-step behavior in collection runner checks. [DONE-hardening: added starter request and smoke assertions for runnable command filtering]
+- TODO(P4-MCP-TOOLS): Include `applied_filters` in execution-plan response so clients can confirm active filtering knobs from API payload alone. [DONE-hardening: `mcp-execution-plan` now returns `applied_filters.include_disabled_commands`]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

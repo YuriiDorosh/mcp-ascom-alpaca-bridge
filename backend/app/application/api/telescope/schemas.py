@@ -154,9 +154,14 @@ class TelescopeHardwareReadinessSchema(BaseModel):
     note: str
 
 
+class McpExecutionPlanAppliedFiltersSchema(BaseModel):
+    include_disabled_commands: bool
+
+
 class TelescopeMcpExecutionPlanSchema(BaseModel):
     objective: str
     mode: Literal['async', 'sync']
+    applied_filters: McpExecutionPlanAppliedFiltersSchema
     hardware_readiness: TelescopeHardwareReadinessSchema
     steps: list[McpExecutionPlanStepSchema]
 
