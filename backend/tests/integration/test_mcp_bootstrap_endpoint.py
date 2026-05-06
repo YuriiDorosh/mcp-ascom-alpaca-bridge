@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from application.api.telescope import handlers as telescope_handlers
 from application.api.telescope.handlers import router as telescope_router
+from domain.exceptions.infrastructure import InfrastructureUnavailableException
 from logic.mediator.base import Mediator
 from settings.config import Config
 
@@ -17,6 +18,14 @@ class FakeMediator(Mediator):
                 'source': 'alpaca-live',
             },
         }
+
+    async def handle_command(self, command):
+        raise NotImplementedError
+
+
+class FailingMediator(Mediator):
+    async def handle_query(self, query):
+        raise InfrastructureUnavailableException('status unavailable')
 
     async def handle_command(self, command):
         raise NotImplementedError
@@ -56,3 +65,21 @@ def test_mcp_bootstrap_aggregates_manifest_and_planning_guide(monkeypatch):
     planning_guide = payload['planning_guide']
     assert planning_guide['objective']
     assert planning_guide['inference_flow'][0]['tool_name'] == 'model.enqueue_inference'
+
+
+def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavailable(monkeypatch):
+    config = Config(COMMAND_AUTH_TOKEN='')
+    monkeypatch.setattr(telescope_handlers, 'init_container', lambda: FakeContainer(config, FailingMediator()))
+    app = FastAPI()
+    app.include_router(telescope_router, prefix='/telescopes')
+    client = TestClient(app)
+
+    response = client.get('/telescopes/tools/mcp-bootstrap')
+    assert response.status_code == 200
+    payload = response.json()
+
+    effective_tools = {tool['tool_name']: tool for tool in payload['effective_manifest']['tools']}
+    assert effective_tools['telescope.slew_icrs']['enabled'] is False
+    assert effective_tools['telescope.sync_icrs']['enabled'] is False
+    assert effective_tools['telescope.set_tracking']['enabled'] is False
+    assert effective_tools['telescope.get_status']['enabled'] is True
