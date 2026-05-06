@@ -76,6 +76,7 @@ Then verify:
   - response includes `hardware_smoke_plan` for machine-readable `P5-HW-SMOKE` preflight steps.
 - Hardware readiness trigger (`Seestar` not required yet + next real-device task): `GET http://localhost:8000/telescopes/hardware/readiness`
 - Hardware smoke plan template (machine-readable P5-HW-SMOKE checklist): `GET http://localhost:8000/telescopes/hardware/smoke-plan`
+- Hardware validation plan template (machine-readable P5-HW-VALIDATION checklist): `GET http://localhost:8000/telescopes/hardware/validation-plan`
   - both responses include `schema_version` for forward-compatible contract evolution.
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`

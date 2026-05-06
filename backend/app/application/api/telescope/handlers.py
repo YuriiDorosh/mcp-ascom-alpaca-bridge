@@ -34,6 +34,7 @@ from application.api.telescope.schemas import (
     TelescopeEffectiveMcpToolManifestSchema,
     TelescopeHardwareReadinessSchema,
     TelescopeHardwareSmokePlanSchema,
+    TelescopeHardwareValidationPlanSchema,
     TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
     TelescopeMcpExecutionPlanSchema,
@@ -251,6 +252,36 @@ def _build_hardware_smoke_plan() -> TelescopeHardwareSmokePlanSchema:
     )
 
 
+def _build_hardware_validation_plan() -> TelescopeHardwareValidationPlanSchema:
+    return TelescopeHardwareValidationPlanSchema(
+        schema_version='v1',
+        trigger_task_id='P5-HW-VALIDATION',
+        prerequisite='Finish P5-HW-SMOKE and confirm Seestar remains on stable local power/network.',
+        steps=[
+            {
+                'step': 1,
+                'action': 'Enable COMMAND_AUTH_TOKEN and verify unauthorized command calls return 401.',
+                'expected_result': 'All `/telescopes/commands/*` endpoints reject missing/invalid token attempts with HTTP 401.',
+            },
+            {
+                'step': 2,
+                'action': 'Call MCP effective-manifest and execution-plan against live hardware capabilities.',
+                'expected_result': 'Capability-disabled command tools are clearly marked with disabled reasons.',
+            },
+            {
+                'step': 3,
+                'action': 'Execute only hardware-supported command paths (slew/sync/tracking) with valid token.',
+                'expected_result': 'Supported commands ACK successfully; unsupported flows remain blocked by gates.',
+            },
+            {
+                'step': 4,
+                'action': 'Review command audit endpoint with operation/status/source filters after test run.',
+                'expected_result': 'Audit records are complete and queryable for safety/review traceability.',
+            },
+        ],
+    )
+
+
 async def _build_effective_mcp_tool_manifest(
     *,
     mediator: Mediator,
@@ -433,6 +464,11 @@ async def get_hardware_readiness():
 @router.get('/hardware/smoke-plan', response_model=TelescopeHardwareSmokePlanSchema)
 async def get_hardware_smoke_plan():
     return _build_hardware_smoke_plan()
+
+
+@router.get('/hardware/validation-plan', response_model=TelescopeHardwareValidationPlanSchema)
+async def get_hardware_validation_plan():
+    return _build_hardware_validation_plan()
 
 
 def _require_command_auth(x_command_token: str | None):
