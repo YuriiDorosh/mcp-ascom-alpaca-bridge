@@ -55,12 +55,33 @@ def test_mcp_execution_plan_marks_capability_gated_steps(monkeypatch):
     assert response.status_code == 200
     payload = response.json()
 
+    assert payload['mode'] == 'async'
     assert payload['hardware_readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
     steps = {step['tool_name']: step for step in payload['steps']}
+    assert 'model.enqueue_inference' in steps
+    assert 'model.enqueue_and_wait_inference' not in steps
     assert steps['telescope.slew_icrs']['enabled'] is True
     assert steps['telescope.sync_icrs']['enabled'] is False
     assert steps['telescope.sync_icrs']['skip_reason'] == 'missing_capability:supports_sync'
     assert steps['telescope.set_tracking']['enabled'] is False
+
+
+def test_mcp_execution_plan_supports_sync_mode(monkeypatch):
+    config = Config(COMMAND_AUTH_TOKEN='secret-token')
+    monkeypatch.setattr(telescope_handlers, 'init_container', lambda: FakeContainer(config, FakeMediator()))
+    app = FastAPI()
+    app.include_router(telescope_router, prefix='/telescopes')
+    client = TestClient(app)
+
+    response = client.get('/telescopes/tools/mcp-execution-plan?mode=sync')
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload['mode'] == 'sync'
+    steps = {step['tool_name']: step for step in payload['steps']}
+    assert 'model.enqueue_and_wait_inference' in steps
+    assert 'model.enqueue_inference' not in steps
+    assert 'model.get_inference_status' not in steps
+    assert 'model.wait_inference_result' not in steps
 
 
 def test_mcp_execution_plan_falls_back_to_safe_disabled_command_steps(monkeypatch):

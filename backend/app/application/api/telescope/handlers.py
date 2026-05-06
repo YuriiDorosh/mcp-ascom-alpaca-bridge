@@ -316,7 +316,9 @@ async def get_mcp_bootstrap():
 
 
 @router.get('/tools/mcp-execution-plan', response_model=TelescopeMcpExecutionPlanSchema)
-async def get_mcp_execution_plan():
+async def get_mcp_execution_plan(
+    mode: Annotated[str, Query(pattern='^(async|sync)$', description='Execution mode: async polling flow or sync single-call flow.')] = 'async',
+):
     container = init_container()
     config: Config = container.resolve(Config)
     mediator: Mediator = container.resolve(Mediator)
@@ -325,17 +327,30 @@ async def get_mcp_execution_plan():
         requires_command_token=bool(config.command_auth_token),
     )
     effective_tools = {tool.tool_name: tool for tool in effective_manifest.tools}
-    baseline_flow = [
+    baseline_flow: list[tuple[str, str]] = [
         ('telescope.get_status', 'Refresh live status/capability snapshot before planning actions.'),
         ('telescope.get_context', 'Load optional catalog/ephemeris context and warnings for the target.'),
-        ('model.enqueue_inference', 'Submit planning prompt into async local model pipeline.'),
-        ('model.get_inference_status', 'Track request progress without transient 404 handling.'),
-        ('model.wait_inference_result', 'Wait for bounded completion to obtain deterministic model output.'),
-        ('telescope.get_command_audit', 'Review recent command history before dispatching hardware movement.'),
-        ('telescope.slew_icrs', 'Execute movement command only when capability gate is enabled.'),
-        ('telescope.sync_icrs', 'Sync mount model after validation when capability gate is enabled.'),
-        ('telescope.set_tracking', 'Apply tracking mode change only when capability gate is enabled.'),
     ]
+    if mode == 'sync':
+        baseline_flow.append(
+            ('model.enqueue_and_wait_inference', 'Request a single-call model decision when synchronous UX is preferred.'),
+        )
+    else:
+        baseline_flow.extend(
+            [
+                ('model.enqueue_inference', 'Submit planning prompt into async local model pipeline.'),
+                ('model.get_inference_status', 'Track request progress without transient 404 handling.'),
+                ('model.wait_inference_result', 'Wait for bounded completion to obtain deterministic model output.'),
+            ],
+        )
+    baseline_flow.extend(
+        [
+            ('telescope.get_command_audit', 'Review recent command history before dispatching hardware movement.'),
+            ('telescope.slew_icrs', 'Execute movement command only when capability gate is enabled.'),
+            ('telescope.sync_icrs', 'Sync mount model after validation when capability gate is enabled.'),
+            ('telescope.set_tracking', 'Apply tracking mode change only when capability gate is enabled.'),
+        ],
+    )
     steps: list[McpExecutionPlanStepSchema] = []
     for index, (tool_name, purpose) in enumerate(baseline_flow, start=1):
         effective_tool = effective_tools.get(tool_name)
@@ -352,6 +367,7 @@ async def get_mcp_execution_plan():
         )
     return TelescopeMcpExecutionPlanSchema(
         objective='Provide a runtime-safe MCP orchestration sequence with capability-aware command gating.',
+        mode='sync' if mode == 'sync' else 'async',
         hardware_readiness=_build_hardware_readiness(),
         steps=steps,
     )

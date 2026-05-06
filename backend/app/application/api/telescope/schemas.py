@@ -156,6 +156,7 @@ class TelescopeHardwareReadinessSchema(BaseModel):
 
 class TelescopeMcpExecutionPlanSchema(BaseModel):
     objective: str
+    mode: Literal['async', 'sync']
     hardware_readiness: TelescopeHardwareReadinessSchema
     steps: list[McpExecutionPlanStepSchema]
 
