@@ -41,6 +41,15 @@ def test_assert_smoke_plan_requires_step_fields():
         )
 
 
+def test_assert_validation_plan_accepts_expected_contract():
+    payload = {
+        "schema_version": "v1",
+        "trigger_task_id": "P5-HW-VALIDATION",
+        "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+    }
+    runner._assert_validation_plan(payload)
+
+
 def test_run_check_reports_assertion_failure(monkeypatch: pytest.MonkeyPatch):
     def fake_http_json(**_kwargs):
         return 200, {"bad": "payload"}
@@ -64,6 +73,7 @@ def test_main_returns_nonzero_on_strict_failures(monkeypatch: pytest.MonkeyPatch
     args = Namespace(
         base_url="http://127.0.0.1:8000",
         report_path=str(tmp_path / "report.json"),
+        validation_only=False,
         include_commands=False,
         command_token="",
         strict=True,
@@ -88,7 +98,7 @@ def test_main_returns_nonzero_on_strict_failures(monkeypatch: pytest.MonkeyPatch
         error="http_error: unavailable",
         details=None,
     )
-    queue = [first_ok, first_ok, first_ok, first_ok, failed]
+    queue = [first_ok, first_ok, first_ok, first_ok, first_ok, failed]
     monkeypatch.setattr(runner, "_run_check", lambda **_kwargs: queue.pop(0))
     monkeypatch.setattr(runner, "_write_report", lambda *_args, **_kwargs: None)
 

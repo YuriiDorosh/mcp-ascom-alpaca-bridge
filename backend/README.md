@@ -47,6 +47,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make postman-smoke-up` - start backend + Kafka + model-service and run Newman smoke checks
 - `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
 - `make hardware-smoke-dry-run` - run hardware preflight CLI checks (read-only by default) and write JSON report for `P5-HW-SMOKE` preparation
+- `make hardware-validation-dry-run` - run validation-focused dry-run checks and write JSON report for `P5-HW-VALIDATION` preparation
 
 ## Recommended Local Startup Order
 
@@ -136,11 +137,12 @@ Recommended flows:
 
 The project is intentionally testable without telescope hardware while `ALPACA_ENABLED=false`.
 
-## Hardware Smoke CLI Preflight
+## Hardware CLI Preflight
 
 - Script: `backend/scripts/hardware_smoke_runner.py`
-- Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `status`, `capabilities`, `commands/audit`).
+- Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `hardware/validation-plan`, `status`, `capabilities`, `commands/audit`).
 - Output report: `backend/artifacts/hardware-smoke-dry-run.json`
+- Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
 
 ## Postman Starter Kit
