@@ -32,6 +32,22 @@
             "header": [],
             "url": "{{base_url}}/telescopes/tools/mcp-manifest"
           }
+        },
+        {
+          "name": "MCP Planning Guide",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-planning-guide"
+          }
+        },
+        {
+          "name": "MCP Bootstrap Bundle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-bootstrap"
+          }
         }
       ]
     },

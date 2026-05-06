@@ -83,6 +83,48 @@
       }
     },
     {
+      "name": "03b - MCP Planning Guide",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp planning guide returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-planning-guide"
+      }
+    },
+    {
+      "name": "03c - MCP Bootstrap Bundle",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp bootstrap returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-bootstrap"
+      }
+    },
+    {
       "name": "04 - Inference Status",
       "event": [
         {
