@@ -34,6 +34,14 @@
           }
         },
         {
+          "name": "MCP Effective Manifest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/telescopes/tools/mcp-manifest/effective"
+          }
+        },
+        {
           "name": "MCP Planning Guide",
           "request": {
             "method": "GET",

@@ -83,6 +83,27 @@
       }
     },
     {
+      "name": "03a - MCP Effective Manifest",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('mcp effective manifest returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/tools/mcp-manifest/effective"
+      }
+    },
+    {
       "name": "03b - MCP Planning Guide",
       "event": [
         {
