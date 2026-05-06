@@ -134,6 +134,13 @@
             "exec": [
               "pm.test('mcp bootstrap returns 200', function () {",
               "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('mcp bootstrap includes effective_manifest tools', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('effective_manifest');",
+              "  pm.expect(json.effective_manifest).to.have.property('tools');",
+              "  pm.expect(Array.isArray(json.effective_manifest.tools)).to.eql(true);",
+              "  pm.expect(json.effective_manifest.tools.length).to.be.above(0);",
               "});"
             ]
           }
