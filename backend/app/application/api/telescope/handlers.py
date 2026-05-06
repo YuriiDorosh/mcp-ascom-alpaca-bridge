@@ -355,6 +355,7 @@ async def get_mcp_execution_plan(
             ('telescope.set_tracking', 'Apply tracking mode change only when capability gate is enabled.'),
         ],
     )
+    baseline_steps = len(baseline_flow)
     steps: list[McpExecutionPlanStepSchema] = []
     for index, (tool_name, purpose) in enumerate(baseline_flow, start=1):
         effective_tool = effective_tools.get(tool_name)
@@ -380,6 +381,7 @@ async def get_mcp_execution_plan(
         objective='Provide a runtime-safe MCP orchestration sequence with capability-aware command gating.',
         mode='sync' if mode == 'sync' else 'async',
         applied_filters={'include_disabled_commands': include_disabled_commands},
+        stats={'baseline_steps': baseline_steps, 'returned_steps': len(steps)},
         hardware_readiness=_build_hardware_readiness(),
         steps=steps,
     )

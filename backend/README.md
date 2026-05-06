@@ -71,6 +71,7 @@ Then verify:
   - supports `?mode=async|sync` to switch between polling flow and single-call inference flow.
   - supports `?include_disabled_commands=false` to return only currently runnable telescope command steps.
   - response includes `applied_filters` to confirm the active filtering mode used to build the plan.
+  - response includes `stats.baseline_steps` and `stats.returned_steps` to make filtering impact explicit.
 - Hardware readiness trigger (`Seestar` not required yet + next real-device task): `GET http://localhost:8000/telescopes/hardware/readiness`
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`

@@ -158,10 +158,16 @@ class McpExecutionPlanAppliedFiltersSchema(BaseModel):
     include_disabled_commands: bool
 
 
+class McpExecutionPlanStatsSchema(BaseModel):
+    baseline_steps: int
+    returned_steps: int
+
+
 class TelescopeMcpExecutionPlanSchema(BaseModel):
     objective: str
     mode: Literal['async', 'sync']
     applied_filters: McpExecutionPlanAppliedFiltersSchema
+    stats: McpExecutionPlanStatsSchema
     hardware_readiness: TelescopeHardwareReadinessSchema
     steps: list[McpExecutionPlanStepSchema]
 
