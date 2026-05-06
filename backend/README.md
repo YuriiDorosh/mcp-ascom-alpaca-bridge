@@ -121,5 +121,6 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 
 - Import-ready templates are available in `backend/postman/`:
   - `alpaca-astro-center.postman_collection.json`
+  - `alpaca-astro-center.smoke.postman_collection.json`
   - `alpaca-astro-center.local.postman_environment.json`
 - See `backend/postman/README.md` for quick-start and variable usage.
