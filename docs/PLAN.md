@@ -138,3 +138,23 @@ flowchart TD
     dddCore --> mcpServer[MCPServerTools]
     mcpServer --> localLLM[LocalLLMRuntime]
 ```
+
+## Future Direction (Post-Frontend, v2.0+)
+
+After the frontend phase is stabilized, a potential **v2.0** enhancement is weather-intelligence integration for telescope-safe MCP planning.
+
+### Candidate Integrations
+- OpenWeather API
+- Alternative weather providers (for example Meteo, WeatherAPI, or self-hosted weather feeds)
+
+### Goal
+Provide real-time local observing conditions (cloud cover, wind speed/gusts, humidity, visibility, precipitation risk) as MCP context so AI agents can make safer telescope decisions.
+
+### Expected Impact
+- Better go/no-go recommendations before movement or long imaging sessions.
+- Smarter target planning when conditions are unstable.
+- Reduced risk from commanding telescope actions in poor weather windows.
+
+### Notes
+- Weather data should remain advisory/guardrail context unless explicit autonomous policies are introduced.
+- Provider abstraction is preferred to avoid hard-coupling to one weather vendor.

@@ -96,3 +96,8 @@
 - TODO(P4-DX-POSTMAN): Add collection-runner smoke suite for one-click API sanity checks after local stack startup. [DONE-hardening: added `backend/postman/alpaca-astro-center.smoke.postman_collection.json` with ordered requests and basic assertions]
 - TODO(P4-DX-POSTMAN): Add CLI smoke runner command so API sanity checks can run in Dockerized CI-like flow without opening Postman UI. [DONE-hardening: added `make postman-smoke-local` using Newman container and documented `BASE_URL` override]
 - TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
+
+## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
+
+- TODO(P6-WEATHER-MCP): Add provider-agnostic weather integration (OpenWeather or alternative) and inject weather context into MCP planning payloads.
+- TODO(P6-WEATHER-SAFETY): Use weather signals (clouds, wind, humidity, visibility, precipitation risk) as advisory guardrails for AI telescope recommendations before command dispatch.
