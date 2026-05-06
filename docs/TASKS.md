@@ -123,6 +123,7 @@
 - TODO(P4-MCP-TOOLS): Add `stats.filtered_out_steps` in execution-plan response so clients can consume filter impact as a direct scalar metric. [DONE-hardening: `mcp-execution-plan` now returns `stats.filtered_out_steps` with integration assertions]
 - TODO(P4-DX-POSTMAN): Add smoke assertions for execution-plan `stats.filtered_out_steps` so direct filter-impact metric stays locked in Postman runner regressions. [DONE-hardening: smoke checks now assert `stats.filtered_out_steps` for both default and runnable-only execution-plan requests]
 - TODO(P4-DX-OPS): Add machine-readable hardware smoke plan endpoint so operators and MCP clients can fetch the exact P5-HW-SMOKE checklist before connecting Seestar. [DONE-hardening: added `GET /telescopes/hardware/smoke-plan` with integration test and README docs]
+- TODO(P4-MCP-TOOLS): Include `hardware_smoke_plan` in MCP bootstrap so agents can initialize real-hardware checklist context in the same call as readiness and manifests. [DONE-hardening: `/telescopes/tools/mcp-bootstrap` now returns `hardware_smoke_plan` with integration assertions]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

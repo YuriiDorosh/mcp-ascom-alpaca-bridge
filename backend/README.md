@@ -66,7 +66,7 @@ Then verify:
 - Effective MCP manifest (runtime-ready tool availability with `enabled` flags): `GET http://localhost:8000/telescopes/tools/mcp-manifest/effective`
 - MCP planning guide (recommended inference tool orchestration + timeout policy): `GET http://localhost:8000/telescopes/tools/mcp-planning-guide`
 - MCP bootstrap bundle (manifest + planning guide in one call): `GET http://localhost:8000/telescopes/tools/mcp-bootstrap`
-  - includes static `manifest`, runtime `effective_manifest`, and `hardware_readiness` for one-call agent initialization.
+  - includes static `manifest`, runtime `effective_manifest`, `hardware_readiness`, and `hardware_smoke_plan` for one-call agent initialization.
 - MCP execution plan (runtime-safe step sequence with capability-gated command tools): `GET http://localhost:8000/telescopes/tools/mcp-execution-plan`
   - supports `?mode=async|sync` to switch between polling flow and single-call inference flow.
   - supports `?include_disabled_commands=false` to return only currently runnable telescope command steps.

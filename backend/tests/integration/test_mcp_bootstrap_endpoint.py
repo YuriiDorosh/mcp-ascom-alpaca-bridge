@@ -68,6 +68,10 @@ def test_mcp_bootstrap_aggregates_manifest_and_planning_guide(monkeypatch):
     hardware_readiness = payload['hardware_readiness']
     assert hardware_readiness['requires_real_telescope_now'] is False
     assert hardware_readiness['trigger_task_id'] == 'P5-HW-SMOKE'
+    smoke_plan = payload['hardware_smoke_plan']
+    assert smoke_plan['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert len(smoke_plan['steps']) >= 4
+    assert smoke_plan['steps'][0]['step'] == 1
 
 
 def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavailable(monkeypatch):
@@ -87,3 +91,4 @@ def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavail
     assert effective_tools['telescope.set_tracking']['enabled'] is False
     assert effective_tools['telescope.get_status']['enabled'] is True
     assert payload['hardware_readiness']['requires_real_telescope_now'] is False
+    assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
