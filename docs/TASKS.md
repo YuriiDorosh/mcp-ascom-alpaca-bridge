@@ -132,6 +132,7 @@
 - TODO(P4-DX-POSTMAN): Assert `hardware_smoke_plan.steps[*]` schema fields in `mcp-execution-plan` smoke flows (default/sync/runnable) so execution-plan variants also lock step-level preflight structure. [DONE-hardening: smoke checks now assert `step`/`action`/`expected_result` in execution-plan hardware smoke payloads for all supported modes]
 - TODO(P4-DX-OPS): Add `schema_version` to hardware readiness/smoke-plan contracts so machine-readable payloads can evolve without ambiguous client parsing. [DONE-hardening: `hardware/readiness` and `hardware/smoke-plan` now return `schema_version=v1` with integration and smoke assertions]
 - TODO(P4-DX-OPS): Add a local CLI dry-run for `P5-HW-SMOKE` preflight to validate readiness/plan/status/capabilities/audit flow and persist machine-readable check results. [DONE-hardening: added `backend/scripts/hardware_smoke_runner.py`, `make hardware-smoke-dry-run`, and README guidance]
+- TODO(P4-DX-OPS): Add unit tests for hardware smoke CLI runner to lock contract validators and strict failure exit behavior for CI-safe maintenance. [DONE-hardening: added `tests/unit/test_hardware_smoke_runner.py` coverage for validators, check error mapping, and strict exit code]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
