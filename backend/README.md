@@ -69,6 +69,7 @@ Then verify:
   - includes static `manifest`, runtime `effective_manifest`, and `hardware_readiness` for one-call agent initialization.
 - MCP execution plan (runtime-safe step sequence with capability-gated command tools): `GET http://localhost:8000/telescopes/tools/mcp-execution-plan`
   - supports `?mode=async|sync` to switch between polling flow and single-call inference flow.
+  - supports `?include_disabled_commands=false` to return only currently runnable telescope command steps.
 - Hardware readiness trigger (`Seestar` not required yet + next real-device task): `GET http://localhost:8000/telescopes/hardware/readiness`
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`

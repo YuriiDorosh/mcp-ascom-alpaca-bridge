@@ -99,3 +99,20 @@ def test_mcp_execution_plan_falls_back_to_safe_disabled_command_steps(monkeypatc
     assert steps['telescope.get_status']['enabled'] is True
     assert steps['telescope.slew_icrs']['enabled'] is False
     assert steps['telescope.slew_icrs']['skip_reason'] == 'missing_capability:supports_slew'
+
+
+def test_mcp_execution_plan_can_filter_disabled_command_steps(monkeypatch):
+    config = Config(COMMAND_AUTH_TOKEN='secret-token')
+    monkeypatch.setattr(telescope_handlers, 'init_container', lambda: FakeContainer(config, FakeMediator()))
+    app = FastAPI()
+    app.include_router(telescope_router, prefix='/telescopes')
+    client = TestClient(app)
+
+    response = client.get('/telescopes/tools/mcp-execution-plan?include_disabled_commands=false')
+    assert response.status_code == 200
+    payload = response.json()
+
+    tool_names = [step['tool_name'] for step in payload['steps']]
+    assert 'telescope.slew_icrs' in tool_names
+    assert 'telescope.sync_icrs' not in tool_names
+    assert 'telescope.set_tracking' not in tool_names
