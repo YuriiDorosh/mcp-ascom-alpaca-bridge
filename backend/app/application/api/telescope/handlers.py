@@ -418,6 +418,7 @@ async def get_mcp_execution_plan(
             'filtered_out_steps': baseline_steps - len(steps),
         },
         hardware_readiness=_build_hardware_readiness(),
+        hardware_smoke_plan=_build_hardware_smoke_plan(),
         steps=steps,
     )
 
