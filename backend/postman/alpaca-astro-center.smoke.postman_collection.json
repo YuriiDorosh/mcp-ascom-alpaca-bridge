@@ -205,7 +205,9 @@
               "  pm.expect(json).to.have.property('stats');",
               "  pm.expect(json.stats.baseline_steps).to.be.a('number');",
               "  pm.expect(json.stats.returned_steps).to.be.a('number');",
+              "  pm.expect(json.stats.filtered_out_steps).to.be.a('number');",
               "  pm.expect(json.stats.returned_steps).to.eql(json.stats.baseline_steps);",
+              "  pm.expect(json.stats.filtered_out_steps).to.eql(0);",
               "  pm.expect(json).to.have.property('steps');",
               "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
               "  pm.expect(json.steps.length).to.be.above(0);",
@@ -271,11 +273,14 @@
               "  pm.expect(json.applied_filters.include_disabled_commands).to.eql(false);",
               "  pm.expect(json).to.have.property('stats');",
               "  pm.expect(json.stats.returned_steps).to.be.below(json.stats.baseline_steps);",
+              "  pm.expect(json.stats.filtered_out_steps).to.be.a('number');",
+              "  pm.expect(json.stats.filtered_out_steps).to.eql(json.stats.baseline_steps - json.stats.returned_steps);",
               "  pm.expect(Array.isArray(json.steps)).to.eql(true);",
               "  const names = json.steps.map((item) => item.tool_name);",
-              "  pm.expect(names).to.include('telescope.slew_icrs');",
               "  pm.expect(names).to.not.include('telescope.sync_icrs');",
               "  pm.expect(names).to.not.include('telescope.set_tracking');",
+              "  const commandSteps = json.steps.filter((item) => item.tool_name.startsWith('telescope.') && ['telescope.slew_icrs', 'telescope.sync_icrs', 'telescope.set_tracking'].includes(item.tool_name));",
+              "  commandSteps.forEach((item) => pm.expect(item.enabled).to.eql(true));",
               "});"
             ]
           }

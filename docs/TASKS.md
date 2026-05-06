@@ -121,6 +121,7 @@
 - TODO(P4-MCP-TOOLS): Include execution-plan `stats` (`baseline_steps`, `returned_steps`) so clients can detect how strongly filters altered orchestration output. [DONE-hardening: `mcp-execution-plan` now returns `stats.baseline_steps/returned_steps` with integration assertions]
 - TODO(P4-DX-POSTMAN): Add smoke assertions for execution-plan `stats` so filtered/unfiltered step-count behavior is validated in collection runner flows. [DONE-hardening: smoke checks now assert `stats.baseline_steps`/`stats.returned_steps` for default and filtered requests]
 - TODO(P4-MCP-TOOLS): Add `stats.filtered_out_steps` in execution-plan response so clients can consume filter impact as a direct scalar metric. [DONE-hardening: `mcp-execution-plan` now returns `stats.filtered_out_steps` with integration assertions]
+- TODO(P4-DX-POSTMAN): Add smoke assertions for execution-plan `stats.filtered_out_steps` so direct filter-impact metric stays locked in Postman runner regressions. [DONE-hardening: smoke checks now assert `stats.filtered_out_steps` for both default and runnable-only execution-plan requests]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
