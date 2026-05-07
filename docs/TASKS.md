@@ -148,6 +148,7 @@
 - TODO(P4-DX-OPS): Add Make shortcuts that generate both JSON report and markdown handoff notes for smoke/validation dry-runs to reduce operator CLI flag overhead. [DONE-hardening: added `hardware-smoke-dry-run-with-notes` and `hardware-validation-dry-run-with-notes` targets with artifact pre-clean and UID/GID-safe output]
 - TODO(P4-DX-OPS): Add a single bundled Make target that runs both note-producing smoke and validation dry-runs in one command for faster operator loops. [DONE-hardening: added `hardware-preflight-dry-run-with-notes` chaining smoke+validation notes targets]
 - TODO(P4-DX-OPS): Add a single bundled Make target that runs both JSON-only smoke and validation dry-runs so operators can capture baseline reports without notes in one command. [DONE-hardening: added `hardware-preflight-dry-run` chaining JSON-only smoke+validation targets]
+- TODO(P4-DX-OPS): Gate CLI command-check execution by hardware readiness to prevent accidental live command calls before the explicit Seestar trigger phase. [DONE-hardening: `hardware_smoke_runner.py` now blocks `--include-commands` when readiness is false unless explicit `--allow-command-checks-when-not-ready` override is set, with unit coverage]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

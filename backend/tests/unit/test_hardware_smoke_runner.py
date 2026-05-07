@@ -250,6 +250,7 @@ def test_main_returns_nonzero_on_strict_failures(monkeypatch: pytest.MonkeyPatch
         report_path=str(tmp_path / "report.json"),
         validation_only=False,
         include_commands=False,
+        allow_command_checks_when_not_ready=False,
         command_token="",
         strict=True,
         notes_path="",
@@ -288,6 +289,7 @@ def test_main_writes_notes_when_notes_path_is_set(monkeypatch: pytest.MonkeyPatc
         report_path=str(tmp_path / "report.json"),
         validation_only=False,
         include_commands=False,
+        allow_command_checks_when_not_ready=False,
         command_token="",
         strict=False,
         notes_path=str(tmp_path / "notes.md"),
@@ -317,3 +319,95 @@ def test_main_writes_notes_when_notes_path_is_set(monkeypatch: pytest.MonkeyPatc
     exit_code = runner.main()
     assert exit_code == 0
     assert called["notes"] is True
+
+
+def test_main_blocks_command_checks_when_readiness_is_not_ready(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    args = Namespace(
+        base_url="http://127.0.0.1:8000",
+        report_path=str(tmp_path / "report.json"),
+        validation_only=False,
+        include_commands=True,
+        allow_command_checks_when_not_ready=False,
+        command_token="",
+        strict=False,
+        notes_path="",
+    )
+    monkeypatch.setattr(runner, "parse_args", lambda: args)
+
+    readiness_ok = runner.CheckResult(
+        name="hardware.readiness",
+        method="GET",
+        url="http://ready",
+        ok=True,
+        status_code=200,
+        error=None,
+        details={"payload": {"requires_real_telescope_now": False}},
+    )
+    ok = runner.CheckResult(
+        name="ok",
+        method="GET",
+        url="http://ok",
+        ok=True,
+        status_code=200,
+        error=None,
+        details=None,
+    )
+    queue = [readiness_ok, ok, ok, ok, ok, ok, ok, ok, ok]
+    calls = {"count": 0}
+
+    def fake_run_check(**_kwargs):
+        calls["count"] += 1
+        return queue.pop(0)
+
+    monkeypatch.setattr(runner, "_run_check", fake_run_check)
+    monkeypatch.setattr(runner, "_write_report", lambda *_args, **_kwargs: None)
+
+    exit_code = runner.main()
+    assert exit_code == 0
+    assert calls["count"] == 9
+
+
+def test_main_allows_command_checks_with_override_when_not_ready(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    args = Namespace(
+        base_url="http://127.0.0.1:8000",
+        report_path=str(tmp_path / "report.json"),
+        validation_only=False,
+        include_commands=True,
+        allow_command_checks_when_not_ready=True,
+        command_token="",
+        strict=False,
+        notes_path="",
+    )
+    monkeypatch.setattr(runner, "parse_args", lambda: args)
+
+    readiness_ok = runner.CheckResult(
+        name="hardware.readiness",
+        method="GET",
+        url="http://ready",
+        ok=True,
+        status_code=200,
+        error=None,
+        details={"payload": {"requires_real_telescope_now": False}},
+    )
+    ok = runner.CheckResult(
+        name="ok",
+        method="GET",
+        url="http://ok",
+        ok=True,
+        status_code=200,
+        error=None,
+        details=None,
+    )
+    queue = [readiness_ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok]
+    calls = {"count": 0}
+
+    def fake_run_check(**_kwargs):
+        calls["count"] += 1
+        return queue.pop(0)
+
+    monkeypatch.setattr(runner, "_run_check", fake_run_check)
+    monkeypatch.setattr(runner, "_write_report", lambda *_args, **_kwargs: None)
+
+    exit_code = runner.main()
+    assert exit_code == 0
+    assert calls["count"] == 12

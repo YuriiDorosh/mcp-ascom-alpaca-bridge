@@ -150,6 +150,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Output report: `backend/artifacts/hardware-smoke-dry-run.json`
 - Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
 - Optional operator note output: pass `--notes-path artifacts/hardware-smoke-notes.md` (or validation variant) to save a markdown run summary for preflight handoff.
+- Command checks safety gate: `--include-commands` is blocked when readiness reports `requires_real_telescope_now=false`; use `--allow-command-checks-when-not-ready` only for intentional override scenarios.
 - Make wrappers: `make hardware-smoke-dry-run-with-notes` and `make hardware-validation-dry-run-with-notes` generate standard markdown handoff files in `backend/artifacts/`.
 - Bundle wrapper: `make hardware-preflight-dry-run` runs both JSON-only smoke and validation dry-runs in sequence.
 - Bundle wrapper: `make hardware-preflight-dry-run-with-notes` runs both note-producing flows in sequence for one-command preflight capture.
