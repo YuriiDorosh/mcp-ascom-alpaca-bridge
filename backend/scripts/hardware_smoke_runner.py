@@ -67,7 +67,7 @@ def _run_check(
             ok=True,
             status_code=status_code,
             error=None,
-            details=None,
+            details={"payload": payload},
         )
     except AssertionError as exc:
         return CheckResult(
@@ -252,6 +252,11 @@ def parse_args() -> argparse.Namespace:
         help="Include movement command checks (POST /commands/*). Use only when telescope is intentionally connected.",
     )
     parser.add_argument(
+        "--allow-command-checks-when-not-ready",
+        action="store_true",
+        help="Override readiness gating and run command checks even when hardware/readiness reports requires_real_telescope_now=false.",
+    )
+    parser.add_argument(
         "--command-token",
         default="",
         help="Optional command auth token for command endpoints.",
@@ -305,38 +310,58 @@ def main() -> int:
         results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
 
     if args.include_commands:
-        token_headers = {}
-        if args.command_token:
-            token_headers["X-Command-Token"] = args.command_token
+        readiness_result = next((item for item in results if item.name == "hardware.readiness"), None)
+        readiness_payload = (readiness_result.details or {}).get("payload", {}) if readiness_result else {}
+        readiness_flag = bool(readiness_payload.get("requires_real_telescope_now"))
 
-        command_checks = [
-            (
-                "telescope.command.slew_icrs",
-                "POST",
-                f"{base_url}/telescopes/commands/slew-icrs",
-                _assert_command_ack,
-                {"ra_hours": 1.0, "dec_degrees": 5.0},
-                token_headers,
-            ),
-            (
-                "telescope.command.sync_icrs",
-                "POST",
-                f"{base_url}/telescopes/commands/sync-icrs",
-                _assert_command_ack,
-                {"ra_hours": 1.0, "dec_degrees": 5.0},
-                token_headers,
-            ),
-            (
-                "telescope.command.set_tracking",
-                "POST",
-                f"{base_url}/telescopes/commands/tracking",
-                _assert_command_ack,
-                {"enabled": True},
-                token_headers,
-            ),
-        ]
-        for name, method, url, validator, body, headers in command_checks:
-            results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
+        if (not readiness_flag) and (not args.allow_command_checks_when_not_ready):
+            results.append(
+                CheckResult(
+                    name="telescope.command_checks.gated_by_readiness",
+                    method="LOCAL",
+                    url=f"{base_url}/telescopes/hardware/readiness",
+                    ok=False,
+                    status_code=None,
+                    error=(
+                        "command_checks_blocked: requires_real_telescope_now=false; "
+                        "re-run with --allow-command-checks-when-not-ready to override intentionally"
+                    ),
+                    details=None,
+                ),
+            )
+        else:
+            token_headers = {}
+            if args.command_token:
+                token_headers["X-Command-Token"] = args.command_token
+
+            command_checks = [
+                (
+                    "telescope.command.slew_icrs",
+                    "POST",
+                    f"{base_url}/telescopes/commands/slew-icrs",
+                    _assert_command_ack,
+                    {"ra_hours": 1.0, "dec_degrees": 5.0},
+                    token_headers,
+                ),
+                (
+                    "telescope.command.sync_icrs",
+                    "POST",
+                    f"{base_url}/telescopes/commands/sync-icrs",
+                    _assert_command_ack,
+                    {"ra_hours": 1.0, "dec_degrees": 5.0},
+                    token_headers,
+                ),
+                (
+                    "telescope.command.set_tracking",
+                    "POST",
+                    f"{base_url}/telescopes/commands/tracking",
+                    _assert_command_ack,
+                    {"enabled": True},
+                    token_headers,
+                ),
+            ]
+            for name, method, url, validator, body, headers in command_checks:
+                results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
 
     _write_report(Path(args.report_path), results, base_url)
     if args.notes_path:
