@@ -159,5 +159,6 @@
 
 > **Operator trigger:** before starting tasks in this section, charge and prepare the real telescope (`Seestar S30 Pro`) for live LAN validation.
 
+- TODO(P5-HW-SMOKE-PREP): Add dedicated Make entrypoint for command-inclusive live smoke run so operators can execute P5-HW-SMOKE with one standard command and consistent artifacts. [DONE-prep: added `make hardware-smoke-live-run` with command checks, token passthrough, and report/notes outputs]
 - TODO(P5-HW-SMOKE): Run first hardware-in-the-loop Alpaca smoke checks (`status/capabilities/slew/sync/tracking`) against Seestar on local network and capture baseline behavior notes.
 - TODO(P5-HW-VALIDATION): Validate command safety path on real hardware (auth guard, capability gating, audit trail writes) and document any hardware-specific constraints.
