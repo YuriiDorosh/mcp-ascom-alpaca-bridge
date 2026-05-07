@@ -138,11 +138,13 @@ def _assert_hardware_overview(payload: dict[str, Any]) -> None:
 def _assert_mcp_bootstrap(payload: dict[str, Any]) -> None:
     assert payload["hardware_smoke_plan"]["trigger_task_id"] == "P5-HW-SMOKE", "bootstrap smoke trigger mismatch"
     assert payload["hardware_validation_plan"]["trigger_task_id"] == "P5-HW-VALIDATION", "bootstrap validation trigger mismatch"
+    _assert_hardware_overview(payload["hardware_overview"])
 
 
 def _assert_mcp_execution_plan(payload: dict[str, Any]) -> None:
     assert payload["hardware_smoke_plan"]["trigger_task_id"] == "P5-HW-SMOKE", "execution smoke trigger mismatch"
     assert payload["hardware_validation_plan"]["trigger_task_id"] == "P5-HW-VALIDATION", "execution validation trigger mismatch"
+    _assert_hardware_overview(payload["hardware_overview"])
     assert isinstance(payload["steps"], list) and len(payload["steps"]) >= 1, "execution steps must be non-empty"
 
 

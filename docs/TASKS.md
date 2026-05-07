@@ -140,6 +140,7 @@
 - TODO(P4-DX-OPS): Extend local CLI dry-run to validate `hardware/overview` aggregate contract so one-call preflight payload regressions are caught before P5 runs. [DONE-hardening: runner now checks `hardware.overview` and unit tests lock the validator contract]
 - TODO(P4-DX-OPS): Run hardware dry-run Make targets with host UID/GID mapping so generated `artifacts/*.json` reports do not become root-owned and block local cleanup. [DONE-hardening: targets now pre-clean stale report files and execute runner with host UID/GID via Docker `--user $(id -u):$(id -g)`]
 - TODO(P4-MCP-TOOLS): Include `hardware_overview` in MCP bootstrap/execution-plan payloads so clients can consume both granular and one-call hardware preflight contracts without extra endpoint fetches. [DONE-hardening: `mcp-bootstrap` and `mcp-execution-plan` now return `hardware_overview` with integration and smoke assertions]
+- TODO(P4-DX-OPS): Extend CLI MCP aggregate validators to assert nested `hardware_overview` contract so dry-run preflight catches one-call bundle regressions beyond top-level trigger IDs. [DONE-hardening: `hardware_smoke_runner.py` now validates `hardware_overview` inside both `mcp-bootstrap` and `mcp-execution-plan` with unit coverage]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
