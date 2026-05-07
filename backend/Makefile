@@ -15,6 +15,8 @@ HARDWARE_SMOKE_REPORT = artifacts/hardware-smoke-dry-run.json
 HARDWARE_VALIDATION_REPORT = artifacts/hardware-validation-dry-run.json
 HARDWARE_SMOKE_NOTES = artifacts/hardware-smoke-dry-run.md
 HARDWARE_VALIDATION_NOTES = artifacts/hardware-validation-dry-run.md
+HARDWARE_SMOKE_LIVE_REPORT = artifacts/hardware-smoke-live-run.json
+HARDWARE_SMOKE_LIVE_NOTES = artifacts/hardware-smoke-live-run.md
 HARDWARE_ARTIFACT_DIR = artifacts
 
 .PHONY: app-dev
@@ -126,3 +128,8 @@ hardware-preflight-dry-run-with-notes: hardware-smoke-dry-run-with-notes hardwar
 
 .PHONY: hardware-preflight-dry-run
 hardware-preflight-dry-run: hardware-smoke-dry-run hardware-validation-dry-run
+
+.PHONY: hardware-smoke-live-run
+hardware-smoke-live-run:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} sh -lc "mkdir -p ${HARDWARE_ARTIFACT_DIR} && chown -R ${HOST_UID}:${HOST_GID} ${HARDWARE_ARTIFACT_DIR} && rm -f ${HARDWARE_SMOKE_LIVE_REPORT} ${HARDWARE_SMOKE_LIVE_NOTES}" && \
+	docker run --rm --network host --user ${HOST_UID}:${HOST_GID} -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --include-commands --allow-command-checks-when-not-ready --command-token "$${COMMAND_TOKEN:-}" --report-path ${HARDWARE_SMOKE_LIVE_REPORT} --notes-path ${HARDWARE_SMOKE_LIVE_NOTES} --strict

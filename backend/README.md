@@ -52,6 +52,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make hardware-smoke-dry-run-with-notes` - run smoke dry-run and save both JSON report and markdown operator notes
 - `make hardware-validation-dry-run-with-notes` - run validation dry-run and save both JSON report and markdown operator notes
 - `make hardware-preflight-dry-run-with-notes` - run both smoke and validation dry-runs with markdown handoff notes
+- `make hardware-smoke-live-run` - run `P5-HW-SMOKE` command-inclusive live smoke flow and save JSON+markdown artifacts
 
 ## Recommended Local Startup Order
 
@@ -154,6 +155,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Make wrappers: `make hardware-smoke-dry-run-with-notes` and `make hardware-validation-dry-run-with-notes` generate standard markdown handoff files in `backend/artifacts/`.
 - Bundle wrapper: `make hardware-preflight-dry-run` runs both JSON-only smoke and validation dry-runs in sequence.
 - Bundle wrapper: `make hardware-preflight-dry-run-with-notes` runs both note-producing flows in sequence for one-command preflight capture.
+- Live hardware wrapper: `make hardware-smoke-live-run` is intended for `P5-HW-SMOKE`, enables command checks, and writes `artifacts/hardware-smoke-live-run.json` + `artifacts/hardware-smoke-live-run.md`.
 - Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
 
