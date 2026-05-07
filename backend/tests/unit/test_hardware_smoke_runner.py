@@ -71,6 +71,65 @@ def test_assert_hardware_overview_accepts_aggregated_contract():
     runner._assert_hardware_overview(payload)
 
 
+def test_assert_mcp_bootstrap_requires_hardware_overview_contract():
+    payload = {
+        "hardware_smoke_plan": {
+            "trigger_task_id": "P5-HW-SMOKE",
+        },
+        "hardware_validation_plan": {
+            "trigger_task_id": "P5-HW-VALIDATION",
+        },
+        "hardware_overview": {
+            "readiness": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "requires_real_telescope_now": False,
+            },
+            "smoke_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+            "validation_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-VALIDATION",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+        },
+    }
+    runner._assert_mcp_bootstrap(payload)
+
+
+def test_assert_mcp_execution_plan_requires_hardware_overview_contract():
+    payload = {
+        "hardware_smoke_plan": {
+            "trigger_task_id": "P5-HW-SMOKE",
+        },
+        "hardware_validation_plan": {
+            "trigger_task_id": "P5-HW-VALIDATION",
+        },
+        "hardware_overview": {
+            "readiness": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "requires_real_telescope_now": False,
+            },
+            "smoke_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+            "validation_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-VALIDATION",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+        },
+        "steps": [{"step": 1, "tool_name": "telescope.get_status"}],
+    }
+    runner._assert_mcp_execution_plan(payload)
+
+
 def test_run_check_reports_assertion_failure(monkeypatch: pytest.MonkeyPatch):
     def fake_http_json(**_kwargs):
         return 200, {"bad": "payload"}
