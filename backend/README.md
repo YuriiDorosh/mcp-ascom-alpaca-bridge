@@ -144,6 +144,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `hardware/validation-plan`, `hardware/overview`, `mcp-bootstrap`, `mcp-execution-plan`, `status`, `capabilities`, `commands/audit`).
 - Output report: `backend/artifacts/hardware-smoke-dry-run.json`
 - Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
+- Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
 
 ## Postman Starter Kit
