@@ -125,6 +125,16 @@ def _assert_validation_plan(payload: dict[str, Any]) -> None:
     assert all(key in first for key in ("step", "action", "expected_result")), "first step fields missing"
 
 
+def _assert_hardware_overview(payload: dict[str, Any]) -> None:
+    readiness = payload["readiness"]
+    smoke_plan = payload["smoke_plan"]
+    validation_plan = payload["validation_plan"]
+
+    _assert_readiness(readiness)
+    _assert_smoke_plan(smoke_plan)
+    _assert_validation_plan(validation_plan)
+
+
 def _assert_mcp_bootstrap(payload: dict[str, Any]) -> None:
     assert payload["hardware_smoke_plan"]["trigger_task_id"] == "P5-HW-SMOKE", "bootstrap smoke trigger mismatch"
     assert payload["hardware_validation_plan"]["trigger_task_id"] == "P5-HW-VALIDATION", "bootstrap validation trigger mismatch"
@@ -213,6 +223,14 @@ def main() -> int:
             "GET",
             f"{base_url}/telescopes/hardware/validation-plan",
             _assert_validation_plan,
+            None,
+            None,
+        ),
+        (
+            "hardware.overview",
+            "GET",
+            f"{base_url}/telescopes/hardware/overview",
+            _assert_hardware_overview,
             None,
             None,
         ),

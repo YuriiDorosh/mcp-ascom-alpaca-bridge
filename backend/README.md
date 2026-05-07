@@ -141,7 +141,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 ## Hardware CLI Preflight
 
 - Script: `backend/scripts/hardware_smoke_runner.py`
-- Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `hardware/validation-plan`, `mcp-bootstrap`, `mcp-execution-plan`, `status`, `capabilities`, `commands/audit`).
+- Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `hardware/validation-plan`, `hardware/overview`, `mcp-bootstrap`, `mcp-execution-plan`, `status`, `capabilities`, `commands/audit`).
 - Output report: `backend/artifacts/hardware-smoke-dry-run.json`
 - Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
