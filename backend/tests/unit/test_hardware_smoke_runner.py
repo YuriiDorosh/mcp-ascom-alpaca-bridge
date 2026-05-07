@@ -100,6 +100,37 @@ def test_assert_mcp_bootstrap_requires_hardware_overview_contract():
     runner._assert_mcp_bootstrap(payload)
 
 
+def test_assert_mcp_bootstrap_rejects_trigger_mismatch_between_top_level_and_overview(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(runner, "_assert_hardware_overview", lambda _payload: None)
+    payload = {
+        "hardware_smoke_plan": {
+            "trigger_task_id": "P5-HW-SMOKE",
+        },
+        "hardware_validation_plan": {
+            "trigger_task_id": "P5-HW-VALIDATION",
+        },
+        "hardware_overview": {
+            "readiness": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "requires_real_telescope_now": False,
+            },
+            "smoke_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-WRONG",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+            "validation_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-VALIDATION",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+        },
+    }
+    with pytest.raises(AssertionError, match="bootstrap smoke/overview trigger mismatch"):
+        runner._assert_mcp_bootstrap(payload)
+
+
 def test_assert_mcp_execution_plan_requires_hardware_overview_contract():
     payload = {
         "hardware_smoke_plan": {
@@ -128,6 +159,38 @@ def test_assert_mcp_execution_plan_requires_hardware_overview_contract():
         "steps": [{"step": 1, "tool_name": "telescope.get_status"}],
     }
     runner._assert_mcp_execution_plan(payload)
+
+
+def test_assert_mcp_execution_plan_rejects_trigger_mismatch_between_top_level_and_overview(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(runner, "_assert_hardware_overview", lambda _payload: None)
+    payload = {
+        "hardware_smoke_plan": {
+            "trigger_task_id": "P5-HW-SMOKE",
+        },
+        "hardware_validation_plan": {
+            "trigger_task_id": "P5-HW-VALIDATION",
+        },
+        "hardware_overview": {
+            "readiness": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "requires_real_telescope_now": False,
+            },
+            "smoke_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-SMOKE",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+            "validation_plan": {
+                "schema_version": "v1",
+                "trigger_task_id": "P5-HW-WRONG",
+                "steps": [{"step": 1, "action": "x", "expected_result": "y"}],
+            },
+        },
+        "steps": [{"step": 1, "tool_name": "telescope.get_status"}],
+    }
+    with pytest.raises(AssertionError, match="execution validation/overview trigger mismatch"):
+        runner._assert_mcp_execution_plan(payload)
 
 
 def test_run_check_reports_assertion_failure(monkeypatch: pytest.MonkeyPatch):
