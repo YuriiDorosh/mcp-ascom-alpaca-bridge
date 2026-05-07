@@ -123,3 +123,6 @@ hardware-validation-dry-run-with-notes:
 
 .PHONY: hardware-preflight-dry-run-with-notes
 hardware-preflight-dry-run-with-notes: hardware-smoke-dry-run-with-notes hardware-validation-dry-run-with-notes
+
+.PHONY: hardware-preflight-dry-run
+hardware-preflight-dry-run: hardware-smoke-dry-run hardware-validation-dry-run
