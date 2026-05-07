@@ -142,6 +142,7 @@
 - TODO(P4-MCP-TOOLS): Include `hardware_overview` in MCP bootstrap/execution-plan payloads so clients can consume both granular and one-call hardware preflight contracts without extra endpoint fetches. [DONE-hardening: `mcp-bootstrap` and `mcp-execution-plan` now return `hardware_overview` with integration and smoke assertions]
 - TODO(P4-DX-OPS): Extend CLI MCP aggregate validators to assert nested `hardware_overview` contract so dry-run preflight catches one-call bundle regressions beyond top-level trigger IDs. [DONE-hardening: `hardware_smoke_runner.py` now validates `hardware_overview` inside both `mcp-bootstrap` and `mcp-execution-plan` with unit coverage]
 - TODO(P4-DX-POSTMAN): Add step-level smoke assertions for nested `hardware_overview` in MCP bootstrap/execution-plan variants so one-call bundle schema regressions are caught in runner flows. [DONE-hardening: smoke + integration checks now validate `hardware_overview` trigger IDs and step fields/length in bootstrap and execution-plan payloads]
+- TODO(P4-DX-OPS): Assert trigger consistency between top-level MCP checklist fields and nested `hardware_overview` payload so aggregate responses cannot silently drift across duplicated contracts. [DONE-hardening: dry-run CLI now cross-checks trigger IDs between top-level plans and `hardware_overview` with mismatch-focused unit tests]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
