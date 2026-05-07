@@ -283,6 +283,14 @@ def _build_hardware_validation_plan() -> TelescopeHardwareValidationPlanSchema:
     )
 
 
+def _build_hardware_overview() -> TelescopeHardwareOverviewSchema:
+    return TelescopeHardwareOverviewSchema(
+        readiness=_build_hardware_readiness(),
+        smoke_plan=_build_hardware_smoke_plan(),
+        validation_plan=_build_hardware_validation_plan(),
+    )
+
+
 async def _build_effective_mcp_tool_manifest(
     *,
     mediator: Mediator,
@@ -378,6 +386,7 @@ async def get_mcp_bootstrap():
         hardware_readiness=_build_hardware_readiness(),
         hardware_smoke_plan=_build_hardware_smoke_plan(),
         hardware_validation_plan=_build_hardware_validation_plan(),
+        hardware_overview=_build_hardware_overview(),
     )
 
 
@@ -455,6 +464,7 @@ async def get_mcp_execution_plan(
         hardware_readiness=_build_hardware_readiness(),
         hardware_smoke_plan=_build_hardware_smoke_plan(),
         hardware_validation_plan=_build_hardware_validation_plan(),
+        hardware_overview=_build_hardware_overview(),
         steps=steps,
     )
 
@@ -476,11 +486,7 @@ async def get_hardware_validation_plan():
 
 @router.get('/hardware/overview', response_model=TelescopeHardwareOverviewSchema)
 async def get_hardware_overview():
-    return TelescopeHardwareOverviewSchema(
-        readiness=_build_hardware_readiness(),
-        smoke_plan=_build_hardware_smoke_plan(),
-        validation_plan=_build_hardware_validation_plan(),
-    )
+    return _build_hardware_overview()
 
 
 def _require_command_auth(x_command_token: str | None):

@@ -64,6 +64,8 @@ def test_mcp_execution_plan_marks_capability_gated_steps(monkeypatch):
     assert len(payload['hardware_smoke_plan']['steps']) >= 4
     assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
     assert len(payload['hardware_validation_plan']['steps']) >= 4
+    assert payload['hardware_overview']['readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert payload['hardware_overview']['validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
     steps = {step['tool_name']: step for step in payload['steps']}
     assert 'model.enqueue_inference' in steps
     assert 'model.enqueue_and_wait_inference' not in steps
@@ -87,6 +89,8 @@ def test_mcp_execution_plan_supports_sync_mode(monkeypatch):
     steps = {step['tool_name']: step for step in payload['steps']}
     assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
+    assert payload['hardware_overview']['smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert payload['hardware_overview']['validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
     assert 'model.enqueue_and_wait_inference' in steps
     assert 'model.enqueue_inference' not in steps
     assert 'model.get_inference_status' not in steps
@@ -107,6 +111,8 @@ def test_mcp_execution_plan_falls_back_to_safe_disabled_command_steps(monkeypatc
     steps = {step['tool_name']: step for step in payload['steps']}
     assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
+    assert payload['hardware_overview']['readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
+    assert payload['hardware_overview']['smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert steps['telescope.get_status']['enabled'] is True
     assert steps['telescope.slew_icrs']['enabled'] is False
     assert steps['telescope.slew_icrs']['skip_reason'] == 'missing_capability:supports_slew'

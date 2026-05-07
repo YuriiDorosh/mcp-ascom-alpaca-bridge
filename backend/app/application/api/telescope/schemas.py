@@ -205,6 +205,7 @@ class TelescopeMcpExecutionPlanSchema(BaseModel):
     hardware_readiness: TelescopeHardwareReadinessSchema
     hardware_smoke_plan: TelescopeHardwareSmokePlanSchema
     hardware_validation_plan: TelescopeHardwareValidationPlanSchema
+    hardware_overview: TelescopeHardwareOverviewSchema
     steps: list[McpExecutionPlanStepSchema]
 
 
@@ -215,6 +216,7 @@ class TelescopeMcpBootstrapSchema(BaseModel):
     hardware_readiness: TelescopeHardwareReadinessSchema
     hardware_smoke_plan: TelescopeHardwareSmokePlanSchema
     hardware_validation_plan: TelescopeHardwareValidationPlanSchema
+    hardware_overview: TelescopeHardwareOverviewSchema
 
 
 class SetTelescopeTrackingRequestSchema(BaseModel):
