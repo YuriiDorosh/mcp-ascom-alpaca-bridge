@@ -68,13 +68,13 @@ Then verify:
 - Effective MCP manifest (runtime-ready tool availability with `enabled` flags): `GET http://localhost:8000/telescopes/tools/mcp-manifest/effective`
 - MCP planning guide (recommended inference tool orchestration + timeout policy): `GET http://localhost:8000/telescopes/tools/mcp-planning-guide`
 - MCP bootstrap bundle (manifest + planning guide in one call): `GET http://localhost:8000/telescopes/tools/mcp-bootstrap`
-  - includes static `manifest`, runtime `effective_manifest`, `hardware_readiness`, `hardware_smoke_plan`, and `hardware_validation_plan` for one-call agent initialization.
+  - includes static `manifest`, runtime `effective_manifest`, `hardware_readiness`, `hardware_smoke_plan`, `hardware_validation_plan`, and `hardware_overview` for one-call agent initialization.
 - MCP execution plan (runtime-safe step sequence with capability-gated command tools): `GET http://localhost:8000/telescopes/tools/mcp-execution-plan`
   - supports `?mode=async|sync` to switch between polling flow and single-call inference flow.
   - supports `?include_disabled_commands=false` to return only currently runnable telescope command steps.
   - response includes `applied_filters` to confirm the active filtering mode used to build the plan.
   - response includes `stats.baseline_steps`, `stats.returned_steps`, and `stats.filtered_out_steps` to make filtering impact explicit.
-  - response includes `hardware_smoke_plan` and `hardware_validation_plan` for machine-readable `P5` preflight/validation steps.
+  - response includes `hardware_smoke_plan`, `hardware_validation_plan`, and `hardware_overview` for machine-readable `P5` preflight/validation steps.
 - Hardware readiness trigger (`Seestar` not required yet + next real-device task): `GET http://localhost:8000/telescopes/hardware/readiness`
 - Hardware smoke plan template (machine-readable P5-HW-SMOKE checklist): `GET http://localhost:8000/telescopes/hardware/smoke-plan`
 - Hardware validation plan template (machine-readable P5-HW-VALIDATION checklist): `GET http://localhost:8000/telescopes/hardware/validation-plan`
