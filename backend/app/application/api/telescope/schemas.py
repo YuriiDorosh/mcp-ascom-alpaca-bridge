@@ -181,6 +181,12 @@ class TelescopeHardwareValidationPlanSchema(BaseModel):
     steps: list[TelescopeHardwareValidationPlanStepSchema]
 
 
+class TelescopeHardwareOverviewSchema(BaseModel):
+    readiness: TelescopeHardwareReadinessSchema
+    smoke_plan: TelescopeHardwareSmokePlanSchema
+    validation_plan: TelescopeHardwareValidationPlanSchema
+
+
 class McpExecutionPlanAppliedFiltersSchema(BaseModel):
     include_disabled_commands: bool
 
