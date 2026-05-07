@@ -48,6 +48,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
 - `make hardware-smoke-dry-run` - run hardware preflight CLI checks (read-only by default) and write JSON report for `P5-HW-SMOKE` preparation
 - `make hardware-validation-dry-run` - run validation-focused dry-run checks and write JSON report for `P5-HW-VALIDATION` preparation
+- `make hardware-preflight-dry-run` - run smoke and validation JSON dry-runs in one command
 - `make hardware-smoke-dry-run-with-notes` - run smoke dry-run and save both JSON report and markdown operator notes
 - `make hardware-validation-dry-run-with-notes` - run validation dry-run and save both JSON report and markdown operator notes
 - `make hardware-preflight-dry-run-with-notes` - run both smoke and validation dry-runs with markdown handoff notes
@@ -150,6 +151,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
 - Optional operator note output: pass `--notes-path artifacts/hardware-smoke-notes.md` (or validation variant) to save a markdown run summary for preflight handoff.
 - Make wrappers: `make hardware-smoke-dry-run-with-notes` and `make hardware-validation-dry-run-with-notes` generate standard markdown handoff files in `backend/artifacts/`.
+- Bundle wrapper: `make hardware-preflight-dry-run` runs both JSON-only smoke and validation dry-runs in sequence.
 - Bundle wrapper: `make hardware-preflight-dry-run-with-notes` runs both note-producing flows in sequence for one-command preflight capture.
 - Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.

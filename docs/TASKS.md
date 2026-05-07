@@ -147,6 +147,7 @@
 - TODO(P4-DX-OPS): Add optional markdown notes output for dry-run CLI so operators can save a human-readable preflight handoff summary alongside JSON reports. [DONE-hardening: `hardware_smoke_runner.py` now supports `--notes-path` and unit coverage for generated notes content]
 - TODO(P4-DX-OPS): Add Make shortcuts that generate both JSON report and markdown handoff notes for smoke/validation dry-runs to reduce operator CLI flag overhead. [DONE-hardening: added `hardware-smoke-dry-run-with-notes` and `hardware-validation-dry-run-with-notes` targets with artifact pre-clean and UID/GID-safe output]
 - TODO(P4-DX-OPS): Add a single bundled Make target that runs both note-producing smoke and validation dry-runs in one command for faster operator loops. [DONE-hardening: added `hardware-preflight-dry-run-with-notes` chaining smoke+validation notes targets]
+- TODO(P4-DX-OPS): Add a single bundled Make target that runs both JSON-only smoke and validation dry-runs so operators can capture baseline reports without notes in one command. [DONE-hardening: added `hardware-preflight-dry-run` chaining JSON-only smoke+validation targets]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
