@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Run a hardware smoke preflight against Alpaca Astro Center API.
+"""Run hardware preflight checks against Alpaca Astro Center API.
 
 This runner is safe by default:
-- It verifies readiness and smoke-plan contracts.
+- It verifies readiness plus smoke/validation contracts.
 - It executes only read-only checks unless --include-commands is explicitly set.
 """
 
@@ -116,6 +116,26 @@ def _assert_smoke_plan(payload: dict[str, Any]) -> None:
     assert all(key in first for key in ("step", "action", "expected_result")), "first step fields missing"
 
 
+def _assert_validation_plan(payload: dict[str, Any]) -> None:
+    assert payload["schema_version"] == "v1", "schema_version must be v1"
+    assert payload["trigger_task_id"] == "P5-HW-VALIDATION", "trigger_task_id must be P5-HW-VALIDATION"
+    steps = payload["steps"]
+    assert isinstance(steps, list) and len(steps) >= 1, "steps must be non-empty list"
+    first = steps[0]
+    assert all(key in first for key in ("step", "action", "expected_result")), "first step fields missing"
+
+
+def _assert_mcp_bootstrap(payload: dict[str, Any]) -> None:
+    assert payload["hardware_smoke_plan"]["trigger_task_id"] == "P5-HW-SMOKE", "bootstrap smoke trigger mismatch"
+    assert payload["hardware_validation_plan"]["trigger_task_id"] == "P5-HW-VALIDATION", "bootstrap validation trigger mismatch"
+
+
+def _assert_mcp_execution_plan(payload: dict[str, Any]) -> None:
+    assert payload["hardware_smoke_plan"]["trigger_task_id"] == "P5-HW-SMOKE", "execution smoke trigger mismatch"
+    assert payload["hardware_validation_plan"]["trigger_task_id"] == "P5-HW-VALIDATION", "execution validation trigger mismatch"
+    assert isinstance(payload["steps"], list) and len(payload["steps"]) >= 1, "execution steps must be non-empty"
+
+
 def _assert_status(payload: dict[str, Any]) -> None:
     assert "capabilities" in payload, "capabilities missing in telescope status"
     assert "connection_state" in payload, "connection_state missing in telescope status"
@@ -151,12 +171,17 @@ def _write_report(path: Path, results: list[CheckResult], base_url: str) -> None
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run P5-HW-SMOKE preflight checks against local API.")
+    parser = argparse.ArgumentParser(description="Run P5 hardware preflight checks against local API.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000", help="Backend base URL.")
     parser.add_argument(
         "--report-path",
         default="artifacts/hardware-smoke-dry-run.json",
         help="Output path for JSON report.",
+    )
+    parser.add_argument(
+        "--validation-only",
+        action="store_true",
+        help="Focus on P5-HW-VALIDATION checks and skip direct smoke-plan endpoint.",
     )
     parser.add_argument(
         "--include-commands",
@@ -183,11 +208,22 @@ def main() -> int:
 
     checks = [
         ("hardware.readiness", "GET", f"{base_url}/telescopes/hardware/readiness", _assert_readiness, None, None),
-        ("hardware.smoke_plan", "GET", f"{base_url}/telescopes/hardware/smoke-plan", _assert_smoke_plan, None, None),
+        (
+            "hardware.validation_plan",
+            "GET",
+            f"{base_url}/telescopes/hardware/validation-plan",
+            _assert_validation_plan,
+            None,
+            None,
+        ),
+        ("mcp.bootstrap", "GET", f"{base_url}/telescopes/tools/mcp-bootstrap", _assert_mcp_bootstrap, None, None),
+        ("mcp.execution_plan", "GET", f"{base_url}/telescopes/tools/mcp-execution-plan", _assert_mcp_execution_plan, None, None),
         ("telescope.status", "GET", f"{base_url}/telescopes/status", _assert_status, None, None),
         ("telescope.capabilities", "GET", f"{base_url}/telescopes/capabilities", _assert_capabilities, None, None),
         ("telescope.command_audit", "GET", f"{base_url}/telescopes/commands/audit?limit=10", _assert_audit, None, None),
     ]
+    if args.validation_only is False:
+        checks.insert(1, ("hardware.smoke_plan", "GET", f"{base_url}/telescopes/hardware/smoke-plan", _assert_smoke_plan, None, None))
 
     for name, method, url, validator, body, headers in checks:
         results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
