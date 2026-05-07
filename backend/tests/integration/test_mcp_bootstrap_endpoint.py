@@ -80,6 +80,10 @@ def test_mcp_bootstrap_aggregates_manifest_and_planning_guide(monkeypatch):
     assert overview['readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert overview['smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert overview['validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
+    assert len(overview['smoke_plan']['steps']) >= 4
+    assert len(overview['validation_plan']['steps']) >= 4
+    assert overview['smoke_plan']['steps'][0]['step'] == 1
+    assert overview['validation_plan']['steps'][0]['step'] == 1
 
 
 def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavailable(monkeypatch):
@@ -103,3 +107,5 @@ def test_mcp_bootstrap_falls_back_to_safe_effective_manifest_when_status_unavail
     assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
     assert payload['hardware_overview']['readiness']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert payload['hardware_overview']['validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
+    assert len(payload['hardware_overview']['smoke_plan']['steps']) >= 4
+    assert len(payload['hardware_overview']['validation_plan']['steps']) >= 4
