@@ -145,6 +145,7 @@
 - TODO(P4-DX-OPS): Assert trigger consistency between top-level MCP checklist fields and nested `hardware_overview` payload so aggregate responses cannot silently drift across duplicated contracts. [DONE-hardening: dry-run CLI now cross-checks trigger IDs between top-level plans and `hardware_overview` with mismatch-focused unit tests]
 - TODO(P4-DX-OPS): Add integration consistency test that `hardware/overview` matches individual readiness/smoke/validation endpoints to prevent drift between aggregate and source contracts. [DONE-hardening: `test_hardware_overview_endpoint.py` now compares overview payload sections against direct endpoint responses]
 - TODO(P4-DX-OPS): Add optional markdown notes output for dry-run CLI so operators can save a human-readable preflight handoff summary alongside JSON reports. [DONE-hardening: `hardware_smoke_runner.py` now supports `--notes-path` and unit coverage for generated notes content]
+- TODO(P4-DX-OPS): Add Make shortcuts that generate both JSON report and markdown handoff notes for smoke/validation dry-runs to reduce operator CLI flag overhead. [DONE-hardening: added `hardware-smoke-dry-run-with-notes` and `hardware-validation-dry-run-with-notes` targets with artifact pre-clean and UID/GID-safe output]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

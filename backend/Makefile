@@ -13,6 +13,8 @@ HOST_UID = $(shell id -u)
 HOST_GID = $(shell id -g)
 HARDWARE_SMOKE_REPORT = artifacts/hardware-smoke-dry-run.json
 HARDWARE_VALIDATION_REPORT = artifacts/hardware-validation-dry-run.json
+HARDWARE_SMOKE_NOTES = artifacts/hardware-smoke-dry-run.md
+HARDWARE_VALIDATION_NOTES = artifacts/hardware-validation-dry-run.md
 HARDWARE_ARTIFACT_DIR = artifacts
 
 .PHONY: app-dev
@@ -108,3 +110,13 @@ hardware-smoke-dry-run:
 hardware-validation-dry-run:
 	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} sh -lc "mkdir -p ${HARDWARE_ARTIFACT_DIR} && chown -R ${HOST_UID}:${HOST_GID} ${HARDWARE_ARTIFACT_DIR} && rm -f ${HARDWARE_VALIDATION_REPORT}" && \
 	docker run --rm --network host --user ${HOST_UID}:${HOST_GID} -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --validation-only --report-path ${HARDWARE_VALIDATION_REPORT} --strict
+
+.PHONY: hardware-smoke-dry-run-with-notes
+hardware-smoke-dry-run-with-notes:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} sh -lc "mkdir -p ${HARDWARE_ARTIFACT_DIR} && chown -R ${HOST_UID}:${HOST_GID} ${HARDWARE_ARTIFACT_DIR} && rm -f ${HARDWARE_SMOKE_REPORT} ${HARDWARE_SMOKE_NOTES}" && \
+	docker run --rm --network host --user ${HOST_UID}:${HOST_GID} -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --report-path ${HARDWARE_SMOKE_REPORT} --notes-path ${HARDWARE_SMOKE_NOTES} --strict
+
+.PHONY: hardware-validation-dry-run-with-notes
+hardware-validation-dry-run-with-notes:
+	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} sh -lc "mkdir -p ${HARDWARE_ARTIFACT_DIR} && chown -R ${HOST_UID}:${HOST_GID} ${HARDWARE_ARTIFACT_DIR} && rm -f ${HARDWARE_VALIDATION_REPORT} ${HARDWARE_VALIDATION_NOTES}" && \
+	docker run --rm --network host --user ${HOST_UID}:${HOST_GID} -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --validation-only --report-path ${HARDWARE_VALIDATION_REPORT} --notes-path ${HARDWARE_VALIDATION_NOTES} --strict
