@@ -193,6 +193,38 @@ def test_assert_mcp_execution_plan_rejects_trigger_mismatch_between_top_level_an
         runner._assert_mcp_execution_plan(payload)
 
 
+def test_write_notes_includes_summary_and_follow_up(tmp_path: Path):
+    notes_path = tmp_path / "notes.md"
+    results = [
+        runner.CheckResult(
+            name="hardware.readiness",
+            method="GET",
+            url="http://localhost/readiness",
+            ok=True,
+            status_code=200,
+            error=None,
+            details=None,
+        ),
+        runner.CheckResult(
+            name="mcp.bootstrap",
+            method="GET",
+            url="http://localhost/bootstrap",
+            ok=False,
+            status_code=None,
+            error="assertion_failed: mismatch",
+            details=None,
+        ),
+    ]
+
+    runner._write_notes(notes_path, results, "http://127.0.0.1:8000")
+    content = notes_path.read_text(encoding="utf-8")
+    assert "# Hardware Preflight Notes" in content
+    assert "- Total checks: 2" in content
+    assert "- Failed: 1" in content
+    assert "`mcp.bootstrap`" in content
+    assert "Investigate failed checks before starting `P5-HW-SMOKE`." in content
+
+
 def test_run_check_reports_assertion_failure(monkeypatch: pytest.MonkeyPatch):
     def fake_http_json(**_kwargs):
         return 200, {"bad": "payload"}
@@ -220,6 +252,7 @@ def test_main_returns_nonzero_on_strict_failures(monkeypatch: pytest.MonkeyPatch
         include_commands=False,
         command_token="",
         strict=True,
+        notes_path="",
     )
     monkeypatch.setattr(runner, "parse_args", lambda: args)
 
