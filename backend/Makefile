@@ -97,3 +97,7 @@ postman-smoke-up-clean:
 .PHONY: hardware-smoke-dry-run
 hardware-smoke-dry-run:
 	docker run --rm --network host -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --strict
+
+.PHONY: hardware-validation-dry-run
+hardware-validation-dry-run:
+	docker run --rm --network host -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --validation-only --report-path artifacts/hardware-validation-dry-run.json --strict
