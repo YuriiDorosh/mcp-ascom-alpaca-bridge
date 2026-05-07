@@ -145,6 +145,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - MCP aggregate checks enforce both checklist triggers, nested `hardware_overview` contract fields, and trigger consistency between top-level plans and overview payloads.
 - Output report: `backend/artifacts/hardware-smoke-dry-run.json`
 - Validation-only report: `backend/artifacts/hardware-validation-dry-run.json` via `--validation-only`
+- Optional operator note output: pass `--notes-path artifacts/hardware-smoke-notes.md` (or validation variant) to save a markdown run summary for preflight handoff.
 - Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
 

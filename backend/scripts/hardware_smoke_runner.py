@@ -192,6 +192,47 @@ def _write_report(path: Path, results: list[CheckResult], base_url: str) -> None
     path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
 
+def _write_notes(path: Path, results: list[CheckResult], base_url: str) -> None:
+    failed = [item for item in results if not item.ok]
+    lines = [
+        "# Hardware Preflight Notes",
+        "",
+        f"- Generated (UTC): {datetime.now(UTC).isoformat()}",
+        f"- Base URL: `{base_url}`",
+        f"- Total checks: {len(results)}",
+        f"- Passed: {len(results) - len(failed)}",
+        f"- Failed: {len(failed)}",
+        "",
+        "## Check Results",
+    ]
+    for item in results:
+        status = "PASS" if item.ok else "FAIL"
+        status_code = f" (status={item.status_code})" if item.status_code is not None else ""
+        lines.append(f"- [{status}] `{item.name}`{status_code}")
+        if item.error:
+            lines.append(f"  - error: `{item.error}`")
+
+    if failed:
+        lines.extend(
+            [
+                "",
+                "## Follow-up",
+                "- Investigate failed checks before starting `P5-HW-SMOKE`.",
+            ],
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "## Follow-up",
+                "- Dry-run preflight is green; keep this note for operator traceability.",
+            ],
+        )
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run P5 hardware preflight checks against local API.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000", help="Backend base URL.")
@@ -219,6 +260,11 @@ def parse_args() -> argparse.Namespace:
         "--strict",
         action="store_true",
         help="Return non-zero exit code when any check fails.",
+    )
+    parser.add_argument(
+        "--notes-path",
+        default="",
+        help="Optional output path for markdown operator notes generated from check results.",
     )
     return parser.parse_args()
 
@@ -293,6 +339,8 @@ def main() -> int:
             results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
 
     _write_report(Path(args.report_path), results, base_url)
+    if args.notes_path:
+        _write_notes(Path(args.notes_path), results, base_url)
 
     failed = [item for item in results if not item.ok]
     for item in results:
