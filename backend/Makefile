@@ -120,3 +120,6 @@ hardware-smoke-dry-run-with-notes:
 hardware-validation-dry-run-with-notes:
 	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} sh -lc "mkdir -p ${HARDWARE_ARTIFACT_DIR} && chown -R ${HOST_UID}:${HOST_GID} ${HARDWARE_ARTIFACT_DIR} && rm -f ${HARDWARE_VALIDATION_REPORT} ${HARDWARE_VALIDATION_NOTES}" && \
 	docker run --rm --network host --user ${HOST_UID}:${HOST_GID} -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/hardware_smoke_runner.py --base-url $${BASE_URL:-http://127.0.0.1:8000} --validation-only --report-path ${HARDWARE_VALIDATION_REPORT} --notes-path ${HARDWARE_VALIDATION_NOTES} --strict
+
+.PHONY: hardware-preflight-dry-run-with-notes
+hardware-preflight-dry-run-with-notes: hardware-smoke-dry-run-with-notes hardware-validation-dry-run-with-notes
