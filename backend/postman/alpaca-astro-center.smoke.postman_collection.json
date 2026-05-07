@@ -268,6 +268,40 @@
       }
     },
     {
+      "name": "03d3 - Hardware Overview",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('hardware overview returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('hardware overview contains readiness and both plans', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('readiness');",
+              "  pm.expect(json).to.have.property('smoke_plan');",
+              "  pm.expect(json).to.have.property('validation_plan');",
+              "  pm.expect(json.readiness.trigger_task_id).to.eql('P5-HW-SMOKE');",
+              "  pm.expect(json.smoke_plan.trigger_task_id).to.eql('P5-HW-SMOKE');",
+              "  pm.expect(json.validation_plan.trigger_task_id).to.eql('P5-HW-VALIDATION');",
+              "  pm.expect(Array.isArray(json.smoke_plan.steps)).to.eql(true);",
+              "  pm.expect(Array.isArray(json.validation_plan.steps)).to.eql(true);",
+              "  pm.expect(json.smoke_plan.steps.length).to.be.above(0);",
+              "  pm.expect(json.validation_plan.steps.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/telescopes/hardware/overview"
+      }
+    },
+    {
       "name": "03e - MCP Execution Plan",
       "event": [
         {

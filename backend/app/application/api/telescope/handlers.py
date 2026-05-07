@@ -35,6 +35,7 @@ from application.api.telescope.schemas import (
     TelescopeHardwareReadinessSchema,
     TelescopeHardwareSmokePlanSchema,
     TelescopeHardwareValidationPlanSchema,
+    TelescopeHardwareOverviewSchema,
     TelescopeMcpBootstrapSchema,
     TelescopeMcpContextSchema,
     TelescopeMcpExecutionPlanSchema,
@@ -471,6 +472,15 @@ async def get_hardware_smoke_plan():
 @router.get('/hardware/validation-plan', response_model=TelescopeHardwareValidationPlanSchema)
 async def get_hardware_validation_plan():
     return _build_hardware_validation_plan()
+
+
+@router.get('/hardware/overview', response_model=TelescopeHardwareOverviewSchema)
+async def get_hardware_overview():
+    return TelescopeHardwareOverviewSchema(
+        readiness=_build_hardware_readiness(),
+        smoke_plan=_build_hardware_smoke_plan(),
+        validation_plan=_build_hardware_validation_plan(),
+    )
 
 
 def _require_command_auth(x_command_token: str | None):
