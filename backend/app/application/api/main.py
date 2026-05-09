@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from aiojobs import Scheduler
 from punq import Container
@@ -13,6 +14,7 @@ from application.api.lifespan import (
 from application.api.system.handlers import router as system_router
 from application.api.telescope.handlers import router as telescope_router
 from logic.init import init_container
+from settings.config import Config
 
 
 @asynccontextmanager
@@ -36,6 +38,21 @@ def create_app() -> FastAPI:
         debug=True,
         lifespan=lifespan,
     )
+
+    config = Config()
+    cors_raw = config.cors_allowed_origins
+    if cors_raw is None:
+        cors_raw = 'http://localhost:5173,http://127.0.0.1:5173'
+    origin_list = [part.strip() for part in cors_raw.split(',') if part.strip()]
+    if origin_list:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origin_list,
+            allow_credentials=True,
+            allow_methods=['*'],
+            allow_headers=['*'],
+        )
+
     app.include_router(system_router)
     app.include_router(telescope_router, prefix='/telescopes')
 

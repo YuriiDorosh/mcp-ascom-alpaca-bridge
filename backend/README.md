@@ -71,6 +71,10 @@ Use this order so you verify **reachability** and **read-only contracts** before
 
 Until step 5, **no physical interaction** with the Seestar beyond normal power/network is strictly required for tooling; steps 5–6 intentionally move the mount and must be run only when observation safety is satisfied.
 
+### Operator UI (React MVP)
+
+The UI lives in **`../frontend/`** with its own **`Makefile`** and **`docker-compose.yaml`**. From the **repository root**, run **`make help`** for orchestration (e.g. `make dev`, `make dev-down`, `make logs`, `make up-backend` / `down-frontend`, `make ps`). Details: `frontend/README.md`.
+
 ## Recommended Local Startup Order
 
 ```bash

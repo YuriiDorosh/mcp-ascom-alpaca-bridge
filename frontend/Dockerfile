@@ -1,0 +1,14 @@
+# Build context: frontend/ (see docker-compose.yaml). Browser calls API at VITE_API_BASE (host reachable URL).
+FROM node:20-bookworm-slim AS build
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+ARG VITE_API_BASE=http://127.0.0.1:8000
+ENV VITE_API_BASE=${VITE_API_BASE}
+RUN npm run build
+
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80

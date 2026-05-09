@@ -34,3 +34,6 @@ class Config(BaseSettings):
     ephemeris_kernel: str = Field(default='de421.bsp', alias='EPHEMERIS_KERNEL')
 
     command_auth_token: str | None = Field(default=None, alias='COMMAND_AUTH_TOKEN')
+
+    # Comma-separated browser origins for the Vite/React UI. None = default localhost dev ports; '' disables CORS middleware.
+    cors_allowed_origins: str | None = Field(default=None, alias='CORS_ALLOWED_ORIGINS')

@@ -36,11 +36,11 @@ app-dev-with-model:
 
 .PHONY: app-dev-logs
 app-dev-logs:
-	${DC} -f ${APP_DEV} logs -f
+	${DC} -f ${APP_DEV} -f ${KAFKA} ${ENV} logs -f
 
 .PHONY: app-dev-with-model-logs
 app-dev-with-model-logs:
-	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} logs -f
+	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} logs -f
 
 .PHONY: storages
 storages:

@@ -158,6 +158,12 @@
 - TODO(P4-DX-OPS): Add a single bundled Make target that runs both JSON-only smoke and validation dry-runs so operators can capture baseline reports without notes in one command. [DONE-hardening: added `hardware-preflight-dry-run` chaining JSON-only smoke+validation targets]
 - TODO(P4-DX-OPS): Gate CLI command-check execution by hardware readiness to prevent accidental live command calls before the explicit Seestar trigger phase. [DONE-hardening: `hardware_smoke_runner.py` now blocks `--include-commands` when readiness is false unless explicit `--allow-command-checks-when-not-ready` override is set, with unit coverage]
 
+## Phase 5 UI — operator dashboard (MVP)
+
+- TODO(P5-UI-CORS): Add FastAPI CORS middleware so the browser SPA can call the REST API from `localhost:5173`. [DONE: `CORS_ALLOWED_ORIGINS` in `backend/app/settings/config.py` (default Seestar-local Vite origins; empty string disables middleware); wired in `create_app`]
+- TODO(P5-UI-MVP-SCAFFOLD): Add Vite + React operator shell (status, capabilities, slew/sync/tracking forms + optional command token). [DONE: `frontend/` package, `frontend/Makefile`, `frontend/docker-compose.yaml`, `frontend/Dockerfile` + nginx, `frontend/.dockerignore`; repo root `Makefile` (`make dev` / `make dev-down`); host `make dev` in `frontend/` for Vite hot reload]
+- TODO(P5-UI-DOCKER-LAYOUT): Keep frontend Compose/Make under `frontend/`; remove blended backend targets; add repo-root orchestration only. [DONE: deleted `backend/docker_compose/frontend.yaml`; `frontend/docker-compose.yaml` with `context: .`; root `Makefile`; backend README no longer owns UI bring-up]
+
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
 - TODO(P6-WEATHER-MCP): Add provider-agnostic weather integration (OpenWeather or alternative) and inject weather context into MCP planning payloads.
