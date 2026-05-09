@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## What This Repo Is
 
-**Alpaca Astro Center** — local-first stack: main **FastAPI** backend (telescope domain + APIs), **MongoDB**, **Kafka**, optional **model microservice** (`model-service/`), planned **React** frontend (`frontend/`). Docs live in `docs/` (authoritative product/architecture context: `PROJECT_CONTEXT.md`, `PLAN.md`, `TASKS.md`, `KAFKA_EVENT_POLICY.md`, `MIGRATION_NOTES.md`).
+**Alpaca Astro Center** — local-first stack: main **FastAPI** backend (telescope domain + APIs), **MongoDB**, **Kafka**, optional **model microservice** (`model-service/`), **React** operator UI (`frontend/`, Docker + Vite). Docs live in `docs/` (authoritative product/architecture context: `PROJECT_CONTEXT.md`, `PLAN.md`, `TASKS.md`, `KAFKA_EVENT_POLICY.md`, `MIGRATION_NOTES.md`).
 
 ## Top-Level Structure
 
@@ -16,7 +16,7 @@ alwaysApply: true
 | `backend/` | Main app: Python package under `backend/app/`, Poetry, Dockerfile, `docker_compose/`, `Makefile`, tests |
 | `model-service/` | Separate FastAPI service: Kafka consumer/producer for model inference (mock runtime today; GPU profiles later) |
 | `docs/` | English project docs — roadmap, tasks, Kafka policy, migration notes |
-| `frontend/` | Placeholder / future React UI |
+| `frontend/` | Vite + React operator MVP; **Docker:** `frontend/Dockerfile`, `backend/docker_compose/frontend.yaml`, `make frontend-up` from `backend/` |
 
 ## Backend Stack
 

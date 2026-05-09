@@ -1,2 +1,5 @@
 # Local secrets (never commit). Named env templates like `.env.example` stay tracked.
 .env
+
+frontend/node_modules
+frontend/dist

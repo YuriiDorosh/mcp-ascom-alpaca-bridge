@@ -45,6 +45,11 @@ Use **`feature/<topic>`** branches for normal work. **Batch related edits** (cod
 - `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
 - `make test-backend-local` - run unit + integration pytest in one ephemeral container (parity with `ci.yml` pytest jobs; one Poetry install)
 - `make ci-local` - run **`test-backend-local`** then **`model-service` `test-local`** (same two jobs as the hosted workflow when dispatched manually; slower but full-repo gate)
+- `make frontend-up` - build and run the operator UI in **Docker** (nginx + static Vite build; port `FRONTEND_PORT`, default 5173 — see `docker_compose/frontend.yaml`)
+- `make frontend-down` - stop the UI container
+- `make app-dev-with-frontend` - same as `make app-dev` plus the **Docker** UI stack (API + Kafka + frontend)
+- `make down-dev-with-frontend` - stop API + Kafka + **Docker** frontend together
+- `make frontend-install` / `make frontend-dev` - optional **host** Node workflow (`npm install` / `npm run dev` in `../frontend`) for hot reload without Docker
 - `make postman-smoke-local` - run Postman smoke collection via Newman (Docker, host network)
 - `make postman-smoke-up` - start backend + Kafka + model-service and run Newman smoke checks
 - `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
@@ -70,6 +75,12 @@ Use this order so you verify **reachability** and **read-only contracts** before
 6. **Validation track on hardware (auth/audit focus):** `make hardware-validation-live-run` after smoke baseline, same safety expectations.
 
 Until step 5, **no physical interaction** with the Seestar beyond normal power/network is strictly required for tooling; steps 5–6 intentionally move the mount and must be run only when observation safety is satisfied.
+
+### Operator UI (React MVP)
+
+**Docker (recommended):** from `backend/` with `.env` configured, run `make app-dev-with-frontend` (or start the API first, then `make frontend-up`). Open `http://localhost:${FRONTEND_PORT:-5173}`. Set `VITE_API_BASE` in `.env` to where the **browser** reaches the API (usually `http://127.0.0.1:8000`). Rebuild the image after changing `VITE_API_BASE`.
+
+**Host Node (hot reload):** install Node 20+, `make frontend-install`, `make frontend-dev`. See `frontend/README.md`.
 
 ## Recommended Local Startup Order
 

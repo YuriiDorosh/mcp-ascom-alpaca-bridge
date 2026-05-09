@@ -1,0 +1,112 @@
+:root {
+  font-family: system-ui, sans-serif;
+  line-height: 1.45;
+  color: #e8edf4;
+  background: #0f1419;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: #7ab8ff;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+h1 {
+  font-size: 1.4rem;
+  font-weight: 650;
+  margin: 0 0 1rem;
+}
+
+.panel {
+  background: #1a222c;
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: #b8c5d6;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+label span {
+  display: block;
+  font-size: 0.75rem;
+  color: #8b99a8;
+  margin-bottom: 0.2rem;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='number'] {
+  background: #0f1419;
+  border: 1px solid #3a4a5e;
+  color: #e8edf4;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  min-width: 12rem;
+}
+
+button {
+  background: #2d6cdf;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: #3a4a5e;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.err {
+  color: #ff8a8a;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+pre.json {
+  background: #0a0e12;
+  border: 1px solid #2a3544;
+  border-radius: 6px;
+  padding: 0.75rem;
+  overflow: auto;
+  max-height: 320px;
+  font-size: 0.78rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #8b99a8;
+  margin-top: 0.5rem;
+}
