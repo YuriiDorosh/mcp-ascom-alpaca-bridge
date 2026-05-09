@@ -55,11 +55,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "poetry"
-          cache-dependency-path: backend/poetry.lock
 
       - name: Install Poetry
         run: pip install poetry==1.8.2
+
+      # setup-python cache: poetry requires `poetry` on PATH during that step, so restore wheel/venv caches manually.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-backend-pypoetry-${{ hashFiles('backend/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-pypoetry-
 
       - name: Install dependencies
         working-directory: backend
@@ -80,11 +86,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "poetry"
-          cache-dependency-path: model-service/poetry.lock
 
       - name: Install Poetry
         run: pip install poetry==1.8.2
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-model-pypoetry-${{ hashFiles('model-service/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-model-pypoetry-
 
       - name: Install dependencies
         working-directory: model-service

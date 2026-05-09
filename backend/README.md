@@ -139,7 +139,7 @@ Recommended flows:
    - `make test-all`
 2. If app container is not running (CI-like local run):
    - `make test-backend-local` — one Docker container, one Poetry install (closest to how the stack is built in prod images)
-   - GitHub Actions (`.github/workflows/ci.yml`) runs the same pytest selection on the **hosted runner** with **cached Poetry** for speed; use `make test-backend-local` when you want a containerized run that matches local Make targets exactly
+   - GitHub Actions (`.github/workflows/ci.yml`) runs the same pytest selection on the **hosted runner** and restores Poetry’s `~/.cache/pypoetry` between runs (see workflow `actions/cache` keys); use `make test-backend-local` when you want a containerized run that matches local Make targets exactly
    - or separately: `make test-unit-local` / `make test-integration-local`; full tree: `make test-local`
 
 The project is intentionally testable without telescope hardware while `ALPACA_ENABLED=false`.
