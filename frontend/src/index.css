@@ -189,6 +189,81 @@ pre.json.ws-log {
   background: #0a0e12;
 }
 
+label.stretch {
+  flex: 1;
+  min-width: 240px;
+}
+
+.prompt-area {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  background: #0f1419;
+  border: 1px solid #3a4a5e;
+  color: #e8edf4;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+select {
+  background: #0f1419;
+  border: 1px solid #3a4a5e;
+  color: #e8edf4;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  min-width: 8rem;
+}
+
+.exec-plan-summary {
+  font-size: 0.85rem;
+  color: #b8c5d6;
+  margin: 0.65rem 0 0.5rem;
+  line-height: 1.4;
+}
+
+.exec-plan-table-wrap {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+}
+
+.exec-plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.exec-plan-table th,
+.exec-plan-table td {
+  border-bottom: 1px solid #2a3544;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.exec-plan-table th {
+  background: #141a22;
+  color: #9aaaba;
+  font-weight: 650;
+}
+
+.exec-row-off {
+  opacity: 0.72;
+}
+
+.exec-skip {
+  max-width: 14rem;
+  word-break: break-word;
+}
+
+pre.json.exec-plan-raw,
+pre.json.model-inf-json {
+  max-height: 360px;
+}
+
 .mcp-stat-grid {
   display: flex;
   flex-wrap: wrap;

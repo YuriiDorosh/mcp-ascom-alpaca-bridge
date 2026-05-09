@@ -17,6 +17,7 @@ from logic.queries.telescope import (
     GetTelescopeStatusQuery,
     GetTelescopeStatusQueryHandler,
 )
+from settings.config import Config
 
 _SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 sys.path.insert(0, str(_SCRIPTS_DIR))
@@ -45,12 +46,15 @@ class _FakeAlpaca(IAlpacaClient):
 
 
 class _MiniContainer:
-    def __init__(self, mediator: Mediator):
+    def __init__(self, mediator: Mediator, config: Config | None = None):
         self._mediator = mediator
+        self._config = config if config is not None else Config()
 
     def resolve(self, cls):
         if cls is Mediator:
             return self._mediator
+        if cls is Config:
+            return self._config
         raise KeyError(cls)
 
 
@@ -66,9 +70,19 @@ def _status_mediator(repo: BaseTelescopeRepository, alpaca: IAlpacaClient) -> Me
     return mediator
 
 
-def _client_for_telescope(monkeypatch, telescope: Telescope, snapshot: AlpacaLiveSnapshot | None) -> TestClient:
+def _client_for_telescope(
+    monkeypatch,
+    telescope: Telescope,
+    snapshot: AlpacaLiveSnapshot | None,
+    *,
+    config: Config | None = None,
+) -> TestClient:
     mediator = _status_mediator(_FakeTelescopeRepo(telescope), _FakeAlpaca(snapshot))
-    monkeypatch.setattr(telescope_handlers, 'init_container', lambda: _MiniContainer(mediator))
+    monkeypatch.setattr(
+        telescope_handlers,
+        'init_container',
+        lambda: _MiniContainer(mediator, config),
+    )
 
     app = FastAPI()
     app.include_router(telescope_router, prefix='/telescopes')
@@ -190,3 +204,26 @@ def test_operator_live_view_placeholder_contract(monkeypatch):
     assert body['available'] is False
     assert body['image_url'] is None
     assert 'notes' in body and len(body['notes']) > 0
+
+
+def test_operator_live_view_serves_configured_http_url(monkeypatch):
+    telescope = Telescope()
+    cfg = Config(OPERATOR_LIVE_VIEW_IMAGE_URL='http://192.168.50.10/snap.jpg')
+    client = _client_for_telescope(monkeypatch, telescope, None, config=cfg)
+
+    response = client.get('/telescopes/operator/live-view')
+    assert response.status_code == 200
+    body = response.json()
+    assert body['available'] is True
+    assert body['provider'] == 'http_still'
+    assert body['image_url'] == 'http://192.168.50.10/snap.jpg'
+
+
+def test_operator_live_view_ignores_non_http_scheme(monkeypatch):
+    telescope = Telescope()
+    cfg = Config(OPERATOR_LIVE_VIEW_IMAGE_URL='ftp://camera/stream')
+    client = _client_for_telescope(monkeypatch, telescope, None, config=cfg)
+
+    body = client.get('/telescopes/operator/live-view').json()
+    assert body['available'] is False
+    assert body['image_url'] is None

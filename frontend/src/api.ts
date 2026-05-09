@@ -80,3 +80,28 @@ export async function telescopePost(path: string, body: object, token?: string):
   }
   return text ? JSON.parse(text) : null
 }
+
+/** POST with query string (e.g. model inference enqueue-and-wait timeout params). */
+export async function telescopePostWithQuery(
+  path: string,
+  body: object,
+  query: Record<string, string | number | boolean>,
+  token?: string,
+): Promise<unknown> {
+  const base = getApiBase()
+  const q = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    q.set(key, String(value))
+  }
+  const suffix = q.toString() ? `?${q.toString()}` : ''
+  const res = await fetch(`${base}${path}${suffix}`, {
+    method: 'POST',
+    headers: headersJson(token),
+    body: JSON.stringify(body),
+  })
+  const text = await res.text()
+  if (!res.ok) {
+    throw new Error(`${res.status}: ${text || res.statusText}`)
+  }
+  return text ? JSON.parse(text) : null
+}

@@ -20,6 +20,10 @@ Use **Connect** under *Operator WebSocket* for pushed `telescope_status` updates
 
 **MCP bootstrap & planning** load `/telescopes/tools/mcp-bootstrap` and `/telescopes/tools/mcp-planning-guide`. **MCP context** calls `/telescopes/context/mcp` with optional SIMBAD designation and ephemeris body. **ICRS → Alt/Az** uses `/telescopes/coordinates/radec-to-altaz` with observer latitude/longitude/elevation — set real site coordinates for meaningful horizons.
 
+**MCP execution plan** renders `/telescopes/tools/mcp-execution-plan` as a step table (`async` / `sync`, optional runnable-only filter). **Model inference** exercises enqueue-and-wait and the async enqueue → status/wait loop (needs Kafka + `model-service`).
+
+Backend optional **`OPERATOR_LIVE_VIEW_IMAGE_URL`** (documented in `backend/.env.example`) publishes a LAN `http(s)` preview URL via `GET /telescopes/operator/live-view` for the SPA image frame.
+
 Stop: `make down`.
 
 ## Full stack from repo root
