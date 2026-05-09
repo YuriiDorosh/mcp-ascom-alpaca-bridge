@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { telescopeGet, telescopePost } from '../../api'
 
 /** One jog step: ΔRA sidereal seconds (east +), ΔDec arcseconds (north +). */
-type StepPreset = {
+type StepRow = {
   readonly id: string
   readonly group: string
   readonly raSec: number
@@ -10,11 +10,11 @@ type StepPreset = {
 }
 
 /**
- * Dense graduation: quasi-«millimetric» at the bottom (fractions of arcsecond /
- * hundredths sidereal-second), sensible middle, big sweeps at the top.
- * Backend caps roughly ±3600s RA · ±21600″ Dec — we stay safely inside both.
+ * ΔRA_degrees ≈ (Δ_sidereal_seconds / 3600) × 15 at the celestial equator (δ≈0).
+ * ΔDec_degrees = decArcsec / 3600 exactly (handler clamps poles).
+ * Backend limits: ±43_200 sidereal-second RA (=±12 sidereal hour ≈±180°Eq), ±648000″ Dec (=±180° before clamp).
  */
-const STEP_PRESETS: readonly StepPreset[] = [
+const STEP_ROWS: readonly StepRow[] = [
   { id: 'm03', group: 'Ultrafine (slow trim)', raSec: 0.03, decArcsec: 0.12 },
   { id: 'm06', group: 'Ultrafine', raSec: 0.06, decArcsec: 0.25 },
   { id: 'm10', group: 'Ultrafine', raSec: 0.1, decArcsec: 0.5 },
@@ -34,13 +34,48 @@ const STEP_PRESETS: readonly StepPreset[] = [
   { id: 'm780_3120', group: 'Large', raSec: 780, decArcsec: 3120 },
   { id: 'm1200_4800', group: 'Large', raSec: 1200, decArcsec: 4800 },
   { id: 'm1650_6600', group: 'Large+', raSec: 1650, decArcsec: 6600 },
-  { id: 'm2280_9120', group: 'Largest bumps (wide steps)', raSec: 2280, decArcsec: 9120 },
+  { id: 'combo_3600_10800', group: 'Large diagonal (combined)', raSec: 3600, decArcsec: 10_800 },
+  // Legacy cap highlight: ΔRA sidereal sec = ±3600 is only ~15°Eq — many users intuit “big” as tens of degrees.
+  { id: 'ra_hour_1', group: 'RA-only (historic one-hour slew ≈15° Eq)', raSec: 3600, decArcsec: 0 },
+  ...(
+    [
+      [7200, 'RA-only (~30° Eq)'],
+      [10_800, 'RA-only (~45° Eq)'],
+      [14_400, 'RA-only (~60° Eq)'],
+      [18_000, 'RA-only (~75° Eq)'],
+      [21_600, 'RA-only (~90° Eq)'],
+      [25_200, 'RA-only (~105° Eq)'],
+      [28_800, 'RA-only (~120° Eq)'],
+      [32_400, 'RA-only (~135° Eq)'],
+      [36_000, 'RA-only (~150° Eq)'],
+      [39_600, 'RA-only (~165° Eq)'],
+      [43_200, 'RA-only (~180° Eq, backend max)'],
+    ] as const
+  ).map(([raSec, group]) => ({ id: `ra_only_${raSec}`, group: String(group), raSec: Number(raSec), decArcsec: 0 })),
+  ...(
+    [
+      [54_000, 'Dec-only (~15° declination)'],
+      [108_000, 'Dec-only (~30°)'],
+      [162_000, 'Dec-only (~45°)'],
+      [216_000, 'Dec-only (~60°)'],
+      [270_000, 'Dec-only (~75°)'],
+      [324_000, 'Dec-only (~90° toward pole clamp)'],
+      [432_000, 'Dec-only (~120°, clamp-heavy)'],
+      [540_000, 'Dec-only (~150°, clamp-heavy)'],
+      [648_000, 'Dec-only (~±180°, heavy clamp ±90°)'],
+    ] as const
+  ).map(([decArcsec, group]) => ({
+    id: `dec_only_${decArcsec}`,
+    group: String(group),
+    raSec: 0,
+    decArcsec: Number(decArcsec),
+  })),
 ] as const
 
 const DEFAULT_STEP_ID = 'm2_8'
 
-function presetById(id: string): StepPreset | undefined {
-  return STEP_PRESETS.find((p) => p.id === id)
+function rowById(id: string): StepRow | undefined {
+  return STEP_ROWS.find((p) => p.id === id)
 }
 
 function fmtRaSec(s: number): string {
@@ -55,6 +90,26 @@ function fmtDecArcsec(a: number): string {
   return `${Number(a.toFixed(2))}″`
 }
 
+/** Apparent Δ along RA axis at celestial equator: Δdegrees ≈ ΔRA_hours × 15. */
+function deltaRaDegreesApproxEquator(siderealSec: number): number {
+  return (siderealSec / 3600) * 15
+}
+
+function deltaDecDegrees(arcseconds: number): number {
+  return arcseconds / 3600
+}
+
+function formatDegreesHint(p: StepRow): string {
+  const raDeg = Math.abs(deltaRaDegreesApproxEquator(p.raSec))
+  const decDeg = Math.abs(deltaDecDegrees(p.decArcsec))
+  const chunks: string[] = []
+  if (raDeg > 1e-9) chunks.push(`~${raDeg >= 100 ? Math.round(raDeg) : Number(raDeg.toPrecision(3))}°Eq RA`)
+  if (decDeg > 1e-9)
+    chunks.push(`~${decDeg >= 100 ? Math.round(decDeg) : Number(decDeg.toPrecision(3))}° Decl.`)
+  if (!chunks.length) return ''
+  return ` — ${chunks.join(' · ')}`
+}
+
 type Props = {
   withBusy: <T>(fn: () => Promise<T>) => Promise<T | undefined>
   busy: boolean
@@ -62,7 +117,7 @@ type Props = {
   onApplyIcrs?: (ra: number, dec: number) => void
 }
 
-/** Small equatorial bumps (read current + slew) — mount axes, not camera PTZ. */
+/** Equatorial bumps: mount slew, not camera PTZ; compare logs with GET mount + Alpaca timeouts. */
 export function MountNudgePanel(props: Props) {
   const { withBusy, busy, commandToken, onApplyIcrs } = props
   const [presetId, setPresetId] = useState<string>(DEFAULT_STEP_ID)
@@ -70,14 +125,14 @@ export function MountNudgePanel(props: Props) {
   const [lastNudge, setLastNudge] = useState<string | null>(null)
   const [staleHint, setStaleHint] = useState<string | null>(null)
 
-  const step = presetById(presetId) ?? presetById(DEFAULT_STEP_ID)!
+  const step = rowById(presetId) ?? rowById(DEFAULT_STEP_ID)!
 
   const optionsGrouped = useMemo(() => {
-    const map = new Map<string, StepPreset[]>()
-    for (const p of STEP_PRESETS) {
-      const list = map.get(p.group) ?? []
-      list.push(p)
-      map.set(p.group, list)
+    const map = new Map<string, StepRow[]>()
+    for (const row of STEP_ROWS) {
+      const list = map.get(row.group) ?? []
+      list.push(row)
+      map.set(row.group, list)
     }
     return Array.from(map.entries())
   }, [])
@@ -115,7 +170,6 @@ export function MountNudgePanel(props: Props) {
         const targetRa = Number(j['target_ra_hours'])
         const targetDec = Number(j['target_dec_degrees'])
 
-        /* Rough float tolerance in driver units (~0.048 sidereal-second RA slice, ~0.7″ Dec). */
         if (
           Number.isFinite(priorRa) &&
           Number.isFinite(targetRa) &&
@@ -125,7 +179,7 @@ export function MountNudgePanel(props: Props) {
           nearlyEq(priorDec, targetDec, 7 / 36_000)
         ) {
           setStaleHint(
-            'Target matches prior within driver precision — any motion may be invisible. Try a larger step or check Alpaca / mount status.',
+            'Target matches prior within driver precision — any motion may be invisible. Confirm connectivity to Alpaca, try RA-only presets, or check mount power / clamps.',
           )
         }
 
@@ -141,34 +195,39 @@ export function MountNudgePanel(props: Props) {
   )
 
   const { raSec, decArcsec } = step
+  const hasRaStep = Math.abs(raSec) > 1e-9
+  const hasDecStep = Math.abs(decArcsec) > 1e-9
 
   return (
     <div className="panel panel--full mount-nudge-panel">
       <header className="panel-header">
         <h2 className="panel-title">Mount jog · ICRS equatorial bumps</h2>
         <p className="panel-lead">
-          Reads the current Alpaca <code>RightAscension</code>/<code>Declination</code>, then executes a short slew to a new
-          equatorial target. This moves the <strong>telescope mount</strong>, not a separate PTZ steer for the imaging
-          camera.
+          Reads Alpaca <code>RightAscension</code>/<code>Declination</code>, slews relative to those numbers. Buttons
+          combine <strong>sidereal seconds of RA</strong> and <strong>arcseconds of declination</strong> — those are{' '}
+          <em>not</em> image degrees unless you convert (see Degree reference below). This steers the{' '}
+          <strong>mount</strong>, not a PTZ tweak of the JPEG preview alone.
         </p>
       </header>
 
       <p className="hint mount-nudge-orientation">
-        <strong>Button arrows</strong> describe motion on the <strong>sky sphere</strong> (ICRS): N/S bump declination (↑
-        toward the north celestial pole, ↓ south), while E/W change right ascension (→ east, higher RA hour value; ←
-        west). A Seestar preview can be cropped or rotated — “N above the keypad” does <em>not</em> imply “toward the
-        top edge of your image”.
+        <strong>Degrees reference:</strong> ΔRA expressed in apparent degrees near the celestial equator (δ≈0) roughly
+        equals <code>(ΔRA_sidereal_seconds / 3600) × 15</code>. Older builds capped ΔRA near{' '}
+        <code>±3600s</code>, i.e. <strong>~±15°</strong> Eq per click regardless of labels — use{' '}
+        <strong>RA-only (~180° Eq)</strong> when you need a hemisphere-wide east/west slew. Compass arrows denote sky
+        sphere axes; the Seestar image can be arbitrarily rotated versus those axes.
       </p>
 
       <div className="row mount-nudge-toolbar">
         <label className="mount-nudge-select-wrap">
-          <span>Step size</span>
+          <span>Step preset</span>
           <select value={presetId} onChange={(e) => setPresetId(e.target.value)} disabled={busy}>
             {optionsGrouped.map(([group, items]) => (
               <optgroup key={group} label={group}>
-                {items.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    ΔRA {fmtRaSec(p.raSec)} · ΔDec {fmtDecArcsec(p.decArcsec)}
+                {items.map((row) => (
+                  <option key={row.id} value={row.id}>
+                    ΔRA {fmtRaSec(row.raSec)} · ΔDec {fmtDecArcsec(row.decArcsec)}
+                    {formatDegreesHint(row)}
                   </option>
                 ))}
               </optgroup>
@@ -180,14 +239,31 @@ export function MountNudgePanel(props: Props) {
         </button>
       </div>
 
+      {!hasRaStep ? (
+        <p className="hint hint--callout mount-nudge-axis-gate">
+          This preset fixes <strong>ΔRA = 0</strong> (declination-only). <strong>E / W</strong> are inactive — switch to any
+          combined row or <strong>RA-only (~60° Eq)</strong> etc. East increases RA by the preset sidereal-second amount.
+        </p>
+      ) : null}
+      {!hasDecStep ? (
+        <p className="hint hint--callout mount-nudge-axis-gate">
+          This preset fixes <strong>ΔDec = 0</strong> (right-ascension only). <strong>N / S</strong> are inactive — pick a
+          combined or Declination preset for latitude bumps.
+        </p>
+      ) : null}
+
       <div className="mount-nudge-pad" aria-label="Equatorial jog pad">
         <div className="mount-nudge-grid">
           <span className="mount-nudge-spacer" />
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`North on Dec axis: +${decArcsec}″ declination`}
+            disabled={busy || !hasDecStep}
+            title={
+              hasDecStep
+                ? `North on Dec axis: +${decArcsec}″ declination`
+                : 'Preset has ΔDec=0 — choose a preset with ΔDec≠0'
+            }
             onClick={() => void nudge(0, decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -201,8 +277,10 @@ export function MountNudgePanel(props: Props) {
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`West: −${raSec}s sidereal RA (earlier RA hours)`}
+            disabled={busy || !hasRaStep}
+            title={
+              hasRaStep ? `West: −${raSec}s sidereal RA` : 'Preset has ΔRA=0 — choose RA or combined preset for ~° east/west'
+            }
             onClick={() => void nudge(-raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -211,16 +289,21 @@ export function MountNudgePanel(props: Props) {
             <span className="mount-nudge-letter">W</span>
             <span className="mount-nudge-axis">−RA</span>
           </button>
-          <div className="mount-nudge-center" aria-hidden>
+          <div className="mount-nudge-center">
             <span className="mount-nudge-step-label">
-              ΔRA {fmtRaSec(raSec)} · ΔDec {fmtDecArcsec(decArcsec)}
+              ΔRA {fmtRaSec(raSec)}
+              <br />
+              ΔDec {fmtDecArcsec(decArcsec)}
+              {formatDegreesHint(step)}
             </span>
           </div>
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`East: +${raSec}s sidereal RA (later RA hours)`}
+            disabled={busy || !hasRaStep}
+            title={
+              hasRaStep ? `East: +${raSec}s sidereal RA` : 'Preset has ΔRA=0 — choose RA or combined preset for ~° east/west'
+            }
             onClick={() => void nudge(raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -234,8 +317,12 @@ export function MountNudgePanel(props: Props) {
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`South on Dec axis: −${decArcsec}″ declination`}
+            disabled={busy || !hasDecStep}
+            title={
+              hasDecStep
+                ? `South on Dec axis: −${decArcsec}″ declination`
+                : 'Preset has ΔDec=0 — choose a preset with ΔDec≠0'
+            }
             onClick={() => void nudge(0, -decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -249,10 +336,9 @@ export function MountNudgePanel(props: Props) {
       </div>
 
       <p className="hint">
-        When <code>COMMAND_AUTH_TOKEN</code> is set, callers must supply the matching header. Even tiny back-to-back
-        nudges often pay the cost of one async Alpaca slew cycle (often seconds)—request latency is not proportional to
-        step size on every rig. Between bursts, tap <strong>GET mount/icrs-equatorial</strong> to confirm the RA/Dec the
-        driver reports.
+        If <code>GET /telescopes/status</code> reports <code>alpaca_live.reachable:false</code> with a Docker timeout,
+        containers must reach Seestar LAN IP/port (Compose often vs host bridge). Huge declination deltas clamp to ±90°
+        poles — expect partial motion if you live near the clamps.
       </p>
 
       {staleHint ? <p className="hint hint--callout">{staleHint}</p> : null}

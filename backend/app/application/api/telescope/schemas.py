@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic import model_validator
 
 
 class AlpacaLiveStatusSchema(BaseModel):
@@ -77,18 +78,38 @@ class MountIcrsEquatorialSchema(BaseModel):
 
 
 class NudgeEquatorialRequestSchema(BaseModel):
-    """Relative bump in sidereal RA seconds (east-positive) and declination arcseconds (north-positive)."""
+    """Relative bump in sidereal RA seconds (east-positive) and declination arcseconds (north-positive).
+
+    Larger bounds than early Alpaca stubs: ΔRA ±12 sidereal hours is ≈±180° at the celestial equator
+    (ΔRA_hours×15°). ΔDec ±180° in arcseconds is clamped downstream to the mount poles (±90°).
+    """
 
     delta_ra_sidereal_seconds: float = Field(
-        ge=-3600,
-        le=3600,
-        description='RA offset as sidereal-time seconds mapped to ΔRA_hours = Δ/3600 (wraps within 24h).',
+        ge=-43_200,
+        le=43_200,
+        description=(
+            'RA offset as sidereal-time seconds; ΔRA_hours = Δ/3600 wraps in [0h,24h). '
+            '|Δ|≤43200s is twelve sidereal hours (≈180° sky motion along RA at δ≈0).'
+        ),
     )
     delta_dec_arcseconds: float = Field(
-        ge=-21600,
-        le=21600,
-        description='Declination offset in arcseconds mapped to ΔDec_degrees = Δ/3600 (clamped ±90°).',
+        ge=-648_000,
+        le=648_000,
+        description=(
+            'Declination offset in arcseconds mapped to ΔDec_degrees = Δ/3600; handler clamps ±90°. '
+            '|Δ|≤648000″ allows up to ±180° before clamping prevents impossible latitudes.'
+        ),
     )
+
+    @model_validator(mode='after')
+    def deltas_not_all_zero(self) -> 'NudgeEquatorialRequestSchema':
+        """Reject no-op payloads (common when SPA preset is ΔRA-only or ΔDec-only and user presses mixed axes)."""
+
+        if abs(float(self.delta_ra_sidereal_seconds)) < 1e-12 and abs(float(self.delta_dec_arcseconds)) < 1e-12:
+            raise ValueError(
+                'Both deltas are zero; use a preset with ΔRA≠0 before East/West or ΔDec≠0 before North/South.',
+            )
+        return self
 
 
 class NudgeEquatorialAckSchema(BaseModel):
