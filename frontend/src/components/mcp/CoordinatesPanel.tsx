@@ -29,10 +29,16 @@ export function CoordinatesPanel({ withBusy, busy }: Props) {
 
   return (
     <div className="panel">
-      <h2>ICRS → Alt / Az (observer)</h2>
+      <header className="panel-header">
+        <h2 className="panel-title">Sky map → local direction</h2>
+        <p className="panel-lead">
+          Convert “where in the sky catalogue” (RA/Dec) into altitude &amp; azimuth for an observer on Earth — think
+          compass direction and how high above the horizon it sits.
+        </p>
+      </header>
       <p className="hint">
-        Uses <code>POST /telescopes/coordinates/radec-to-altaz</code>. Default observer coords are central Ukraine
-        placeholder — set your real latitude, longitude, elevation for meaningful horizons.
+        Example site defaults to central Ukraine placeholders; replace latitude, longitude, and elevation with your
+        observing spot for real answers.
       </p>
       <div className="row">
         <label>

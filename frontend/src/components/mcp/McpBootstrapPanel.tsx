@@ -44,10 +44,15 @@ export function McpBootstrapPanel({ withBusy, busy }: Props) {
 
   return (
     <div className="panel">
-      <h2>MCP bootstrap & planning</h2>
+      <header className="panel-header">
+        <h2 className="panel-title">MCP bootstrap &amp; planning</h2>
+        <p className="panel-lead">
+          See the same tool list and planning notes that AI agents use. No sky knowledge required — this is just the
+          contract the backend exposes.
+        </p>
+      </header>
       <p className="hint">
-        Same payloads agents use for tool discovery. Uses optional command token when backend requires it on guarded
-        routes.
+        Optional command token is sent automatically when you fill it in the Connection card and the route is guarded.
       </p>
       <div className="row">
         <button type="button" disabled={busy} onClick={loadBootstrap}>

@@ -186,7 +186,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="app-header">
-        <h1>Alpaca Astro Center — operator (local)</h1>
+        <h1>Alpaca Astro Center · operator dashboard</h1>
         <div className="header-actions">
           <span
             className={`api-pill api-pill--${apiHealth.state === 'ok' ? 'ok' : apiHealth.state === 'fail' ? 'fail' : 'idle'}`}
@@ -209,10 +209,16 @@ export default function App() {
 
       <main className="dashboard-grid" aria-label="Operator tools and telescope controls">
       <div className="panel">
-        <h2>Connection</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">Connection</h2>
+          <p className="panel-lead">
+            Tell the dashboard where your API lives. Checking health does not touch the telescope — it is OK to poke
+            around if you are new to this.
+          </p>
+        </header>
         <div className="row">
           <label>
-            <span>API base (matches VITE_API_BASE)</span>
+            <span>API base URL (same idea as VITE_API_BASE)</span>
             <input
               type="text"
               value={apiBaseInput}
@@ -253,10 +259,16 @@ export default function App() {
       <ModelInferencePanel withBusy={withBusy} busy={busy} />
 
       <div className="panel">
-        <h2>Hardware preflight (read-only API)</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">Hardware preflight</h2>
+          <p className="panel-lead">
+            Quick “is everything wired?” checks — read-only endpoints, never nudges the mount. Agents (and cautious
+            humans) use this before live runs.
+          </p>
+        </header>
         <p className="hint">
-          Uses <code>GET /telescopes/hardware/*</code> — no mount motion. For live Seestar checks (smoke / validation)
-          follow <code>docs/TASKS.md</code> and CLI targets when readiness says so.
+          Uses <code>GET /telescopes/hardware/*</code>. For full Seestar smoke/validation workflows see{' '}
+          <code>docs/TASKS.md</code>.
         </p>
         <div className="row">
           <button type="button" className="secondary" disabled={busy} onClick={loadHardwareReadiness}>
@@ -282,10 +294,14 @@ export default function App() {
       </div>
 
       <div className="panel">
-        <h2>Operator WebSocket (backend → browser)</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">Live status stream</h2>
+          <p className="panel-lead">
+            Optional streaming channel for the same telescope status JSON you see over REST — handy for dashboards.
+          </p>
+        </header>
         <p className="hint">
-          Connects to <code>{getOperatorWebSocketUrl()}</code> — periodic <code>telescope_status</code> JSON (same
-          contract as REST). Close before changing API base.
+          Connect to <code>{getOperatorWebSocketUrl()}</code>. Close before you change API base above.
         </p>
         <div className="row">
           <button type="button" disabled={busy || wsUi.state === 'connecting'} onClick={connectOperatorWs}>
@@ -310,11 +326,16 @@ export default function App() {
       </div>
 
       <div className="panel panel--full">
-        <h2>Live view (FOV)</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">What the telescope sees</h2>
+          <p className="panel-lead">
+            Camera previews and overlays so you never command blind. Backend still images, MJPEG relays, or both can
+            show up side by side.
+          </p>
+        </header>
         <p className="hint">
-          Loads <code>GET /telescopes/operator/live-view</code>. When the backend exposes an <code>image_url</code>{' '}
-          (still or stream URL), it renders here so you are not slewing blind. Seestar-specific video may need a
-          follow-up integration task.
+          Still / URL mode: backend may return <code>image_url</code> via <code>GET /telescopes/operator/live-view</code>{' '}
+          when configured.
         </p>
         <div className="row">
           <button type="button" className="secondary" disabled={busy} onClick={loadLiveViewMeta}>
@@ -363,7 +384,13 @@ export default function App() {
       </div>
 
       <div className="panel">
-        <h2>Read-only</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">Telescope snapshot</h2>
+          <p className="panel-lead">
+            Inspect current state — these buttons only read data. Useful when you’re learning how the mount responds to
+            the sky.
+          </p>
+        </header>
         <div className="row">
           <button type="button" disabled={busy} onClick={loadStatus}>
             GET /telescopes/status
@@ -374,20 +401,26 @@ export default function App() {
         </div>
         {statusJson && (
           <>
-            <h2 style={{ marginTop: '1rem' }}>Status</h2>
+            <h3 className="section-title">Status payload</h3>
             <pre className="json">{statusJson}</pre>
           </>
         )}
         {capabilitiesJson && (
           <>
-            <h2 style={{ marginTop: '1rem' }}>Capabilities</h2>
+            <h3 className="section-title">Capabilities payload</h3>
             <pre className="json">{capabilitiesJson}</pre>
           </>
         )}
       </div>
 
       <div className="panel">
-        <h2>Commands (moves hardware when Alpaca is enabled)</h2>
+        <header className="panel-header">
+          <h2 className="panel-title">Mount commands — careful</h2>
+          <p className="panel-lead">
+            These actions request real slew / sync / tracking when Alpaca control is enabled. Skip this card entirely if
+            you only want read-only tooling.
+          </p>
+        </header>
         <div className="row">
           <label>
             <span>RA (hours)</span>
@@ -434,7 +467,7 @@ export default function App() {
         </p>
         {lastCmd && (
           <>
-            <h2 style={{ marginTop: '0.75rem' }}>Last command response</h2>
+            <h3 className="section-title">Last command response</h3>
             <pre className="json">{lastCmd}</pre>
           </>
         )}

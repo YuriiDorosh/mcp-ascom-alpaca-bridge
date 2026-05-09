@@ -34,10 +34,16 @@ export function McpExecutionPlanPanel({ withBusy, busy }: Props) {
 
   return (
     <div className="panel">
-      <h2>MCP execution plan</h2>
+      <header className="panel-header">
+        <h2 className="panel-title">Suggested command order</h2>
+        <p className="panel-lead">
+          A human-readable playbook of telescope steps tailored to capabilities (what is allowed vs skipped). Matches
+          the structured plan agents follow.
+        </p>
+      </header>
       <p className="hint">
-        Read-only view of <code>GET /telescopes/tools/mcp-execution-plan</code> — capability-gated orchestration steps
-        agents are expected to follow.
+        Data comes from <code>GET /telescopes/tools/mcp-execution-plan</code>; toggling mode only changes how aggressively
+        the backend sequences async tooling.
       </p>
       <div className="row">
         <label>
