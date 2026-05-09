@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -13,6 +16,12 @@ from logic.mediator.base import Mediator
 from logic.queries.telescope import (
     GetTelescopeStatusQuery,
     GetTelescopeStatusQueryHandler,
+)
+
+_SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
+sys.path.insert(0, str(_SCRIPTS_DIR))
+from telescope_status_contract import (  # noqa: E402
+    assert_telescope_status_payload_matches_contract,
 )
 
 
@@ -93,6 +102,7 @@ def test_telescope_status_endpoint_serializes_live_overlay(monkeypatch):
     assert payload['alpaca_live'] is not None
     assert payload['alpaca_live']['connected'] is True
     assert payload['capabilities']['source'] == 'alpaca-live'
+    assert_telescope_status_payload_matches_contract(payload)
 
 
 def test_telescope_status_without_live_probe_returns_persisted_fields(monkeypatch):
@@ -107,6 +117,7 @@ def test_telescope_status_without_live_probe_returns_persisted_fields(monkeypatc
     assert payload['tracking_enabled'] is True
     assert payload['alpaca_live'] is None
     assert payload['capabilities']['source'] == 'default-disabled'
+    assert_telescope_status_payload_matches_contract(payload)
 
 
 def test_telescope_status_unreachable_alpaca_clears_connection_overlay(monkeypatch):
@@ -124,6 +135,7 @@ def test_telescope_status_unreachable_alpaca_clears_connection_overlay(monkeypat
     assert payload['connection_state'] == 'disconnected'
     assert payload['tracking_enabled'] is True
     assert payload['alpaca_live']['reachable'] is False
+    assert_telescope_status_payload_matches_contract(payload)
 
 
 def test_telescope_status_reachable_but_not_connected_forces_disconnected_and_no_tracking(monkeypatch):
@@ -149,3 +161,4 @@ def test_telescope_status_reachable_but_not_connected_forces_disconnected_and_no
     assert payload['connection_state'] == 'disconnected'
     assert payload['tracking_enabled'] is False
     assert payload['alpaca_live']['connected'] is False
+    assert_telescope_status_payload_matches_contract(payload)
