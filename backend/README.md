@@ -54,6 +54,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make hardware-validation-dry-run-with-notes` - run validation dry-run and save both JSON report and markdown operator notes
 - `make hardware-preflight-dry-run-with-notes` - run both smoke and validation dry-runs with markdown handoff notes
 - `make hardware-smoke-live-run` - run `P5-HW-SMOKE` command-inclusive live smoke flow and save JSON+markdown artifacts
+- `make hardware-validation-live-run` - run validation-focused CLI with command checks (`P5-HW-VALIDATION` track) and save `artifacts/hardware-validation-live-run.{json,md}`
 
 ## Recommended Local Startup Order
 
@@ -156,10 +157,11 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Make wrappers: `make hardware-smoke-dry-run-with-notes` and `make hardware-validation-dry-run-with-notes` generate standard markdown handoff files in `backend/artifacts/`.
 - Bundle wrapper: `make hardware-preflight-dry-run` runs both JSON-only smoke and validation dry-runs in sequence.
 - Bundle wrapper: `make hardware-preflight-dry-run-with-notes` runs both note-producing flows in sequence for one-command preflight capture.
-- Live hardware wrapper: `make hardware-smoke-live-run` is intended for `P5-HW-SMOKE`, enables command checks, and writes `artifacts/hardware-smoke-live-run.json` + `artifacts/hardware-smoke-live-run.md`.
+- Live smoke wrapper: `make hardware-smoke-live-run` targets `P5-HW-SMOKE`, enables command checks, and writes `artifacts/hardware-smoke-live-run.json` + `artifacts/hardware-smoke-live-run.md`.
+- Live validation wrapper: `make hardware-validation-live-run` runs the CLI with `--validation-only` plus the same command-check flags as smoke live, writing `artifacts/hardware-validation-live-run.json` + `.md` (omit `hardware/smoke-plan` GET; still asserts smoke plan inside overview/bootstrap so contracts stay coherent).
 - Operator qualitative baseline handoff outline (filled after a **real Seestar run**): `docs/hardware/p5_hw_smoke_baseline_template.md` (keep LAN secrets out of git when copying).
 - Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
-- Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
+- Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running smoke or validation live targets on **real hardware** (`P5-HW-SMOKE` / `P5-HW-VALIDATION`).
 
 ## Troubleshooting / Known Issues
 

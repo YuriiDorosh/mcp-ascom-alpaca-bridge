@@ -1,6 +1,6 @@
 # P5 hardware smoke — baseline capture (operator template)
 
-Fill this **after** a real **Seestar S30 Pro** LAN run (`P5-HW-SMOKE` / `make hardware-smoke-live-run`). Intended for concise hand-off: what worked, what differed from dry-run assumptions, follow-ups.
+Fill this **after** a real **Seestar S30 Pro** LAN run (`P5-HW-SMOKE` / `make hardware-smoke-live-run`, then `P5-HW-VALIDATION` / `make hardware-validation-live-run` when you intentionally exercise auth gating against live hardware). Intended for concise hand-off: what worked, what differed from dry-run assumptions, follow-ups.
 
 > **Needs physical telescope:** Alpaca reachable on **`http://<ip>:32323`**, backend `ALPACA_*` aligned with the device, charging and safe sky conditions respected.
 
@@ -36,6 +36,12 @@ Fill this **after** a real **Seestar S30 Pro** LAN run (`P5-HW-SMOKE` / `make ha
 -
 - Markdown notes path (`hardware-smoke-live-run.md`):  
 -
+
+## Live validation artifacts (optional, after smoke baseline)
+
+- JSON report (`make hardware-validation-live-run`): default `backend/artifacts/hardware-validation-live-run.json`
+- Markdown notes: `backend/artifacts/hardware-validation-live-run.md`
+- Note: checklist step **1** in `hardware/validation-plan` expects `COMMAND_AUTH_TOKEN` enforced—you must exercise 401-vs-token behaviour manually unless you automate it outside this runner.
 
 ## Behaviour summary
 
