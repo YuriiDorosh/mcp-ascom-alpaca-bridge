@@ -26,10 +26,6 @@ Backend optional **`OPERATOR_LIVE_VIEW_IMAGE_URL`** (documented in `backend/.env
 
 Stop: `make down`.
 
-### Docker Hub / DNS timeouts (`auth.docker.io` … `127.0.0.53` … timeout)
-
-Same as **[Troubleshooting: Docker Hub / DNS](../README.md#docker-dns-dockerhub)** in the root README — fix host DNS/VPN connectivity, or use **host Node**: `make install` then `make dev` (Vite on port 5173) while the API runs in Docker or locally.
-
 ## Full stack from repo root
 
 From the **project root** (parent of `backend/` and `frontend/`): use **`backend/.env`** and **`frontend/.env`** (see root **`README.md`** quick start), then:

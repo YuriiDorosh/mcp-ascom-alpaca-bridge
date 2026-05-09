@@ -37,25 +37,13 @@ make dev-with-model
 make dev-with-model-down
 ```
 
-## Screenshots
+## What this looks like
 
-Operator dashboard (MJPEG/live frame in the hero card; optional still URL appears after **Refresh metadata** once `OPERATOR_LIVE_VIEW_IMAGE_URL` is set):
+Here is how the project looks in the browser with the operator UI and the backend OpenAPI docs.
 
-![Operator dashboard with live-view preview](docs/media/operator-dashboard-live-preview.png)
+![Operator dashboard](docs/media/operator-dashboard-live-preview.png)
 
-API browser reference (Swagger UI at `/api/docs`):
-
-![OpenAPI Swagger UI](docs/media/backend-openapi-swagger-ui.png)
-
-<a id="docker-dns-dockerhub"></a>
-
-## Troubleshooting: Docker Hub / DNS (build pull timeouts)
-
-Building the frontend image (or pulling `node:*` / `nginx:*`) asks Docker Hub for manifests. If the build fails with something like **`lookup auth.docker.io on 127.0.0.53: … i/o timeout`**, DNS from your resolver (often **systemd-resolved** stub at `127.0.0.53`) cannot reach Docker’s registry—not an application bug.
-
-- **Retry** after confirming general internet connectivity (VPN off, captive portal, flaky Wi‑Fi).
-- **Point the host at working DNS**, e.g. router IP or `1.1.1.1` / `8.8.8.8` via NetworkManager / `resolvectl`; or temporarily `sudo systemd-resolve -i eth0 …` equivalent for your interface.
-- **Skip the Docker UI build**: run **`make -C frontend install`** once, then **`make -C frontend dev`** ([`frontend/README.md`](frontend/README.md)) with the backend on `:8000` and CORS allowing `http://localhost:5173`.
+![Swagger UI](docs/media/backend-openapi-swagger-ui.png)
 
 <a id="linux-arp-lan-telescope"></a>
 
