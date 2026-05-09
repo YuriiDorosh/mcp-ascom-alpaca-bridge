@@ -90,6 +90,7 @@ Then verify:
 - Telescope status JSON: `GET http://localhost:8000/telescopes/status`
 - Operator WebSocket (browser ↔ backend, periodic `telescope_status` JSON): `ws://127.0.0.1:8000/telescopes/ws/operator` (use `wss://` when the API is served over HTTPS)
 - Live-view / FOV contract (still or stream URL when integrated; placeholder until camera path is wired): `GET http://localhost:8000/telescopes/operator/live-view`
+  - set optional `OPERATOR_LIVE_VIEW_IMAGE_URL` (http/https) to expose a LAN still/MJPEG URL to the operator UI without code changes
 - Telescope capability flags (MCP-safe gating surface): `GET http://localhost:8000/telescopes/capabilities`
 - MCP tool manifest (tool definitions + capability/auth requirements): `GET http://localhost:8000/telescopes/tools/mcp-manifest`
   - now includes both telescope tools and model inference tools for MCP planning.
@@ -122,6 +123,30 @@ Then verify:
 - telescope control ops are published to Kafka topic `TELESCOPE_OPERATION_TOPIC` (default `telescope-operation-events`)
 - Kafka contracts include `schema_version` and `correlation_id` fields for event evolution and traceability.
 - Mongo Express (if `make ui` was started): <http://localhost:28081>
+
+## Operator camera preview (`OPERATOR_LIVE_VIEW_IMAGE_URL`)
+
+The SPA can only show “what the camera sees” if you configure a **fixed `http://` or `https://` URL** that already returns image data: a single still (`image/jpeg`, `image/png`, …) or a Motion-JPEG stream (`multipart/x-mixed-replace` is common). The backend **does not auto-discover** your telescope’s camera. It reads `OPERATOR_LIVE_VIEW_IMAGE_URL` from `backend/.env`, validates the scheme, and returns that string as `image_url` from `GET /telescopes/operator/live-view` so the browser can render `<img src="...">`.
+
+**Do I need an HTTP endpoint on the telescope right now?**
+
+- **You need some LAN-reachable HTTP(S) picture URL** if you want this feature to work today. Often that is **on the device** (built-in IP camera behaviour) or **not exposed at all** by the vendor.
+- **Alpaca on port `32323`** (Seestar LAN control) is for **driver-style commands and status**, not guaranteed to expose a trivial “live JPEG at `/foo`”. A preview path may be undocumented, behind the vendor app only, or absent.
+- If you **cannot find** a URL that loads in a browser tab (or returns image headers with `curl -sSI`), leave the variable unset; the UI stays on the placeholder until you have a URL or until a dedicated integration (see `P5-UI-LIVEVIEW-SEESTAR` in `docs/TASKS.md`) implements a supported capture path.
+
+**How to sanity-check a candidate URL**
+
+1. From the same PC/LAN, open it in a normal browser tab, or run:
+   ```bash
+   curl -sSI "http://YOUR_HOST:PORT/your/path"
+   ```
+   and look for an image-friendly `Content-Type` or a streaming MJPEG content type.
+2. If the stream **requires login, cookies, or a proprietary protocol** only the vendor app understands, a plain `<img>` will usually **fail** until you add a proxy or a different integration.
+
+**Workarounds people use before native Seestar video is wired**
+
+- A **separate IP camera** or NVR on the LAN with a known snapshot/MJPEG URL.
+- An **`ffmpeg` (or similar) restream** on your network that exposes `http://…` MJPEG or repeated stills—point `OPERATOR_LIVE_VIEW_IMAGE_URL` at that URL.
 
 ## Kafka Startup Troubleshooting
 
