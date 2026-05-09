@@ -21,6 +21,10 @@ HARDWARE_VALIDATION_LIVE_REPORT = artifacts/hardware-validation-live-run.json
 HARDWARE_VALIDATION_LIVE_NOTES = artifacts/hardware-validation-live-run.md
 HARDWARE_ARTIFACT_DIR = artifacts
 
+.PHONY: alpaca-lan-probe
+alpaca-lan-probe:
+	docker run --rm --network host -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} python scripts/alpaca_lan_probe.py
+
 .PHONY: app-dev
 app-dev:
 	${DC} -f ${APP_DEV} -f ${KAFKA} ${ENV} up --build -d
