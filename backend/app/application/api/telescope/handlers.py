@@ -493,7 +493,8 @@ def _require_command_auth(x_command_token: str | None):
     container = init_container()
     config: Config = container.resolve(Config)
     expected = config.command_auth_token
-    if expected is None:
+    # Treat empty/whitespace env value as "auth disabled".
+    if expected is None or expected.strip() == '':
         return
     if x_command_token != expected:
         raise HTTPException(status_code=401, detail='Missing or invalid command auth token')
