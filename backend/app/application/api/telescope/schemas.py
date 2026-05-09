@@ -65,6 +65,42 @@ class IcrsHourAngleDecSchema(BaseModel):
     dec_degrees: float = Field(ge=-90, le=90)
 
 
+class MountIcrsEquatorialSchema(BaseModel):
+    """Instantaneous Alpaca telescope equatorial axes (hours / degrees), same numeric story as slew targets."""
+
+    ra_hours: float = Field(description='Right ascension in decimal hours reported by the mount driver.')
+    dec_degrees: float = Field(description='Declination in degrees reported by the mount driver.')
+    frame: Literal['mount-equatorial-driver'] = Field(
+        default='mount-equatorial-driver',
+        description='Coordinate frame identifier; aligns with Alpaca SlewToCoordinates units.',
+    )
+
+
+class NudgeEquatorialRequestSchema(BaseModel):
+    """Relative bump in sidereal RA seconds (east-positive) and declination arcseconds (north-positive)."""
+
+    delta_ra_sidereal_seconds: float = Field(
+        ge=-3600,
+        le=3600,
+        description='RA offset as sidereal-time seconds mapped to ΔRA_hours = Δ/3600 (wraps within 24h).',
+    )
+    delta_dec_arcseconds: float = Field(
+        ge=-21600,
+        le=21600,
+        description='Declination offset in arcseconds mapped to ΔDec_degrees = Δ/3600 (clamped ±90°).',
+    )
+
+
+class NudgeEquatorialAckSchema(BaseModel):
+    status: Literal['ok'] = 'ok'
+    prior_ra_hours: float
+    prior_dec_degrees: float
+    target_ra_hours: float
+    target_dec_degrees: float
+    delta_ra_sidereal_seconds: float
+    delta_dec_arcseconds: float
+
+
 class TelescopeCommandAckSchema(BaseModel):
     status: Literal['ok'] = 'ok'
 

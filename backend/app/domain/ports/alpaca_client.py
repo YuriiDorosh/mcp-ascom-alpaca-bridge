@@ -26,6 +26,12 @@ class IAlpacaTelescopeClient(IAlpacaClient, ABC):
     """Alpaca telescope control (ICRS-equatorial slew/sync plus tracking switches)."""
 
     @abstractmethod
+    async def read_mount_icrs_equatorial(self) -> tuple[float, float]:
+        """Return current mount equatorial coordinates: RA in decimal hours, Dec in degrees (driver frame)."""
+
+        ...
+
+    @abstractmethod
     async def slew_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
         ...
 

@@ -13,6 +13,7 @@ import { CoordinatesPanel } from './components/mcp/CoordinatesPanel'
 import { McpBootstrapPanel } from './components/mcp/McpBootstrapPanel'
 import { McpContextPanel } from './components/mcp/McpContextPanel'
 import { McpExecutionPlanPanel } from './components/operator/McpExecutionPlanPanel'
+import { MountNudgePanel } from './components/operator/MountNudgePanel'
 import { ModelInferencePanel } from './components/operator/ModelInferencePanel'
 import { formatJson } from './formatJson'
 
@@ -418,9 +419,18 @@ export default function App() {
         <DashboardZone
           zoneId="wk-mount"
           title="Mount"
-          description="Read first, command second — slew/sync/tracking only when Alpaca is enabled and you trust the sky."
-          cols="pair"
+          description="Read first — absolute slew targets in hours/degrees, small jog via sidereal RA seconds and Dec arcseconds when hardware allows."
+          cols="fluid"
         >
+      <MountNudgePanel
+        withBusy={withBusy}
+        busy={busy}
+        commandToken={commandToken}
+        onApplyIcrs={(ra, dec) => {
+          setRaHours(ra)
+          setDecDeg(dec)
+        }}
+      />
       <div className="panel">
         <header className="panel-header">
           <h2 className="panel-title">Telescope snapshot</h2>

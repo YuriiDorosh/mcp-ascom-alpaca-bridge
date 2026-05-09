@@ -7,12 +7,16 @@ from domain.ports.alpaca_client import (
 )
 from infra.message_brokers.base import BaseMessageBroker
 from logic.commands.telescope_control import (
+    NudgeMountEquatorialCommand,
+    NudgeMountEquatorialCommandHandler,
     SetTelescopeTrackingCommand,
     SetTelescopeTrackingCommandHandler,
     SlewToIcrsCommand,
     SlewToIcrsCommandHandler,
     SyncMountToIcrsCommand,
     SyncMountToIcrsCommandHandler,
+    apply_equatorial_nudge,
+    normalize_ra_hours,
 )
 from logic.mediator.base import Mediator
 
@@ -27,6 +31,9 @@ class RecordingTelescopePort(IAlpacaTelescopeClient):
 
     async def read_live_telescope_snapshot(self) -> AlpacaLiveSnapshot | None:
         return None
+
+    async def read_mount_icrs_equatorial(self) -> tuple[float, float]:
+        return (12.0, 44.5)
 
     async def slew_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
         self.slew_calls.append((ra_hours, dec_degrees))
@@ -128,3 +135,52 @@ async def test_command_handlers_invoke_alpaca_port():
     assert payloads[2]['schema_version'] == 'v1'
     assert payloads[0]['correlation_id'] == payloads[0]['event_id']
     assert [record['operation'] for record in audit_repo.records] == ['slew-icrs', 'sync-icrs', 'set-tracking']
+
+
+def test_normalize_ra_hours_wrap():
+    assert normalize_ra_hours(23.75 + 0.5) == 0.25
+    assert normalize_ra_hours(-0.5) == 23.5
+
+
+def test_apply_equatorial_nudge_respects_wrap_and_declination_limits():
+    ra, dec = apply_equatorial_nudge(
+        ra_hours=23.9,
+        dec_degrees=89.999,
+        delta_ra_sidereal_seconds=720.0,
+        delta_dec_arcseconds=7200.0,
+    )
+    assert ra == pytest.approx(0.1, abs=1e-9)
+    assert dec == 90.0
+
+
+class _NudgeTestTelescopePort(RecordingTelescopePort):
+    async def read_mount_icrs_equatorial(self) -> tuple[float, float]:
+        return (10.0, -5.0)
+
+
+@pytest.mark.asyncio
+async def test_nudge_mount_equatorial_handler_reads_and_slaws():
+    port = _NudgeTestTelescopePort()
+
+    broker = RecordingBroker()
+    audit_repo = RecordingAuditRepository()
+    mediator = Mediator()
+    handler = NudgeMountEquatorialCommandHandler(
+        _mediator=mediator,
+        alpaca_telescope=port,
+        message_broker=broker,
+        audit_repository=audit_repo,
+        config=StubConfig(),
+    )
+
+    result = await handler.handle(
+        NudgeMountEquatorialCommand(delta_ra_sidereal_seconds=3600.0, delta_dec_arcseconds=3600.0),
+    )
+
+    assert result['target_ra_hours'] == 11.0
+    assert result['target_dec_degrees'] == -4.0
+    assert port.slew_calls[-1] == (11.0, -4.0)
+    assert len(broker.messages) == 1
+    payload = orjson.loads(broker.messages[0][2])
+    assert payload['operation'] == 'nudge-equatorial'
+    assert audit_repo.records[-1]['operation'] == 'nudge-equatorial'

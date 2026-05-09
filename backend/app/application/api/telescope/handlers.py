@@ -22,6 +22,9 @@ from application.api.telescope.schemas import (
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
+    MountIcrsEquatorialSchema,
+    NudgeEquatorialAckSchema,
+    NudgeEquatorialRequestSchema,
     OperatorLiveViewSchema,
     McpExecutionPlanStepSchema,
     McpContextWarningSchema,
@@ -49,6 +52,7 @@ from application.api.telescope.schemas import (
 from logic.init import init_container
 from logic.commands.model_inference import EnqueueModelInferenceCommand
 from logic.commands.telescope_control import (
+    NudgeMountEquatorialCommand,
     SetTelescopeTrackingCommand,
     SlewToIcrsCommand,
     SyncMountToIcrsCommand,
@@ -59,7 +63,10 @@ from logic.queries.coordinates import GetHorizontalFromIcrsQuery
 from logic.queries.ephemeris import GetSolarSystemBodyIcrsQuery
 from logic.queries.command_audit import ListCommandAuditQuery
 from logic.queries.model_inference import GetModelInferenceResultQuery
-from logic.queries.telescope import GetTelescopeStatusQuery
+from logic.queries.telescope import (
+    GetMountIcrsEquatorialQuery,
+    GetTelescopeStatusQuery,
+)
 from settings.config import Config
 
 
@@ -116,6 +123,29 @@ def _build_mcp_tool_manifest(*, requires_command_token: bool) -> TelescopeMcpToo
                 'endpoint': '/telescopes/commands/tracking',
                 'requirements': {
                     'required_capability': 'supports_tracking',
+                    'requires_command_token': requires_command_token,
+                },
+            },
+            {
+                'tool_name': 'telescope.get_mount_icrs_equatorial',
+                'description': 'Read current Alpaca telescope equatorial coordinates (RA decimal hours / Dec degrees) from the linked mount.',
+                'method': 'GET',
+                'endpoint': '/telescopes/mount/icrs-equatorial',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'telescope.nudge_equatorial',
+                'description': (
+                    'Apply a bounded relative slew: offsets are sidereal RA seconds (east-positive) plus Dec arcseconds '
+                    '(north-positive), implemented via read-current + slew-after-normalize/clamp.'
+                ),
+                'method': 'POST',
+                'endpoint': '/telescopes/commands/nudge-equatorial',
+                'requirements': {
+                    'required_capability': 'supports_slew',
                     'requires_command_token': requires_command_token,
                 },
             },
@@ -239,7 +269,7 @@ def _build_hardware_smoke_plan() -> TelescopeHardwareSmokePlanSchema:
             },
             {
                 'step': 2,
-                'action': 'Run a low-risk slew smoke command using POST /telescopes/commands/slew-icrs.',
+                'action': 'Run a low-risk slew smoke command using POST /telescopes/commands/slew-icrs (or nudge-equatorial for small offsets after reading mount/icrs-equatorial).',
                 'expected_result': 'Command ACK is returned and movement result is observable without driver errors.',
             },
             {
@@ -428,6 +458,8 @@ async def get_mcp_execution_plan(
     baseline_flow.extend(
         [
             ('telescope.get_command_audit', 'Review recent command history before dispatching hardware movement.'),
+            ('telescope.get_mount_icrs_equatorial', 'Read instantaneous mount RA/Dec from Alpaca before small jog commands.'),
+            ('telescope.nudge_equatorial', 'Bump mount by bounded RA-second / Dec-arcsecond deltas when slew capability gate is enabled.'),
             ('telescope.slew_icrs', 'Execute movement command only when capability gate is enabled.'),
             ('telescope.sync_icrs', 'Sync mount model after validation when capability gate is enabled.'),
             ('telescope.set_tracking', 'Apply tracking mode change only when capability gate is enabled.'),
@@ -442,7 +474,13 @@ async def get_mcp_execution_plan(
         if (
             include_disabled_commands is False
             and tool_name.startswith('telescope.')
-            and tool_name in {'telescope.slew_icrs', 'telescope.sync_icrs', 'telescope.set_tracking'}
+            and tool_name
+            in {
+                'telescope.slew_icrs',
+                'telescope.sync_icrs',
+                'telescope.set_tracking',
+                'telescope.nudge_equatorial',
+            }
             and enabled is False
         ):
             continue
@@ -673,6 +711,18 @@ async def get_mcp_context(
     )
 
 
+@router.get('/mount/icrs-equatorial', response_model=MountIcrsEquatorialSchema)
+async def get_mount_icrs_equatorial():
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        raw = await mediator.handle_query(GetMountIcrsEquatorialQuery())
+    except AlpacaDriverException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    return MountIcrsEquatorialSchema(**raw)
+
+
 @router.post('/coordinates/radec-to-altaz', response_model=HorizontalCoordsResponseSchema)
 async def radec_to_altaz(schema: RadecToAltAzRequestSchema):
     container = init_container()
@@ -746,10 +796,35 @@ async def set_telescope_tracking(
     return TelescopeCommandAckSchema()
 
 
+@router.post('/commands/nudge-equatorial', response_model=NudgeEquatorialAckSchema)
+async def nudge_mount_equatorial(
+    body: NudgeEquatorialRequestSchema,
+    x_command_token: Annotated[str | None, Header(alias='X-Command-Token')] = None,
+):
+    _require_command_auth(x_command_token)
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        payloads = await mediator.handle_command(
+            NudgeMountEquatorialCommand(
+                delta_ra_sidereal_seconds=body.delta_ra_sidereal_seconds,
+                delta_dec_arcseconds=body.delta_dec_arcseconds,
+            ),
+        )
+    except AlpacaDriverException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    payload = next(iter(payloads))
+    return NudgeEquatorialAckSchema(**payload)
+
+
 @router.get('/commands/audit', response_model=list[CommandAuditRecordSchema])
 async def list_command_audits(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
-    operation: Annotated[str | None, Query(description='Optional operation filter (slew-icrs/sync-icrs/set-tracking).')] = None,
+    operation: Annotated[
+        str | None,
+        Query(description='Optional operation filter (slew-icrs/sync-icrs/set-tracking/nudge-equatorial).'),
+    ] = None,
     status: Annotated[str | None, Query(description='Optional status filter (e.g. ok).')] = None,
     source: Annotated[str | None, Query(description='Optional source filter (e.g. main-backend).')] = None,
 ):

@@ -119,6 +119,25 @@ def _blocking_set_tracking(config: Config, enabled: bool) -> None:
     _blocking_transaction(config, work)
 
 
+def _blocking_read_mount_icrs(config: Config) -> tuple[float, float]:
+    """Read Alpaca ``RightAscension`` / ``Declination`` while connected (same units as slew)."""
+
+    def work(driver: Any) -> tuple[float, float]:
+        if not bool(getattr(driver, 'Connected', False)):
+            raise AlpacaDriverException('Telescope is not connected; cannot read equatorial coordinates.')
+
+        ra_raw = getattr(driver, 'RightAscension', None)
+        dec_raw = getattr(driver, 'Declination', None)
+        if ra_raw is None or dec_raw is None:
+            raise AlpacaDriverException(
+                'Alpaca driver does not expose RightAscension/Declination for this device profile.',
+            )
+
+        return float(ra_raw), float(dec_raw)
+
+    return _blocking_transaction(config, work)
+
+
 class AlpycaTelescopeClient(IAlpacaTelescopeClient):
     def __init__(self, config: Config):
         self._config = config
@@ -133,6 +152,10 @@ class AlpycaTelescopeClient(IAlpacaTelescopeClient):
         if not self._config.alpaca_enabled:
             return None
         return await asyncio.to_thread(_blocking_alpaca_snapshot, self._config)
+
+    async def read_mount_icrs_equatorial(self) -> tuple[float, float]:
+        self._require_hardware_control()
+        return await asyncio.to_thread(_blocking_read_mount_icrs, self._config)
 
     async def slew_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
         self._require_hardware_control()

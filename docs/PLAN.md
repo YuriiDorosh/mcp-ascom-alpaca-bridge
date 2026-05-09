@@ -146,6 +146,8 @@ What we steal for the MVP operator dashboard (`frontend/` SPA):
 | **Imaging surface first** | On narrow viewports the MJPEG / still preview stack above configuration notes; on wide screens a sticky sidebar mirrors N.I.N.A.’s tool rail next to the picture. |
 | **Save/restore layout** | Future (localStorage, URL hash, or packaged shell). |
 
+**Mount jog vs camera steering:** the operator **Mount** zone includes an equatorial **compass pad** backed by `GET /telescopes/mount/icrs-equatorial` and `POST /telescopes/commands/nudge-equatorial`. That reads Alpaca `RightAscension`/`Declination` (hours / degrees) and applies bounded offsets expressed as **sidereal RA seconds** (east-positive) and **declination arcseconds** (north-positive), then slews to the normalized target. It is **not** a dome or Seestar camera PTZ joystick; independent camera aim remains a vendor/Alpaca-camera follow-up (`docs/TASKS.md`).
+
 Reference capture (RTSP relay, Seestar camera-on behaviour) remains backend-configured; the SPA only surfaces instructions and preview affordances.
 
 ## High-Level Flow

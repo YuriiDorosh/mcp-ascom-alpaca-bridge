@@ -35,6 +35,8 @@ from logic.commands.model_inference import (
     EnqueueModelInferenceCommandHandler,
 )
 from logic.commands.telescope_control import (
+    NudgeMountEquatorialCommand,
+    NudgeMountEquatorialCommandHandler,
     SetTelescopeTrackingCommand,
     SetTelescopeTrackingCommandHandler,
     SlewToIcrsCommand,
@@ -65,6 +67,8 @@ from logic.queries.model_inference import (
     GetModelInferenceResultQueryHandler,
 )
 from logic.queries.telescope import (
+    GetMountIcrsEquatorialQuery,
+    GetMountIcrsEquatorialQueryHandler,
     GetTelescopeStatusQuery,
     GetTelescopeStatusQueryHandler,
 )
@@ -187,6 +191,14 @@ def _init_container() -> Container:
             audit_repository=container.resolve(BaseModelInferenceRepository),
             config=config,
         )
+        get_mount_icrs_handler = GetMountIcrsEquatorialQueryHandler(alpaca_telescope=alpaca_telescope)
+        nudge_equatorial_handler = NudgeMountEquatorialCommandHandler(
+            _mediator=mediator,
+            alpaca_telescope=alpaca_telescope,
+            message_broker=container.resolve(BaseMessageBroker),
+            audit_repository=container.resolve(BaseModelInferenceRepository),
+            config=config,
+        )
         resolve_name_handler = ResolveCommonNameToIcrsHandler(
             catalog=container.resolve(ICatalogResolveService),
         )
@@ -218,6 +230,10 @@ def _init_container() -> Container:
             GetSolarSystemBodyIcrsQuery,
             get_solar_body_handler,
         )
+        mediator.register_query(
+            GetMountIcrsEquatorialQuery,
+            get_mount_icrs_handler,
+        )
 
         mediator.register_command(
             EnqueueModelInferenceCommand,
@@ -226,6 +242,7 @@ def _init_container() -> Container:
         mediator.register_command(SlewToIcrsCommand, [slew_to_icrs_handler])
         mediator.register_command(SyncMountToIcrsCommand, [sync_mount_icrs_handler])
         mediator.register_command(SetTelescopeTrackingCommand, [set_tracking_handler])
+        mediator.register_command(NudgeMountEquatorialCommand, [nudge_equatorial_handler])
 
         return mediator
 
