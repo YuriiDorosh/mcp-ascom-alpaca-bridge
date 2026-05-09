@@ -2,9 +2,9 @@
 
 Local-first FastAPI backend for ASCOM Alpaca telescope control with DDD architecture, Kafka messaging, and MongoDB persistence.
 
-## Git branching
+## Git workflow
 
-Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub pull requests instead of committing directly on `main`, so telescope and infra changes stay reviewable before release.
+Use **`feature/<topic>`** branches for normal work. **Batch related edits** (code, tests, docs for one logical step) into **fewer, larger pull requests** instead of micro-PRs for single-line doc tweaks—this keeps review and merge overhead low while the project is still pre-1.0. Merge into **`main`** when the chunk is coherent. Reserve **direct pushes to `main`** for **urgent hotfixes** only.
 
 ## Requirements
 

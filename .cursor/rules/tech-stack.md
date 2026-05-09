@@ -52,7 +52,7 @@ alwaysApply: true
 
 ## Git Workflow (Project Convention)
 
-- Feature work on **`feature/<short-topic>`** branches; merge to `main` via **GitHub PRs** (see `docs/TASKS.md`).
+- Work on **`feature/<short-topic>`** branches. Prefer **batched PRs**: combine related files (implementation + tests + docs) for one milestone or feature slice, and **merge less often**—avoid one PR per minimal change. See the blockquote at the top of **`docs/TASKS.md`**. Direct `main` commits only for **urgent hotfixes**.
 
 ## When Adding Dependencies
 
