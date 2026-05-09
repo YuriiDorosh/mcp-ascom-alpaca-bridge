@@ -118,6 +118,7 @@ Provide real-time user-facing interaction and operational observability so opera
 - Hardware gate passed: Seestar HIL smoke/validation tasks from `docs/TASKS.md` are completed.
 
 ### Risks and Dependencies
+- **Alpaca HTTP slews are async-only**: hosts implement **`SlewToCoordinatesAsync`**; blocking sync slews are rejected (common **502** symptom: `"Synchronous methods are deprecated"` / **0x400**). Backend clients must poll **`Slewing`** until quiescence (see `ALPACA_SLEW_*` settings and `docs/TASKS.md`).
 - **Seestar S30 Pro** live view may **not** map 1:1 to generic Alpaca Camera APIs; expect a **provider-specific** path (vendor protocol, RTSP, or companion contract) alongside Alpaca where applicable—`docs/TASKS.md` tracks investigation and integration milestones.
 - Real-time state synchronization complexity across backend, Kafka, and UI.
 - Browser WebSockets use `ws`/`wss` (not CORS); operators must point the UI at the correct API host/port (same as REST `VITE_API_BASE`).
