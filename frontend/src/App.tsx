@@ -7,6 +7,7 @@ import {
   telescopeGet,
   telescopePost,
 } from './api'
+import { DashboardZone } from './components/layout/DashboardZone'
 import { ReadinessSummary } from './components/ReadinessSummary'
 import { CoordinatesPanel } from './components/mcp/CoordinatesPanel'
 import { McpBootstrapPanel } from './components/mcp/McpBootstrapPanel'
@@ -207,13 +208,18 @@ export default function App() {
         </div>
       </div>
 
-      <main className="dashboard-grid" aria-label="Operator tools and telescope controls">
+      <main className="app-workspace" aria-label="Operator workspace">
+        <DashboardZone
+          zoneId="wk-session"
+          title="Session"
+          description="Where the browser talks to your API. Ping /health is always safe for the telescope."
+          cols="single"
+        >
       <div className="panel">
         <header className="panel-header">
-          <h2 className="panel-title">Connection</h2>
+          <h2 className="panel-title">API connection</h2>
           <p className="panel-lead">
-            Tell the dashboard where your API lives. Checking health does not touch the telescope — it is OK to poke
-            around if you are new to this.
+            Set the backend URL and optional guard token once per browser session — all other cards reuse them.
           </p>
         </header>
         <div className="row">
@@ -250,20 +256,33 @@ export default function App() {
           <code>:5173</code>). Current API base: <code>{getApiBase()}</code>
         </p>
       </div>
+        </DashboardZone>
 
+        <DashboardZone
+          zoneId="wk-agents"
+          title="Agents & automation"
+          description="Tools MCP clients need, plus maths helpers operators can sanity-check beside the telescope."
+          cols="fluid"
+        >
       <McpBootstrapPanel withBusy={withBusy} busy={busy} />
       <McpContextPanel withBusy={withBusy} busy={busy} />
       <CoordinatesPanel withBusy={withBusy} busy={busy} />
 
       <McpExecutionPlanPanel withBusy={withBusy} busy={busy} />
       <ModelInferencePanel withBusy={withBusy} busy={busy} />
+        </DashboardZone>
 
+        <DashboardZone
+          zoneId="wk-observatory"
+          title="Observatory health"
+          description="Quiet checks plus the optional websocket timeline — read-only telemetry only."
+          cols="pair"
+        >
       <div className="panel">
         <header className="panel-header">
           <h2 className="panel-title">Hardware preflight</h2>
           <p className="panel-lead">
-            Quick “is everything wired?” checks — read-only endpoints, never nudges the mount. Agents (and cautious
-            humans) use this before live runs.
+            Quick “is everything wired?” probes — endpoints never slew the hardware.
           </p>
         </header>
         <p className="hint">
@@ -296,9 +315,7 @@ export default function App() {
       <div className="panel">
         <header className="panel-header">
           <h2 className="panel-title">Live status stream</h2>
-          <p className="panel-lead">
-            Optional streaming channel for the same telescope status JSON you see over REST — handy for dashboards.
-          </p>
+          <p className="panel-lead">Same JSON as REST, pushed over a websocket for dashboard-style monitoring.</p>
         </header>
         <p className="hint">
           Connect to <code>{getOperatorWebSocketUrl()}</code>. Close before you change API base above.
@@ -324,65 +341,86 @@ export default function App() {
           </>
         ) : null}
       </div>
+        </DashboardZone>
 
-      <div className="panel panel--full">
+        <DashboardZone
+          zoneId="wk-imaging"
+          title="Imaging desk"
+          description="Treat this row like N.I.N.A.’s imaging surface: previews first, fine print tucked into the toolbar."
+          cols="fluid"
+        >
+      <div className="panel panel--full live-scope-panel">
         <header className="panel-header">
           <h2 className="panel-title">What the telescope sees</h2>
           <p className="panel-lead">
-            Camera previews and overlays so you never command blind. Backend still images, MJPEG relays, or both can
-            show up side by side.
+            Still URLs and RTSP relays land here so assistants and operators share the same picture of the rig.
           </p>
         </header>
-        <p className="hint">
-          Still / URL mode: backend may return <code>image_url</code> via <code>GET /telescopes/operator/live-view</code>{' '}
-          when configured.
-        </p>
-        <div className="row">
-          <button type="button" className="secondary" disabled={busy} onClick={loadLiveViewMeta}>
-            Refresh live-view metadata
-          </button>
-        </div>
-        <h3 className="subhead">RTSP relay (MJPEG)</h3>
-        <p className="hint">
-          When <code>TELESCOPE_RTSP_URL</code> is set on the API, this frame loads{' '}
-          <code>GET /api/v1/telescope/stream</code> as a multipart JPEG stream (503 if unset).
-        </p>
-        <p className="hint hint--callout">
-          <strong>Seestar (incl. Seestar S30 Pro):</strong> the RTSP preview only works while the device is actually
-          streaming from its built-in camera. ZWO does not publish an API to power the camera on from this bridge — in
-          practice you start the feed from the mobile app first (e.g. enter <strong>Scenery</strong> / imaging mode; the
-          exact menu label depends on firmware). After the camera is live, the MJPEG relay here should show video.
-        </p>
-        <div className="live-view-frame">
-          <img
-            className="live-view-img"
-            alt="Telescope RTSP relay (configure TELESCOPE_RTSP_URL if this stays blank)"
-            src={`${getApiBase().replace(/\/+$/, '')}/api/v1/telescope/stream`}
-            key={apiBaseInput}
-          />
-        </div>
-        {liveViewMeta ? (
-          <>
-            <p className="live-view-meta">
-              {liveViewMeta.available === true ? (
-                <span className="live-flag live-flag--ok">preview URL available</span>
-              ) : (
-                <span className="live-flag live-flag--muted">no preview URL yet (API placeholder)</span>
-              )}{' '}
-              <code>provider={(liveViewMeta.provider as string) ?? '?'}</code>
-            </p>
-            {typeof liveViewMeta.notes === 'string' ? <p className="hint">{liveViewMeta.notes}</p> : null}
-            {typeof liveViewMeta.image_url === 'string' && liveViewMeta.image_url.length > 0 ? (
-              <div className="live-view-frame">
-                <img className="live-view-img" alt="Telescope live view" src={liveViewMeta.image_url} />
-              </div>
-            ) : null}
-            <h3 className="subhead">Contract JSON</h3>
-            <pre className="json">{formatJson(liveViewMeta)}</pre>
-          </>
-        ) : null}
-      </div>
 
+        <div className="live-scope-body">
+          <aside className="live-scope-toolbar" aria-label="Imaging feeds and notes">
+            <div className="row live-toolbar-actions">
+              <button type="button" className="secondary" disabled={busy} onClick={loadLiveViewMeta}>
+                Refresh metadata
+              </button>
+            </div>
+            <p className="hint hint-tiny">
+              <strong className="hint-strong">Still / URL preview</strong> — appears when{' '}
+              <code>operator/live-view</code> returns an <code>image_url</code>.
+            </p>
+            <h3 className="subhead subhead--toolbar">RTSP → browser (MJPEG)</h3>
+            <p className="hint hint-tiny">
+              Set <code>TELESCOPE_RTSP_URL</code> on the API; stream endpoint is <code>GET /api/v1/telescope/stream</code>{' '}
+              (503 if unset).
+            </p>
+            <p className="hint hint--callout hint-tiny hint-spaced-top">
+              <strong>Seestar cameras:</strong> RTSP mirrors the mobile feed — open the vendor app first (often{' '}
+              <strong>Scenery</strong> / imaging). There is no LAN API to wake the sensor from this UI yet.
+            </p>
+          </aside>
+
+          <div className="live-scope-stage">
+            <div className="live-view-frame live-view-frame--hero">
+              <img
+                className="live-view-img"
+                alt="Telescope RTSP relay — configure TELESCOPE_RTSP_URL if blank"
+                src={`${getApiBase().replace(/\/+$/, '')}/api/v1/telescope/stream`}
+                key={`${apiBaseInput}-mjpeg`}
+              />
+            </div>
+            {liveViewMeta ? (
+              <>
+                <p className="live-view-meta">
+                  {liveViewMeta.available === true ? (
+                    <span className="live-flag live-flag--ok">preview URL available</span>
+                  ) : (
+                    <span className="live-flag live-flag--muted">no preview URL yet</span>
+                  )}{' '}
+                  <code>provider={(liveViewMeta.provider as string) ?? '?'}</code>
+                </p>
+                {typeof liveViewMeta.notes === 'string' ? <p className="hint">{liveViewMeta.notes}</p> : null}
+                {typeof liveViewMeta.image_url === 'string' && liveViewMeta.image_url.length > 0 ? (
+                  <div className="live-view-frame">
+                    <img className="live-view-img" alt="Configured still or MJPEG preview" src={liveViewMeta.image_url} />
+                  </div>
+                ) : null}
+                <details className="json-disclosure">
+                  <summary>Technical · live-view JSON payload</summary>
+                  <pre className="json">{formatJson(liveViewMeta)}</pre>
+                </details>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </div>
+        </DashboardZone>
+
+        <DashboardZone
+          zoneId="wk-mount"
+          title="Mount"
+          description="Read first, command second — slew/sync/tracking only when Alpaca is enabled and you trust the sky."
+          cols="pair"
+        >
       <div className="panel">
         <header className="panel-header">
           <h2 className="panel-title">Telescope snapshot</h2>
@@ -415,7 +453,7 @@ export default function App() {
 
       <div className="panel">
         <header className="panel-header">
-          <h2 className="panel-title">Mount commands — careful</h2>
+          <h2 className="panel-title">Mount commands · careful</h2>
           <p className="panel-lead">
             These actions request real slew / sync / tracking when Alpaca control is enabled. Skip this card entirely if
             you only want read-only tooling.
@@ -472,6 +510,7 @@ export default function App() {
           </>
         )}
       </div>
+        </DashboardZone>
 
       </main>
 
