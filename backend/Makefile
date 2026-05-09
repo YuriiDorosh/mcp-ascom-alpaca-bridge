@@ -21,8 +21,6 @@ HARDWARE_VALIDATION_LIVE_REPORT = artifacts/hardware-validation-live-run.json
 HARDWARE_VALIDATION_LIVE_NOTES = artifacts/hardware-validation-live-run.md
 HARDWARE_ARTIFACT_DIR = artifacts
 MODEL_SERVICE_DIR = ../model-service
-FRONTEND_DIR = ../frontend
-FRONTEND_COMPOSE = docker_compose/frontend.yaml
 
 .PHONY: alpaca-lan-probe
 alpaca-lan-probe:
@@ -35,10 +33,6 @@ app-dev:
 .PHONY: app-dev-with-model
 app-dev-with-model:
 	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} up --build -d
-
-.PHONY: app-dev-with-frontend
-app-dev-with-frontend:
-	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${FRONTEND_COMPOSE} ${ENV} up --build -d
 
 .PHONY: app-dev-logs
 app-dev-logs:
@@ -59,10 +53,6 @@ down-dev:
 .PHONY: down-dev-with-model
 down-dev-with-model:
 	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${MODEL_SERVICE} ${ENV} down
-
-.PHONY: down-dev-with-frontend
-down-dev-with-frontend:
-	${DC} -f ${APP_DEV} -f ${KAFKA} -f ${FRONTEND_COMPOSE} ${ENV} down
 
 .PHONY: down
 down:
@@ -115,22 +105,6 @@ test-backend-local:
 .PHONY: ci-local
 ci-local: test-backend-local
 	${MAKE} -C ${MODEL_SERVICE_DIR} test-local
-
-.PHONY: frontend-up
-frontend-up:
-	${DC} -f ${FRONTEND_COMPOSE} ${ENV} up --build -d
-
-.PHONY: frontend-down
-frontend-down:
-	${DC} -f ${FRONTEND_COMPOSE} ${ENV} down
-
-.PHONY: frontend-install
-frontend-install:
-	cd ${FRONTEND_DIR} && npm install
-
-.PHONY: frontend-dev
-frontend-dev:
-	cd ${FRONTEND_DIR} && npm run dev
 
 .PHONY: postman-smoke-local
 postman-smoke-local:

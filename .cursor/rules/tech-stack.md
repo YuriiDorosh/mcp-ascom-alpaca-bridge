@@ -16,7 +16,7 @@ alwaysApply: true
 | `backend/` | Main app: Python package under `backend/app/`, Poetry, Dockerfile, `docker_compose/`, `Makefile`, tests |
 | `model-service/` | Separate FastAPI service: Kafka consumer/producer for model inference (mock runtime today; GPU profiles later) |
 | `docs/` | English project docs — roadmap, tasks, Kafka policy, migration notes |
-| `frontend/` | Vite + React operator MVP; **Docker:** `frontend/Dockerfile`, `backend/docker_compose/frontend.yaml`, `make frontend-up` from `backend/` |
+| `frontend/` | Vite + React operator MVP; **Docker:** `frontend/docker-compose.yaml`, `frontend/Makefile`; **repo root** `Makefile` orchestrates `make dev` (API + UI) |
 
 ## Backend Stack
 

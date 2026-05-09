@@ -161,7 +161,8 @@
 ## Phase 5 UI — operator dashboard (MVP)
 
 - TODO(P5-UI-CORS): Add FastAPI CORS middleware so the browser SPA can call the REST API from `localhost:5173`. [DONE: `CORS_ALLOWED_ORIGINS` in `backend/app/settings/config.py` (default Seestar-local Vite origins; empty string disables middleware); wired in `create_app`]
-- TODO(P5-UI-MVP-SCAFFOLD): Add Vite + React operator shell (status, capabilities, slew/sync/tracking forms + optional command token). [DONE: `frontend/` package, `frontend/README.md`, `.env.example`; host `make frontend-dev`; **Docker:** `frontend/Dockerfile` + nginx, `backend/docker_compose/frontend.yaml`, `make frontend-up` / `make app-dev-with-frontend`, repo `.dockerignore`]
+- TODO(P5-UI-MVP-SCAFFOLD): Add Vite + React operator shell (status, capabilities, slew/sync/tracking forms + optional command token). [DONE: `frontend/` package, `frontend/Makefile`, `frontend/docker-compose.yaml`, `frontend/Dockerfile` + nginx, `frontend/.dockerignore`; repo root `Makefile` (`make dev` / `make dev-down`); host `make dev` in `frontend/` for Vite hot reload]
+- TODO(P5-UI-DOCKER-LAYOUT): Keep frontend Compose/Make under `frontend/`; remove blended backend targets; add repo-root orchestration only. [DONE: deleted `backend/docker_compose/frontend.yaml`; `frontend/docker-compose.yaml` with `context: .`; root `Makefile`; backend README no longer owns UI bring-up]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

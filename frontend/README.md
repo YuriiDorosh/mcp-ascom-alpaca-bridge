@@ -1,42 +1,56 @@
 # Alpaca Astro Center — operator UI (MVP)
 
-Vite + React SPA for local telescope control against the FastAPI backend.
+Vite + React SPA. **Compose and Make targets live here** (not under `backend/`).
 
 ## Docker (recommended)
 
-From the **`backend/`** directory (uses `backend/.env`):
+From **`frontend/`**:
 
 ```bash
-make app-dev-with-frontend
-# or: make app-dev && make frontend-up
+cp .env.example .env   # optional — defaults match local API on :8000
+make up
 ```
 
-Open **http://localhost:5173** (or `http://localhost:${FRONTEND_PORT}`). The UI container is nginx serving a static build; the **browser** calls `VITE_API_BASE` (default `http://127.0.0.1:8000`). Change `VITE_API_BASE` / `FRONTEND_PORT` in `backend/.env`, then rebuild: `make frontend-down && make frontend-up`.
+Open **http://localhost:5173** (or `FRONTEND_PORT` from `.env`).  
+After changing **`VITE_API_BASE`**, rebuild: `make down && make up`.
 
-Stop stack: `make down-dev-with-frontend` (or `make frontend-down` if API stays up).
+Stop: `make down`.
 
-## Prerequisites (host Node — optional)
+## Full stack from repo root
 
-- Node.js 20+ (or 18 LTS) with npm — only for `npm run dev` hot reload without Docker
-- Backend with CORS allowing the UI origin (`http://localhost:5173` is included by default when `CORS_ALLOWED_ORIGINS` is unset)
-
-## Host dev (hot reload)
+From the **project root** (parent of `backend/` and `frontend/`):
 
 ```bash
-cd frontend
-cp .env.example .env   # optional
-npm install
-npm run dev
+make dev
 ```
+
+Starts `backend` app-dev (API + Kafka) then `frontend` Docker UI.  
+Stop: `make dev-down`.
+
+With model-service:
+
+```bash
+make dev-with-model
+make dev-with-model-down
+```
+
+## Host Node (hot reload, no Docker UI)
+
+```bash
+make install
+make dev
+```
+
+Requires Node 20+. Backend must allow CORS for `http://localhost:5173` (default when backend `CORS_ALLOWED_ORIGINS` is unset).
 
 ## Safety
 
-Command buttons call real Alpaca-backed endpoints when `ALPACA_ENABLED=true`. Use only on a safe test sky / with hardware precautions.
+Command buttons call real Alpaca-backed endpoints when `ALPACA_ENABLED=true` on the backend. Use only with a safe sky and mount precautions.
 
-## Build (manual)
+## Layout
 
-```bash
-npm run build
-```
-
-`Dockerfile` runs this during `docker compose build`.
+| File | Role |
+|------|------|
+| `docker-compose.yaml` | nginx UI service, build `context: .` |
+| `Dockerfile` | multi-stage build + nginx |
+| `Makefile` | `up` / `down` / `logs` / `build` / `install` / `dev` |

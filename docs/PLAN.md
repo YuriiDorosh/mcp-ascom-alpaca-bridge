@@ -104,7 +104,7 @@ Expose telescope control as MCP tools and integrate local AI inference through K
 Provide real-time user-facing interaction and operational observability.
 
 ### Deliverables
-- **MVP operator UI** (`frontend/`, Vite + React): status/capabilities readouts and command actions against existing REST endpoints; documented in `frontend/README.md`; backend CORS for local dev (`CORS_ALLOWED_ORIGINS`).
+- **MVP operator UI** (`frontend/`, Vite + React): own `docker-compose.yaml` + `Makefile`; repo root `Makefile` runs API + UI (`make dev`); backend CORS for local dev (`CORS_ALLOWED_ORIGINS`).
 - WebSocket streams for telescope state, command progress, and alerts (future hardening).
 - Richer dashboard workflows: target selection, movement presets, live diagnostics (iterations after MVP).
 - Basic operator UX for model profile selection and diagnostics visibility (extends MCP/model HTTP today).
