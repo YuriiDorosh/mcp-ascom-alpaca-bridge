@@ -19,9 +19,40 @@ a {
 }
 
 .app {
-  max-width: 960px;
+  width: 100%;
+  max-width: min(100vw, 120rem);
   margin: 0 auto;
-  padding: 1.25rem;
+  padding: 1rem clamp(0.65rem, 2.2vw, 1.5rem) 1.75rem;
+}
+
+/* Responsive operator layout: 1 → 2 → 3 (→ 4 very wide) columns of cards */
+.dashboard-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1500px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dashboard-grid > .panel--full {
+  grid-column: 1 / -1;
 }
 
 .app-header {
@@ -88,7 +119,12 @@ h1 {
   border: 1px solid #2a3544;
   border-radius: 8px;
   padding: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.dashboard-grid .panel {
+  height: fit-content;
 }
 
 .panel h2 {
@@ -184,7 +220,7 @@ pre.json.ws-log {
 .live-view-img {
   display: block;
   width: 100%;
-  max-height: 360px;
+  max-height: min(50vh, 440px);
   object-fit: contain;
   background: #0a0e12;
 }
@@ -362,4 +398,21 @@ pre.json {
   font-size: 0.8rem;
   color: #8b99a8;
   margin-top: 0.5rem;
+}
+
+.hint--callout {
+  padding: 0.55rem 0.68rem;
+  border-radius: 6px;
+  border: 1px solid #3d4f66;
+  background: #121924;
+  color: #aebccd;
+  line-height: 1.45;
+}
+
+.hint--callout strong {
+  color: #d8e4f2;
+}
+
+.app-error {
+  margin: 1rem 0 0;
 }

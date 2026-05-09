@@ -207,6 +207,7 @@ export default function App() {
         </div>
       </div>
 
+      <main className="dashboard-grid" aria-label="Operator tools and telescope controls">
       <div className="panel">
         <h2>Connection</h2>
         <div className="row">
@@ -308,7 +309,7 @@ export default function App() {
         ) : null}
       </div>
 
-      <div className="panel">
+      <div className="panel panel--full">
         <h2>Live view (FOV)</h2>
         <p className="hint">
           Loads <code>GET /telescopes/operator/live-view</code>. When the backend exposes an <code>image_url</code>{' '}
@@ -324,6 +325,12 @@ export default function App() {
         <p className="hint">
           When <code>TELESCOPE_RTSP_URL</code> is set on the API, this frame loads{' '}
           <code>GET /api/v1/telescope/stream</code> as a multipart JPEG stream (503 if unset).
+        </p>
+        <p className="hint hint--callout">
+          <strong>Seestar (incl. Seestar S30 Pro):</strong> the RTSP preview only works while the device is actually
+          streaming from its built-in camera. ZWO does not publish an API to power the camera on from this bridge — in
+          practice you start the feed from the mobile app first (e.g. enter <strong>Scenery</strong> / imaging mode; the
+          exact menu label depends on firmware). After the camera is live, the MJPEG relay here should show video.
         </p>
         <div className="live-view-frame">
           <img
@@ -433,7 +440,9 @@ export default function App() {
         )}
       </div>
 
-      {error && <p className="err">{error}</p>}
+      </main>
+
+      {error && <p className="err app-error">{error}</p>}
     </div>
   )
 }
