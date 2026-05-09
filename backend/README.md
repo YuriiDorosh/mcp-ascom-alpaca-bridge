@@ -159,6 +159,48 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 - Make targets run the CLI with host UID/GID mapping so generated reports remain editable/removable without root permission issues, and pre-clean stale report files before each run.
 - Optional real-command checks are gated behind `--include-commands` and should be used only when intentionally running `P5-HW-SMOKE` on real hardware.
 
+## Troubleshooting / Known Issues
+
+### Seestar: IP conflicts and stale ARP on Linux
+
+On some LAN setups the Seestar’s DHCP lease can change, or another device can briefly use the same IPv4 address your notes still refer to as “the telescope”. Your machine may then keep an **incorrect neighbor (ARP) entry**: traffic to the “right” IP reaches the **wrong MAC**, so tools report `Connection timed out`, `nc`/`curl` hang, or `ping` shows **100% packet loss** even though the IP string in `ALPACA_ADDRESS` matches what the router UI showed earlier. The Alpaca API on port **32323** is especially easy to mistake for a “dead” device when this happens.
+
+#### 1. Diagnosis (Linux)
+
+Compare the kernel’s idea of the telescope IP with the **real** Seestar MAC from your router’s client list or the Seestar app.
+
+```bash
+ip neigh show <TELESCOPE_IP>
+```
+
+If the **lladdr** (MAC) in the output does **not** match the Seestar hardware MAC, you likely have a stale or conflicting neighbor entry—fix it before re-testing Alpaca.
+
+To see which interface reaches your LAN default gateway (use that name in the flush command below):
+
+```bash
+ip route get 192.168.31.1
+```
+
+#### 2. Quick fix (flush ARP cache for the interface)
+
+Clear neighbors on the Wi‑Fi or Ethernet interface your PC uses on the home LAN (examples: `wlp7s0`, `wlan0`, `enpXs0`):
+
+```bash
+sudo ip neigh flush dev <your_network_interface>
+```
+
+Then retry connectivity:
+
+```bash
+ping -c 3 <TELESCOPE_IP>
+nc -zv -w2 <TELESCOPE_IP> 32323
+curl -m 3 -s "http://<TELESCOPE_IP>:32323/management/v1/configureddevices"
+```
+
+#### 3. Permanent fix (recommended)
+
+**Reserve a static DHCP lease** on your router: bind the Seestar’s **MAC address** to a fixed **LAN IP** so the address does not float and other clients cannot legitimately take the same lease. After any IP change, update `ALPACA_ADDRESS` in `backend/.env` to match the reserved address.
+
 ## Postman Starter Kit
 
 - Import-ready templates are available in `backend/postman/`:
