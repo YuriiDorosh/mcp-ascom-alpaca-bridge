@@ -13,16 +13,20 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  POETRY_NO_INTERACTION: 1
+
 jobs:
   changes:
+    name: Decide what to test
     runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.merge.outputs.backend }}
       model: ${{ steps.merge.outputs.model }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         if: github.event_name != 'workflow_dispatch'
         with:
@@ -47,25 +51,25 @@ jobs:
   backend-pytest:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
+    name: Backend • pytest (unit + integration)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: pip install poetry==1.8.2
-
-      # setup-python cache: poetry requires `poetry` on PATH during that step, so restore wheel/venv caches manually.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-backend-pypoetry-${{ hashFiles('backend/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-backend-pypoetry-
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
 
       - name: Install dependencies
         working-directory: backend
@@ -78,24 +82,25 @@ jobs:
   model-pytest:
     needs: changes
     if: needs.changes.outputs.model == 'true'
+    name: Model service • pytest
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: pip install poetry==1.8.2
-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-model-pypoetry-${{ hashFiles('model-service/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-model-pypoetry-
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
 
       - name: Install dependencies
         working-directory: model-service
