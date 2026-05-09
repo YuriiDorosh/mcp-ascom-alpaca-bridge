@@ -411,3 +411,94 @@ def test_main_allows_command_checks_with_override_when_not_ready(monkeypatch: py
     exit_code = runner.main()
     assert exit_code == 0
     assert calls["count"] == 12
+
+
+def test_assert_status_requires_tracking_enabled_field():
+    base = {"capabilities": {}, "connection_state": "disconnected"}
+    with pytest.raises(AssertionError):
+        runner._assert_status(base)
+
+    runner._assert_status({**base, "tracking_enabled": False})
+
+
+def test_assert_status_skips_live_rules_when_alpaca_live_null():
+    runner._assert_status(
+        {
+            "capabilities": {},
+            "connection_state": "wormhole",
+            "tracking_enabled": True,
+            "alpaca_live": None,
+        }
+    )
+
+
+def test_assert_status_enforces_unreachable_alpaca_overlay():
+    runner._assert_status(
+        {
+            "capabilities": {},
+            "connection_state": "disconnected",
+            "tracking_enabled": True,
+            "alpaca_live": {"reachable": False, "connected": None, "error_hint": "timeout"},
+        },
+    )
+    with pytest.raises(AssertionError):
+        runner._assert_status(
+            {
+                "capabilities": {},
+                "connection_state": "connected",
+                "tracking_enabled": True,
+                "alpaca_live": {"reachable": False},
+            },
+        )
+
+
+def test_assert_status_enforces_connected_scope_overlay():
+    runner._assert_status(
+        {
+            "capabilities": {},
+            "connection_state": "connected",
+            "tracking_enabled": False,
+            "alpaca_live": {"reachable": True, "connected": True, "tracking": False},
+        },
+    )
+    with pytest.raises(AssertionError):
+        runner._assert_status(
+            {
+                "capabilities": {},
+                "connection_state": "disconnected",
+                "tracking_enabled": False,
+                "alpaca_live": {"reachable": True, "connected": True, "tracking": False},
+            },
+        )
+
+
+def test_assert_status_tracking_must_mirror_alpaca_when_reported():
+    with pytest.raises(AssertionError):
+        runner._assert_status(
+            {
+                "capabilities": {},
+                "connection_state": "connected",
+                "tracking_enabled": False,
+                "alpaca_live": {"reachable": True, "connected": True, "tracking": True},
+            },
+        )
+
+
+def test_assert_status_enforces_disconnected_while_reachable_but_not_linked():
+    runner._assert_status(
+        {
+            "capabilities": {},
+            "connection_state": "disconnected",
+            "tracking_enabled": False,
+            "alpaca_live": {"reachable": True, "connected": False, "tracking": None},
+        },
+    )
+    with pytest.raises(AssertionError):
+        runner._assert_status(
+            {
+                "capabilities": {},
+                "connection_state": "disconnected",
+                "tracking_enabled": True,
+                "alpaca_live": {"reachable": True, "connected": False, "tracking": None},
+            },
+        )
