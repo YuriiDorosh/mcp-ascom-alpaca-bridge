@@ -68,7 +68,7 @@ If **lladdr** does not match the real telescope MAC, fix the cache before re-tes
 Find the **network interface** your PC uses on the home LAN (Wi‑Fi e.g. `wlp7s0`, `wlan0`; Ethernet e.g. `enp3s0`)—for example from the route to your gateway (replace with your router IP):
 
 ```bash
-ip route get 192.168.31.1
+ip route get 10.47.210.1
 ```
 
 #### Fixes
