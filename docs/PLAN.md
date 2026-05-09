@@ -185,3 +185,37 @@ Provide real-time local observing conditions (cloud cover, wind speed/gusts, hum
 ### Notes
 - Weather data should remain advisory/guardrail context unless explicit autonomous policies are introduced.
 - Provider abstraction is preferred to avoid hard-coupling to one weather vendor.
+
+## Phase 6 — Operator QA without weather (planned)
+
+Many operators will run **`WEATHER_PROVIDER=none`** (default) and omit **`OPENWEATHER_API_KEY`**. The stack must remain fully usable: MCP context, execution plans, hardware preflight, mount commands, model inference, and the SPA must behave predictably with **no weather fields** populated (or explicit empty/disabled messaging only where helpful).
+
+**Planned work (documentation + tests + light UX):**
+
+- Regression checklist: cold start with weather disabled; confirm `/telescopes/context/mcp` without `weather_lat`/`weather_lon` matches prior behaviour; confirm optional weather query params still yield warnings (not hard failures) when only one coordinate is sent.
+- SPA copy: one short note in the context / bootstrap area that weather enrichment is optional and off unless configured—avoid implying failure when advisories are absent.
+- Optional integration test tightening if any edge case surfaces (e.g. partial coordinate pair already covered).
+
+## Phase 6 — MCP prompt library in the operator SPA (planned)
+
+Goal: ship a **curated set of English prompt templates** (copy-paste into model-inference or external MCP clients) that teach safe tool order: status → context → (optional weather when enabled) → mount read → commands only when capabilities allow.
+
+**Anchor prompt (example intent, to be polished in UI copy):**
+
+> “Given the telescope’s current pointing (use mount ICRS read + status), list notable deep-sky objects that should lie in or near the current field of view for tonight’s date and my site coordinates. Return a short ranked list with approximate separation from field centre. I will pick one object next and ask you to slew to it only if capabilities and my explicit confirmation allow.”
+
+**Planned additional templates (~10+):** hardware readiness interpretation; execution-plan walkthrough; catalog + ephemeris combined planning; safe “dry run only” wording; nudge vs slew decision tree; audit trail review before first slew; Alt/Az sanity at horizon; model inference timeout tuning; error recovery after Alpaca timeout; Seestar-specific reminders (RTSP / live view).
+
+Deliverables: collapsible panel or drawer in **`frontend/`** (e.g. under *Agents & automation*), English-only strings, links to relevant endpoints in hints, no backend contract change strictly required for v1 (static copy is enough).
+
+## Phase 6 — Long-exposure / “focus” and video capture feasibility (planned)
+
+**Long integration / guiding (“focus” colloquially):** distinguish **autofocus** (hardware / Alpaca Camera / vendor) from **tracking stability + long subs** (integration time). Plan a research spike: which Alpaca interfaces (if any) the Seestar exposes for exposure length, bulb, sequencing, or whether those remain vendor-app-only. Outcome: TASKS entries either for Alpaca-backed exposure control or explicit “not supported via this bridge” documentation.
+
+**Video record + download to PC:** clarify stack: RTSP → backend MJPEG relay today; **browser recording** (MediaRecorder), **server-side ffmpeg segment capture**, or **vendor export** are separate paths. Plan spike on disk/bandwidth, auth, and whether we expose a **download URL** or only stream. Deliverable: decision doc + phased TASKS (MVP vs never).
+
+## Phase 6 — Operator “Information” (`I`) guide in the SPA (planned)
+
+Add a persistent control (e.g. header button **“I — Information”** or keyboard shortcut) opening a **modal / side sheet** with structured English prose covering every dashboard zone: Session (API base, token), Agents & automation (MCP panels, model inference), Observatory health (read-only probes, WebSocket), Imaging desk (stream vs live-view URL), Mount (slew / sync / tracking / nudge semantics and safety), links to `/api/docs`, and explicit **non-goals** (weather optional, no cloud requirement, etc.).
+
+Accessibility: focus trap in modal, `Escape` to close, `aria-labelledby` for the guide title.
