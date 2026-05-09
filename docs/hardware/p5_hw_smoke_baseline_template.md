@@ -22,7 +22,7 @@ Fill this **after** a real **Seestar S30 Pro** LAN run (`P5-HW-SMOKE` / `make ha
 | ----- | ----- |
 | Telescope LAN IP (reserved lease?) | |
 | `backend/.env` `ALPACA_ADDRESS` snapshot | |
-| Quick probe (e.g. `curl`/Alpaca discovery) outcome | |
+| Quick probe (`make alpaca-lan-probe` from `backend/` or `curl` to `management/v1/configureddevices`) outcome | |
 
 ## Preflight tooling
 

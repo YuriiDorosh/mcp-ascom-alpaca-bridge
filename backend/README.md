@@ -55,6 +55,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make hardware-preflight-dry-run-with-notes` - run both smoke and validation dry-runs with markdown handoff notes
 - `make hardware-smoke-live-run` - run `P5-HW-SMOKE` command-inclusive live smoke flow and save JSON+markdown artifacts
 - `make hardware-validation-live-run` - run validation-focused CLI with command checks (`P5-HW-VALIDATION` track) and save `artifacts/hardware-validation-live-run.{json,md}`
+- `make alpaca-lan-probe` - read-only `GET .../management/v1/configureddevices` against `ALPACA_ADDRESS` from `backend/.env` (no slew/sync/tracking; quick LAN + Alpaca reachability check)
 
 ## Recommended Local Startup Order
 
@@ -147,6 +148,7 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 
 ## Hardware CLI Preflight
 
+- Quick Alpaca-only reachability (host network, uses `ALPACA_ADDRESS` / `ALPACA_PROTOCOL` from `backend/.env`): `make alpaca-lan-probe` or `python backend/scripts/alpaca_lan_probe.py` from `backend/` with the same `.env`. Override for a one-off check: `ALPACA_ADDRESS=192.168.x.x:32323 docker run ...` as in the Makefile target.
 - Script: `backend/scripts/hardware_smoke_runner.py`
 - Default behavior is read-only (`hardware/readiness`, `hardware/smoke-plan`, `hardware/validation-plan`, `hardware/overview`, `mcp-bootstrap`, `mcp-execution-plan`, `status`, `capabilities`, `commands/audit`).
 - MCP aggregate checks enforce both checklist triggers, nested `hardware_overview` contract fields, and trigger consistency between top-level plans and overview payloads.
