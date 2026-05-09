@@ -112,6 +112,7 @@ Then verify:
 - MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`
 - slew / sync / tracking (Alpaca HTTP; requires `ALPACA_ENABLED`): `POST /telescopes/commands/slew-icrs`, `POST /telescopes/commands/sync-icrs`, `POST /telescopes/commands/tracking`
+- **Alpaca note:** networked Alpaca hosts (including **Seestar S30 Pro**) do not implement synchronous `SlewToCoordinates`; the backend uses **`SlewToCoordinatesAsync`** and polls **`Slewing`** until the move completes. Tune **`ALPACA_SLEW_TIMEOUT_SECONDS`** / **`ALPACA_SLEW_POLL_INTERVAL_SECONDS`** if very long slews hit timeouts.
 - optional command auth guard: set `COMMAND_AUTH_TOKEN` and send `X-Command-Token` header for `/telescopes/commands/*`
 - telescope hardware commands write command-audit records into `MONGODB_OPERATION_COLLECTION` for local traceability
 - command-audit read API with optional filters: `GET /telescopes/commands/audit?limit=50&operation=slew-icrs&status=ok&source=main-backend`

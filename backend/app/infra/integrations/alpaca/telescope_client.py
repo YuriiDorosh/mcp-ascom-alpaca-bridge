@@ -94,11 +94,44 @@ def _blocking_alpaca_snapshot(config: Config) -> AlpacaLiveSnapshot:
         )
 
 
+def _wait_until_not_slewing(driver: Any, config: Config) -> None:
+    """Poll ``Slewing`` after an async slew; Alpaca devices do not support blocking sync slews."""
+
+    deadline = time.monotonic() + float(config.alpaca_slew_timeout_seconds)
+    interval = float(config.alpaca_slew_poll_interval_seconds)
+
+    while time.monotonic() < deadline:
+        try:
+            if not bool(getattr(driver, 'Slewing', False)):
+                return
+        except AlpacaRequestException as exc:
+            raise AlpacaDriverException(f'Failed to read Slewing while waiting for slew: {exc}') from exc
+        time.sleep(interval)
+
+    raise AlpacaDriverException(
+        f'Alpaca slew timed out after {config.alpaca_slew_timeout_seconds}s (Slewing did not clear).',
+    )
+
+
 def _blocking_slew(config: Config, ra_hours: float, dec_degrees: float) -> None:
     def work(driver: Any) -> None:
-        if not bool(driver.CanSlew):
-            raise AlpacaDriverException('Mount reports CanSlew=False.')
-        driver.SlewToCoordinates(float(ra_hours), float(dec_degrees))
+        can_async = bool(getattr(driver, 'CanSlewAsync', False))
+        can_sync = bool(getattr(driver, 'CanSlew', False))
+
+        if can_async:
+            # ASCOM Alpaca: synchronous slews are invalid over HTTP; Seestar and other Alpaca hosts return 0x400.
+            async_method = getattr(driver, 'SlewToCoordinatesAsync', None)
+            if async_method is None:
+                raise AlpacaDriverException('Mount reports CanSlewAsync=True but SlewToCoordinatesAsync is missing.')
+            async_method(float(ra_hours), float(dec_degrees))
+            _wait_until_not_slewing(driver, config)
+            return
+
+        if can_sync:
+            driver.SlewToCoordinates(float(ra_hours), float(dec_degrees))
+            return
+
+        raise AlpacaDriverException('Mount reports neither CanSlewAsync nor CanSlew; cannot slew.')
 
     _blocking_transaction(config, work)
 
