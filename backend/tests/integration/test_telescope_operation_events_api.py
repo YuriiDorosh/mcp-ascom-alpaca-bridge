@@ -1,4 +1,5 @@
 import orjson
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -8,6 +9,8 @@ from domain.ports.alpaca_client import (
 )
 from infra.message_brokers.base import BaseMessageBroker
 from logic.commands.telescope_control import (
+    NudgeMountEquatorialCommand,
+    NudgeMountEquatorialCommandHandler,
     SetTelescopeTrackingCommand,
     SetTelescopeTrackingCommandHandler,
     SlewToIcrsCommand,
@@ -15,17 +18,29 @@ from logic.commands.telescope_control import (
     SyncMountToIcrsCommand,
     SyncMountToIcrsCommandHandler,
 )
+from logic.queries.telescope import (
+    GetMountIcrsEquatorialQuery,
+    GetMountIcrsEquatorialQueryHandler,
+)
 from logic.mediator.base import Mediator
 from application.api.telescope import handlers as telescope_handlers
 from application.api.telescope.handlers import router as telescope_router
 
 
 class RecordingTelescopePort(IAlpacaTelescopeClient):
+    def __init__(self) -> None:
+        self.ra_hours = 5.0
+        self.dec_degrees = 10.0
+
     async def read_live_telescope_snapshot(self) -> AlpacaLiveSnapshot | None:
         return None
 
+    async def read_mount_icrs_equatorial(self) -> tuple[float, float]:
+        return (self.ra_hours, self.dec_degrees)
+
     async def slew_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
-        return None
+        self.ra_hours = ra_hours
+        self.dec_degrees = dec_degrees
 
     async def sync_mount_to_icrs(self, ra_hours: float, dec_degrees: float) -> None:
         return None
@@ -137,6 +152,22 @@ def _build_test_app(broker: RecordingBroker, monkeypatch, *, command_auth_token:
             ),
         ],
     )
+    mediator.register_query(
+        GetMountIcrsEquatorialQuery,
+        GetMountIcrsEquatorialQueryHandler(alpaca_telescope=alpaca),
+    )
+    mediator.register_command(
+        NudgeMountEquatorialCommand,
+        [
+            NudgeMountEquatorialCommandHandler(
+                _mediator=mediator,
+                alpaca_telescope=alpaca,
+                message_broker=broker,
+                audit_repository=audit_repo,
+                config=config,
+            ),
+        ],
+    )
 
     fake_container = FakeContainer(mediator=mediator, config=config, audit_repo=audit_repo)
     monkeypatch.setattr(telescope_handlers, 'init_container', lambda: fake_container)
@@ -183,3 +214,40 @@ def test_telescope_command_auth_guard_requires_token_when_configured(monkeypatch
 
     assert unauthorized.status_code == 401
     assert authorized.status_code == 200
+
+
+def test_mount_icrs_equatorial_endpoint_reads_alpaca_port(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch)
+    client = TestClient(app)
+
+    r = client.get('/telescopes/mount/icrs-equatorial')
+    assert r.status_code == 200
+    payload = r.json()
+    assert payload['ra_hours'] == 5.0
+    assert payload['dec_degrees'] == 10.0
+    assert payload['frame'] == 'mount-equatorial-driver'
+
+
+def test_nudge_equatorial_publishes_and_returns_targets(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch)
+    client = TestClient(app)
+
+    r = client.post(
+        '/telescopes/commands/nudge-equatorial',
+        json={'delta_ra_sidereal_seconds': 3600.0, 'delta_dec_arcseconds': -3600.0},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body['prior_ra_hours'] == 5.0
+    assert body['prior_dec_degrees'] == 10.0
+    assert body['target_ra_hours'] == 6.0
+    assert body['target_dec_degrees'] == pytest.approx(9.0)
+    assert body['delta_ra_sidereal_seconds'] == 3600.0
+    assert body['delta_dec_arcseconds'] == -3600.0
+
+    assert len(broker.messages) == 1
+    published = orjson.loads(broker.messages[0][2])
+    assert published['operation'] == 'nudge-equatorial'
+    assert published['target_ra_hours'] == 6.0

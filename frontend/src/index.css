@@ -129,6 +129,59 @@ textarea:focus-visible,
   max-width: 100%;
 }
 
+.mount-nudge-toolbar {
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.mount-nudge-pad {
+  margin: 0.6rem 0 0.15rem;
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid rgb(126 154 188 / 0.16);
+  background: rgb(10 14 20 / 0.65);
+}
+
+.mount-nudge-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 0.42rem;
+  max-width: 18rem;
+  margin: 0 auto;
+}
+
+.mount-nudge-spacer {
+  min-height: 0.35rem;
+}
+
+.mount-nudge-btn {
+  min-width: 4.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+.mount-nudge-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.85rem;
+  border-radius: 10px;
+  background: rgb(6 10 14 / 0.55);
+  border: 1px dashed rgb(126 154 188 / 0.2);
+}
+
+.mount-nudge-step-label {
+  font-size: 0.72rem;
+  color: rgb(168 186 206);
+  text-align: center;
+  padding: 0 0.35rem;
+}
+
+.mount-nudge-json {
+  max-height: 12rem;
+}
+
 /* Preflight + streaming pair */
 .zone-grid--pair > .panel {
   flex: 1 1 calc(50% - 0.425rem);

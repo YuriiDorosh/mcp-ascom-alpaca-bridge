@@ -4,6 +4,7 @@ from domain.entities.telescope import Telescope
 from domain.ports.alpaca_client import (
     AlpacaLiveSnapshot,
     IAlpacaClient,
+    IAlpacaTelescopeClient,
 )
 from infra.repositories.telescope.base import BaseTelescopeRepository
 from logic.queries.base import (
@@ -91,3 +92,17 @@ class GetTelescopeStatusQueryHandler(BaseQueryHandler[GetTelescopeStatusQuery, d
             'alpaca_live': alpaca_live,
             'capabilities': capabilities,
         }
+
+
+@dataclass(frozen=True)
+class GetMountIcrsEquatorialQuery(BaseQuery):
+    ...
+
+
+@dataclass(frozen=True)
+class GetMountIcrsEquatorialQueryHandler(BaseQueryHandler[GetMountIcrsEquatorialQuery, dict]):
+    alpaca_telescope: IAlpacaTelescopeClient
+
+    async def handle(self, query: GetMountIcrsEquatorialQuery) -> dict:
+        ra_hours, dec_degrees = await self.alpaca_telescope.read_mount_icrs_equatorial()
+        return {'ra_hours': ra_hours, 'dec_degrees': dec_degrees, 'frame': 'mount-equatorial-driver'}
