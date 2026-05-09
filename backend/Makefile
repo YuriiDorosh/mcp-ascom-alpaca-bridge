@@ -20,6 +20,7 @@ HARDWARE_SMOKE_LIVE_NOTES = artifacts/hardware-smoke-live-run.md
 HARDWARE_VALIDATION_LIVE_REPORT = artifacts/hardware-validation-live-run.json
 HARDWARE_VALIDATION_LIVE_NOTES = artifacts/hardware-validation-live-run.md
 HARDWARE_ARTIFACT_DIR = artifacts
+MODEL_SERVICE_DIR = ../model-service
 
 .PHONY: alpaca-lan-probe
 alpaca-lan-probe:
@@ -100,6 +101,10 @@ test-integration-local:
 .PHONY: test-backend-local
 test-backend-local:
 	docker run --rm -v ${PWD}:/workspace -w /workspace ${PYTHON_IMAGE} bash -lc "pip install -q poetry==1.8.2 && poetry install -q --no-interaction && poetry run pytest -q tests/unit tests/integration"
+
+.PHONY: ci-local
+ci-local: test-backend-local
+	${MAKE} -C ${MODEL_SERVICE_DIR} test-local
 
 .PHONY: postman-smoke-local
 postman-smoke-local:
