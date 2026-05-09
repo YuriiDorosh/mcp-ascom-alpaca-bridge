@@ -48,22 +48,48 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
-      - name: Backend unit + integration (Docker, parity with Makefile)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+          cache-dependency-path: backend/poetry.lock
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
+
+      - name: Install dependencies
         working-directory: backend
-        run: make test-backend-local
+        run: poetry install --no-interaction
+
+      - name: Pytest (unit + integration)
+        working-directory: backend
+        run: poetry run pytest -q tests/unit tests/integration
 
   model-pytest:
     needs: changes
     if: needs.changes.outputs.model == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Model service pytest (Docker, parity with Makefile)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+          cache-dependency-path: model-service/poetry.lock
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
+
+      - name: Install dependencies
         working-directory: model-service
-        run: make test-local
+        run: poetry install --no-interaction
+
+      - name: Pytest
+        working-directory: model-service
+        run: poetry run pytest -q
