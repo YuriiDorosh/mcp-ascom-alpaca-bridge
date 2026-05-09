@@ -1,0 +1,30 @@
+name: Model service tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "model-service/**"
+      - ".github/workflows/model-service-tests.yml"
+  pull_request:
+    paths:
+      - "model-service/**"
+      - ".github/workflows/model-service-tests.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-service-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pytest (Docker + Poetry via Makefile)
+        working-directory: model-service
+        run: make test-local
