@@ -166,6 +166,7 @@
 - TODO(P5-UI-MVP-SCAFFOLD): Add Vite + React operator shell (status, capabilities, slew/sync/tracking forms + optional command token). [DONE: `frontend/` package, `frontend/Makefile`, `frontend/docker-compose.yaml`, `frontend/Dockerfile` + nginx, `frontend/.dockerignore`; repo root `Makefile` (`make dev` / `make dev-down`); host `make dev` in `frontend/` for Vite hot reload]
 - TODO(P5-UI-DOCKER-LAYOUT): Keep frontend Compose/Make under `frontend/`; remove blended backend targets; add repo-root orchestration only. [DONE: deleted `backend/docker_compose/frontend.yaml`; `frontend/docker-compose.yaml` with `context: .`; root `Makefile`; backend README no longer owns UI bring-up]
 - TODO(P5-UI-API-HEALTH): Surface backend liveness in the operator SPA (`GET /health` pill, ping control, link to `/docs`). [DONE: `apiGet`, header status + OpenAPI link + Ping `/health` in `frontend/src/App.tsx`]
+- TODO(P5-UI-HARDWARE-PREFLIGHT): Expose read-only hardware readiness + overview in the operator SPA for Seestar gate visibility without motion commands. [DONE: readiness summary + `/hardware/readiness` and `/hardware/overview` in `frontend/src/App.tsx`]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

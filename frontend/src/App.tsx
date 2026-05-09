@@ -7,9 +7,44 @@ function formatJson(data: unknown): string {
   return JSON.stringify(data, null, 2)
 }
 
+function ReadinessSummary({ data }: { data: unknown }) {
+  if (!data || typeof data !== 'object') {
+    return null
+  }
+  const o = data as Record<string, unknown>
+  const req = o.requires_real_telescope_now
+  const trigger = o.trigger_task_id
+  const action = o.operator_action
+  if (typeof req !== 'boolean') {
+    return null
+  }
+  return (
+    <p className="preflight-summary">
+      <span className={req ? 'req-pill req-pill--yes' : 'req-pill req-pill--no'}>
+        {req ? 'Real telescope needed for HIL gate' : 'Software / dry-run paths OK without live mount'}
+      </span>
+      {typeof trigger === 'string' && trigger ? (
+        <>
+          {' '}
+          · task <code>{trigger}</code>
+        </>
+      ) : null}
+      {typeof action === 'string' && action ? (
+        <>
+          <br />
+          <span className="preflight-action">{action}</span>
+        </>
+      ) : null}
+    </p>
+  )
+}
+
 export default function App() {
   const [apiBaseInput, setApiBaseInput] = useState(() => getApiBase())
   const [commandToken, setCommandToken] = useState('')
+
+  const [readinessData, setReadinessData] = useState<unknown>(null)
+  const [overviewData, setOverviewData] = useState<unknown>(null)
 
   const [statusJson, setStatusJson] = useState<string | null>(null)
   const [capabilitiesJson, setCapabilitiesJson] = useState<string | null>(null)
@@ -73,6 +108,18 @@ export default function App() {
     withBusy(async () => {
       const j = await telescopeGet('/telescopes/capabilities')
       setCapabilitiesJson(formatJson(j))
+    })
+
+  const loadHardwareReadiness = () =>
+    withBusy(async () => {
+      const j = await telescopeGet('/telescopes/hardware/readiness')
+      setReadinessData(j)
+    })
+
+  const loadHardwareOverview = () =>
+    withBusy(async () => {
+      const j = await telescopeGet('/telescopes/hardware/overview')
+      setOverviewData(j)
     })
 
   const sendSlew = () =>
@@ -160,9 +207,39 @@ export default function App() {
           </label>
         </div>
         <p className="hint">
-          Backend must allow this origin in <code>CORS_ALLOWED_ORIGINS</code> (defaults include Vite{' '}
-          <code>:5173</code>). Current base: <code>{getApiBase()}</code>
+          Backend must allow this origin in <code>CORS_ALLOWED_ORIGINS</code> (defaults include browser{' '}
+          <code>http://localhost:FRONTEND_PORT</code>, e.g. Vite or nginx on{' '}
+          <code>:5173</code>). Current API base: <code>{getApiBase()}</code>
         </p>
+      </div>
+
+      <div className="panel">
+        <h2>Hardware preflight (read-only API)</h2>
+        <p className="hint">
+          Uses <code>GET /telescopes/hardware/*</code> — no mount motion. For live Seestar checks (smoke / validation)
+          follow <code>docs/TASKS.md</code> and CLI targets when readiness says so.
+        </p>
+        <div className="row">
+          <button type="button" className="secondary" disabled={busy} onClick={loadHardwareReadiness}>
+            GET /telescopes/hardware/readiness
+          </button>
+          <button type="button" className="secondary" disabled={busy} onClick={loadHardwareOverview}>
+            GET /telescopes/hardware/overview
+          </button>
+        </div>
+        {readinessData != null && (
+          <>
+            <ReadinessSummary data={readinessData} />
+            <h3 className="subhead">Readiness JSON</h3>
+            <pre className="json">{formatJson(readinessData)}</pre>
+          </>
+        )}
+        {overviewData != null && (
+          <>
+            <h3 className="subhead">Overview JSON</h3>
+            <pre className="json">{formatJson(overviewData)}</pre>
+          </>
+        )}
       </div>
 
       <div className="panel">
