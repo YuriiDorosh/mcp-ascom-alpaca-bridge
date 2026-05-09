@@ -30,6 +30,9 @@ help:
 	@echo ""
 	@echo "  Status"
 	@echo "    make ps               — docker compose ps for both stacks"
+	@echo "    make ps-with-model    — same when using model-service compose set"
+	@echo ""
+	@echo "  More: README.md at repo root, backend/README.md, frontend/README.md"
 
 .PHONY: dev
 dev:
