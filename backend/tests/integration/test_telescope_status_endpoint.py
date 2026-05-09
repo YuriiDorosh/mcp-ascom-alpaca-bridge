@@ -57,29 +57,32 @@ def _status_mediator(repo: BaseTelescopeRepository, alpaca: IAlpacaClient) -> Me
     return mediator
 
 
-def test_telescope_status_endpoint_serializes_live_overlay(monkeypatch):
-    telescope = Telescope()
-    telescope.set_connection_state('disconnected')
-    telescope.set_tracking_enabled(True)
-    mediator = _status_mediator(
-        _FakeTelescopeRepo(telescope),
-        _FakeAlpaca(
-            AlpacaLiveSnapshot(
-                reachable=True,
-                connected=True,
-                tracking=False,
-                supports_slew=True,
-                supports_sync=True,
-                supports_tracking=True,
-                device_name='Integration',
-            ),
-        ),
-    )
+def _client_for_telescope(monkeypatch, telescope: Telescope, snapshot: AlpacaLiveSnapshot | None) -> TestClient:
+    mediator = _status_mediator(_FakeTelescopeRepo(telescope), _FakeAlpaca(snapshot))
     monkeypatch.setattr(telescope_handlers, 'init_container', lambda: _MiniContainer(mediator))
 
     app = FastAPI()
     app.include_router(telescope_router, prefix='/telescopes')
-    client = TestClient(app)
+    return TestClient(app)
+
+
+def test_telescope_status_endpoint_serializes_live_overlay(monkeypatch):
+    telescope = Telescope()
+    telescope.set_connection_state('disconnected')
+    telescope.set_tracking_enabled(True)
+    client = _client_for_telescope(
+        monkeypatch,
+        telescope,
+        AlpacaLiveSnapshot(
+            reachable=True,
+            connected=True,
+            tracking=False,
+            supports_slew=True,
+            supports_sync=True,
+            supports_tracking=True,
+            device_name='Integration',
+        ),
+    )
 
     response = client.get('/telescopes/status')
     assert response.status_code == 200
@@ -90,3 +93,59 @@ def test_telescope_status_endpoint_serializes_live_overlay(monkeypatch):
     assert payload['alpaca_live'] is not None
     assert payload['alpaca_live']['connected'] is True
     assert payload['capabilities']['source'] == 'alpaca-live'
+
+
+def test_telescope_status_without_live_probe_returns_persisted_fields(monkeypatch):
+    telescope = Telescope()
+    telescope.set_connection_state('connected')
+    telescope.set_tracking_enabled(True)
+    client = _client_for_telescope(monkeypatch, telescope, None)
+
+    payload = client.get('/telescopes/status').json()
+
+    assert payload['connection_state'] == 'connected'
+    assert payload['tracking_enabled'] is True
+    assert payload['alpaca_live'] is None
+    assert payload['capabilities']['source'] == 'default-disabled'
+
+
+def test_telescope_status_unreachable_alpaca_clears_connection_overlay(monkeypatch):
+    telescope = Telescope()
+    telescope.set_connection_state('connected')
+    telescope.set_tracking_enabled(True)
+    client = _client_for_telescope(
+        monkeypatch,
+        telescope,
+        AlpacaLiveSnapshot(reachable=False, error_hint='timeout'),
+    )
+
+    payload = client.get('/telescopes/status').json()
+
+    assert payload['connection_state'] == 'disconnected'
+    assert payload['tracking_enabled'] is True
+    assert payload['alpaca_live']['reachable'] is False
+
+
+def test_telescope_status_reachable_but_not_connected_forces_disconnected_and_no_tracking(monkeypatch):
+    telescope = Telescope()
+    telescope.set_connection_state('connected')
+    telescope.set_tracking_enabled(True)
+    client = _client_for_telescope(
+        monkeypatch,
+        telescope,
+        AlpacaLiveSnapshot(
+            reachable=True,
+            connected=False,
+            tracking=None,
+            supports_slew=True,
+            supports_sync=True,
+            supports_tracking=True,
+            device_name='Integration',
+        ),
+    )
+
+    payload = client.get('/telescopes/status').json()
+
+    assert payload['connection_state'] == 'disconnected'
+    assert payload['tracking_enabled'] is False
+    assert payload['alpaca_live']['connected'] is False
