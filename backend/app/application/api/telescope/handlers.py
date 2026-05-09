@@ -16,6 +16,9 @@ from domain.exceptions.telescope import CoordinateTransformException
 from domain.exceptions.telescope import EphemerisDisabledException
 from domain.exceptions.telescope import EphemerisUnavailableException
 from domain.exceptions.telescope import UnresolvedObjectNameException
+from domain.exceptions.telescope import WeatherDisabledException
+from domain.exceptions.telescope import WeatherUnavailableException
+from application.api.telescope.weather_advisory import build_site_weather_advisories
 from application.api.telescope.schemas import (
     CommandAuditRecordSchema,
     EffectiveMcpToolManifestItemSchema,
@@ -34,6 +37,7 @@ from application.api.telescope.schemas import (
     ModelInferenceStatusSchema,
     RadecToAltAzRequestSchema,
     ResolvedCatalogIcrsSchema,
+    SiteWeatherObservationSchema,
     SetTelescopeTrackingRequestSchema,
     TelescopeCapabilitiesSchema,
     TelescopeCommandAckSchema,
@@ -67,6 +71,7 @@ from logic.queries.telescope import (
     GetMountIcrsEquatorialQuery,
     GetTelescopeStatusQuery,
 )
+from logic.queries.weather import GetSiteWeatherObservationQuery
 from settings.config import Config
 
 
@@ -88,9 +93,25 @@ def _build_mcp_tool_manifest(*, requires_command_token: bool) -> TelescopeMcpToo
             },
             {
                 'tool_name': 'telescope.get_context',
-                'description': 'Read MCP context aggregate (status/capabilities/catalog/ephemeris warnings).',
+                'description': (
+                    'Read MCP context aggregate (status/capabilities/catalog/ephemeris plus optional coarse weather '
+                    'when weather_lat & weather_lon are supplied and WEATHER_PROVIDER=openweather).'
+                ),
                 'method': 'GET',
                 'endpoint': '/telescopes/context/mcp',
+                'requirements': {
+                    'required_capability': None,
+                    'requires_command_token': False,
+                },
+            },
+            {
+                'tool_name': 'telescope.get_site_weather',
+                'description': (
+                    'Read coarse surface-oriented weather observation for latitude/longitude (OpenWeather-backed; '
+                    'advisory-grade only).'
+                ),
+                'method': 'GET',
+                'endpoint': '/telescopes/weather/current',
                 'requirements': {
                     'required_capability': None,
                     'requires_command_token': False,
@@ -210,6 +231,14 @@ def _build_mcp_planning_guide() -> TelescopeMcpPlanningGuideSchema:
             'Prefer read-only status checks before long waits to avoid unnecessary blocking.',
             'Treat pending status as expected for async Kafka workflows; do not retry enqueue immediately.',
             'Use enqueue-and-wait only when synchronous UX is required and timeout budget is known.',
+            (
+                'Weather payloads are advisory summaries from coarse grid forecasts—never defer lightning or dome '
+                'decisions purely to MCP text; operators must reconcile with onsite sensors and aviation SIGMET.'
+            ),
+            (
+                'When OpenWeather enrichment is configured, optionally call telescope.get_site_weather (or MCP context '
+                'with weather_lat/weather_lon) before unattended slews, but telescope motion remains capability-gated.'
+            ),
         ],
         inference_flow=[
             {
@@ -442,6 +471,10 @@ async def get_mcp_execution_plan(
     baseline_flow: list[tuple[str, str]] = [
         ('telescope.get_status', 'Refresh live status/capability snapshot before planning actions.'),
         ('telescope.get_context', 'Load optional catalog/ephemeris context and warnings for the target.'),
+        (
+            'telescope.get_site_weather',
+            'Optional coarse METAR-ish snapshot for onsite latitude/longitude when OpenWeather is configured.',
+        ),
     ]
     if mode == 'sync':
         baseline_flow.append(
@@ -651,6 +684,14 @@ async def get_mcp_context(
     designation: Annotated[str | None, Query(description='Optional catalog object to resolve via Sesame.')] = None,
     ephemeris_body: Annotated[str | None, Query(description='Optional Solar System body (e.g. mars).')] = None,
     obstime_utc_iso: Annotated[str | None, Query(description='UTC instant for ephemeris query, required with ephemeris_body.')] = None,
+    weather_lat: Annotated[
+        float | None,
+        Query(description='Optional WGS84 latitude for coarse OpenWeather enrichment (pair with weather_lon).'),
+    ] = None,
+    weather_lon: Annotated[
+        float | None,
+        Query(description='Optional WGS84 longitude for coarse OpenWeather enrichment (pair with weather_lat).'),
+    ] = None,
 ):
     container = init_container()
     mediator: Mediator = container.resolve(Mediator)
@@ -702,13 +743,57 @@ async def get_mcp_context(
             except (EphemerisDisabledException, EphemerisUnavailableException) as exc:
                 warnings.append(McpContextWarningSchema(source='ephemeris', code='ephemeris_unavailable', message=exc.message))
 
+    weather_observation = None
+    weather_advisories: list[str] = []
+    if weather_lat is not None or weather_lon is not None:
+        if weather_lat is None or weather_lon is None:
+            warnings.append(
+                McpContextWarningSchema(
+                    source='weather',
+                    code='incomplete_coordinates',
+                    message='Provide both weather_lat and weather_lon to enable MCP weather enrichment.',
+                ),
+            )
+        else:
+            try:
+                snap = await mediator.handle_query(
+                    GetSiteWeatherObservationQuery(latitude=float(weather_lat), longitude=float(weather_lon)),
+                )
+                weather_observation = SiteWeatherObservationSchema(**snap)
+                weather_advisories = build_site_weather_advisories(snap)
+            except WeatherDisabledException as exc:
+                warnings.append(McpContextWarningSchema(source='weather', code='weather_disabled', message=exc.message))
+            except WeatherUnavailableException as exc:
+                warnings.append(McpContextWarningSchema(source='weather', code='weather_unavailable', message=exc.message))
+
     return TelescopeMcpContextSchema(
         capabilities=capabilities,
         telescope_status=telescope_status,
         catalog_target=catalog_target,
         ephemeris_target=ephemeris_target,
+        weather_observation=weather_observation,
+        weather_advisories=weather_advisories,
         warnings=warnings,
     )
+
+
+@router.get('/weather/current', response_model=SiteWeatherObservationSchema)
+async def get_site_weather_current(
+    latitude: Annotated[float, Query(ge=-90.0, le=90.0, description='WGS84 latitude in degrees.')],
+    longitude: Annotated[float, Query(ge=-180.0, le=180.0, description='WGS84 longitude in degrees.')],
+):
+    """Portable surface-ish weather snapshot powered by OpenWeather when configured."""
+
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        snapshot = await mediator.handle_query(GetSiteWeatherObservationQuery(latitude=latitude, longitude=longitude))
+    except WeatherDisabledException as exc:
+        raise HTTPException(status_code=503, detail=exc.message) from exc
+    except WeatherUnavailableException as exc:
+        raise HTTPException(status_code=502, detail=exc.message) from exc
+
+    return SiteWeatherObservationSchema(**snapshot)
 
 
 @router.get('/mount/icrs-equatorial', response_model=MountIcrsEquatorialSchema)

@@ -218,6 +218,15 @@
               ]
             }
           }
+        },
+        {
+          "name": "Site Weather Snapshot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Returns 503 when WEATHER_PROVIDER=none; configure OpenWeather credentials for 200 payloads.",
+            "url": "{{base_url}}/telescopes/weather/current?latitude=52.3676&longitude=4.9041"
+          }
         }
       ]
     },

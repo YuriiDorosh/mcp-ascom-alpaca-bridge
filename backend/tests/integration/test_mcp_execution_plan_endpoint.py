@@ -69,6 +69,7 @@ def test_mcp_execution_plan_marks_capability_gated_steps(monkeypatch):
     assert len(payload['hardware_overview']['smoke_plan']['steps']) >= 4
     assert len(payload['hardware_overview']['validation_plan']['steps']) >= 4
     steps = {step['tool_name']: step for step in payload['steps']}
+    assert 'telescope.get_site_weather' in steps
     assert 'model.enqueue_inference' in steps
     assert 'model.enqueue_and_wait_inference' not in steps
     assert steps['telescope.slew_icrs']['enabled'] is True
@@ -89,6 +90,7 @@ def test_mcp_execution_plan_supports_sync_mode(monkeypatch):
     payload = response.json()
     assert payload['mode'] == 'sync'
     steps = {step['tool_name']: step for step in payload['steps']}
+    assert 'telescope.get_site_weather' in steps
     assert payload['hardware_smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'
     assert payload['hardware_validation_plan']['trigger_task_id'] == 'P5-HW-VALIDATION'
     assert payload['hardware_overview']['smoke_plan']['trigger_task_id'] == 'P5-HW-SMOKE'

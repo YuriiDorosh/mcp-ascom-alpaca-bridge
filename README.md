@@ -49,7 +49,7 @@ The **`frontend/`** SPA is **React (Vite)**: it drives the same telescope API fr
 - **Observatory** — **hardware preflight**, **capabilities/status** JSON pulls, **operator WebSocket** for pushed status.
 - **Imaging desk** — **live view / stream** placeholders (MJPEG gateway + optional still preview from **`OPERATOR_LIVE_VIEW_IMAGE_URL`**).
 - **Mount** — ICRS **slew**, **sync**, **tracking** plus **equatorial nudge presets** (“joystick” jogging in sidereal ΔRA /″ ΔDec steps).
-- **Agents & automation** — **MCP bootstrap & context**, coordinates maths, printable **execution plan**, and **model inference** (questions to your **local model-service** via the backend Kafka flow when enabled).
+- **Agents & automation** — **MCP bootstrap & context** (optional **OpenWeather** site advisories when you pass paired lat/lon and configure the backend), coordinates maths, printable **execution plan**, and **model inference** (questions to your **local model-service** via the backend Kafka flow when enabled).
 
 ![React operator dashboard](docs/media/operator-dashboard-live-preview.png)
 

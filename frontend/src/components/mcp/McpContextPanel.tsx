@@ -9,6 +9,8 @@ export function McpContextPanel({ withBusy, busy }: Props) {
   const [designation, setDesignation] = useState('')
   const [ephemerisBody, setEphemerisBody] = useState('')
   const [obstimeUtcIso, setObstimeUtcIso] = useState(() => new Date().toISOString().slice(0, 19) + 'Z')
+  const [weatherLat, setWeatherLat] = useState('')
+  const [weatherLon, setWeatherLon] = useState('')
   const [context, setContext] = useState<unknown>(null)
 
   const loadContext = () =>
@@ -16,12 +18,25 @@ export function McpContextPanel({ withBusy, busy }: Props) {
       const params = new URLSearchParams()
       const des = designation.trim()
       const body = ephemerisBody.trim()
+      const wlat = weatherLat.trim()
+      const wlon = weatherLon.trim()
+      if ((wlat && !wlon) || (!wlat && wlon)) {
+        setContext({
+          error:
+            'Fill both Weather latitude °N/S and longitude °E/W together (decimal degrees), or leave both blank.',
+        })
+        return
+      }
       if (des) {
         params.set('designation', des)
       }
       if (body) {
         params.set('ephemeris_body', body)
         params.set('obstime_utc_iso', obstimeUtcIso.trim())
+      }
+      if (wlat && wlon) {
+        params.set('weather_lat', wlat)
+        params.set('weather_lon', wlon)
       }
       const q = params.toString()
       const path = `/telescopes/context/mcp${q ? `?${q}` : ''}`
@@ -39,8 +54,8 @@ export function McpContextPanel({ withBusy, busy }: Props) {
         </p>
       </header>
       <p className="hint">
-        Optional SIMBAD + ephemeris features must be enabled on the server; fields can stay empty if you only want a
-        boilerplate context.
+        Optional SIMBAD + ephemeris + OpenWeather enrichment must be enabled on the server; fields can stay empty if you
+        only want a boilerplate context.
       </p>
       <div className="row">
         <label>
@@ -71,6 +86,28 @@ export function McpContextPanel({ withBusy, busy }: Props) {
             type="text"
             value={obstimeUtcIso}
             onChange={(e) => setObstimeUtcIso(e.target.value)}
+            spellCheck={false}
+          />
+        </label>
+      </div>
+      <div className="row">
+        <label>
+          <span>Weather latitude ° (optional, requires lon too)</span>
+          <input
+            type="text"
+            value={weatherLat}
+            onChange={(e) => setWeatherLat(e.target.value)}
+            placeholder="e.g. 50.45"
+            spellCheck={false}
+          />
+        </label>
+        <label>
+          <span>Weather longitude ° (optional, requires lat too)</span>
+          <input
+            type="text"
+            value={weatherLon}
+            onChange={(e) => setWeatherLon(e.target.value)}
+            placeholder="e.g. 30.52"
             spellCheck={false}
           />
         </label>

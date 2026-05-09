@@ -182,8 +182,8 @@
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
-- TODO(P6-WEATHER-MCP): Add provider-agnostic weather integration (OpenWeather or alternative) and inject weather context into MCP planning payloads.
-- TODO(P6-WEATHER-SAFETY): Use weather signals (clouds, wind, humidity, visibility, precipitation risk) as advisory guardrails for AI telescope recommendations before command dispatch.
+- TODO(P6-WEATHER-MCP): Add provider-agnostic weather integration (OpenWeather or alternative) and inject weather context into MCP planning payloads. [DONE-foundation: `WEATHER_PROVIDER=openweather`, `OPENWEATHER_API_KEY`, `GetSiteWeatherObservationQuery`, `/telescopes/weather/current`, optional `weather_lat`/`weather_lon` on `/telescopes/context/mcp`, MCP manifest + execution-plan tool `telescope.get_site_weather`, Postman starter + operator SPA fields]
+- TODO(P6-WEATHER-SAFETY): Use weather signals (clouds, wind, humidity, visibility, precipitation risk) as advisory guardrails for AI telescope recommendations before command dispatch. [DONE-hardening: `build_site_weather_advisories` + `weather_advisories` on MCP context; planning-guide safety notes describing advisory-only scope and human override expectations]
 
 ## Phase 5 Hardware Gate (Seestar Trigger)
 
