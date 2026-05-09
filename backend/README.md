@@ -44,6 +44,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make test-unit-local` - run unit tests in ephemeral Python 3.12 container
 - `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
 - `make test-backend-local` - run unit + integration pytest in one ephemeral container (parity with `ci.yml` pytest jobs; one Poetry install)
+- `make ci-local` - run **`test-backend-local`** then **`model-service` `test-local`** (same two jobs as the hosted workflow when dispatched manually; slower but full-repo gate)
 - `make postman-smoke-local` - run Postman smoke collection via Newman (Docker, host network)
 - `make postman-smoke-up` - start backend + Kafka + model-service and run Newman smoke checks
 - `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
@@ -153,9 +154,10 @@ Recommended flows:
    - `make test-integration`
    - `make test-all`
 2. If app container is not running (CI-like local run):
-   - `make test-backend-local` — one Docker container, one Poetry install (closest to how the stack is built in prod images)
-   - GitHub Actions (`.github/workflows/ci.yml`) uses the same pytest selection when you **manually dispatch** the workflow (automatic runs on push/PR are off pre-release to save runner minutes); locally use `make test-backend-local` for the usual PR gate
-   - or separately: `make test-unit-local` / `make test-integration-local`; full tree: `make test-local`
+   - `make test-backend-local` — backend unit + integration only (fast)
+   - `make ci-local` — backend `test-backend-local` **plus** `model-service` `make test-local` (matches both pytest jobs from `.github/workflows/ci.yml` when you run the workflow manually)
+   - GitHub Actions (`.github/workflows/ci.yml`) uses the same pytest selection when you **manually dispatch** the workflow (automatic runs on push/PR are off pre-release to save runner minutes)
+   - or separately: `make test-unit-local` / `make test-integration-local`; full backend tree: `make test-local`
 
 The project is intentionally testable without telescope hardware while `ALPACA_ENABLED=false`.
 
