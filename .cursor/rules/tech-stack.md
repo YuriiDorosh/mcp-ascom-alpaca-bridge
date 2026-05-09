@@ -13,6 +13,7 @@ alwaysApply: true
 
 | Path | Role |
 |------|------|
+| `README.md` (repo root) | Clone / `make dev` quick start; links to `backend/`, `frontend/`, `docs/` |
 | `backend/` | Main app: Python package under `backend/app/`, Poetry, Dockerfile, `docker_compose/`, `Makefile`, tests |
 | `model-service/` | Separate FastAPI service: Kafka consumer/producer for model inference (mock runtime today; GPU profiles later) |
 | `docs/` | English project docs — roadmap, tasks, Kafka policy, migration notes |
