@@ -13,6 +13,7 @@ from application.api.lifespan import (
 )
 from application.api.system.handlers import router as system_router
 from application.api.telescope.handlers import router as telescope_router
+from application.api.telescope.video_stream import router as telescope_video_stream_router
 from logic.init import init_container
 from settings.config import Config
 
@@ -55,5 +56,6 @@ def create_app() -> FastAPI:
 
     app.include_router(system_router)
     app.include_router(telescope_router, prefix='/telescopes')
+    app.include_router(telescope_video_stream_router, prefix='/api/v1/telescope')
 
     return app

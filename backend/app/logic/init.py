@@ -18,10 +18,12 @@ from domain.ports.alpaca_client import (
 from domain.ports.catalog_resolve import ICatalogResolveService
 from domain.ports.coordinate_transform import ICoordinateTransformService
 from domain.ports.ephemeris import IEphemerisService
+from domain.ports.telescope_video_stream import ITelescopeVideoStreamRelay
 from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
 from infra.integrations.astroquery.catalog_resolve import SesameBackedCatalogResolveService
 from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
 from infra.integrations.skyfield.ephemeris import SkyfieldEphemerisService
+from infra.integrations.telescope.rtsp_cv2_relay import Cv2RtspTelescopeVideoRelay
 from infra.message_brokers.base import BaseMessageBroker
 from infra.message_brokers.kafka import KafkaMessageBroker
 from infra.repositories.operations.base import BaseModelInferenceRepository
@@ -121,6 +123,9 @@ def _init_container() -> Container:
     alpaca_telescope_singleton = AlpycaTelescopeClient(config=config)
     container.register(IAlpacaTelescopeClient, instance=alpaca_telescope_singleton, scope=Scope.singleton)
     container.register(IAlpacaClient, instance=alpaca_telescope_singleton, scope=Scope.singleton)
+
+    rtsp_video_relay = Cv2RtspTelescopeVideoRelay(config=config)
+    container.register(ITelescopeVideoStreamRelay, instance=rtsp_video_relay, scope=Scope.singleton)
 
     container.register(
         ICoordinateTransformService,
