@@ -133,6 +133,21 @@ Provide real-time user-facing interaction and operational observability so opera
   - CPU-only profile
 - README and `make` targets must map to profile-specific startup modes and hardware guidance.
 
+## Operator SPA ergonomics (Phase 5)
+
+Classic imaging suites ([N.I.N.A. / Nighttime Imaging ’N’ Astronomy](https://nighttime-imaging.eu/)) organise work into **docked strips**—equipment controls, sequencing, framing, guiding—around a dominant **image/sky surface**. Their [quick-start UI overview](https://nighttime-imaging.eu/docs/master/site/quickstart/uioverview) emphasises draggable panes plus saved layouts (“Imaging layouts” Options). Web constraints mean we defer true docking persisted across sessions.
+
+What we steal for the MVP operator dashboard (`frontend/` SPA):
+
+| Pattern | SPA interpretation |
+|---------|---------------------|
+| **Segmented workspaces** instead of one monolithic CSS grid spanning unrelated tools | `DashboardZone` sections (`Session`, `Agents & automation`, `Observatory health`, `Imaging desk`, `Mount`). Each zone lays out cards independently so imperfect row counts cannot leave phantom empty columns spanning the whole viewport. |
+| **Fluid tiles** resembling instrument strips | `flex-wrap` with ~19–21rem comfy min width; cards stretch per line without forcing a third column when only two cards belong together. |
+| **Imaging surface first** | On narrow viewports the MJPEG / still preview stack above configuration notes; on wide screens a sticky sidebar mirrors N.I.N.A.’s tool rail next to the picture. |
+| **Save/restore layout** | Future (localStorage, URL hash, or packaged shell). |
+
+Reference capture (RTSP relay, Seestar camera-on behaviour) remains backend-configured; the SPA only surfaces instructions and preview affordances.
+
 ## High-Level Flow
 
 ```mermaid

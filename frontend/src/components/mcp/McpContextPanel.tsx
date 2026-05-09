@@ -31,14 +31,20 @@ export function McpContextPanel({ withBusy, busy }: Props) {
 
   return (
     <div className="panel">
-      <h2>MCP context snapshot</h2>
+      <header className="panel-header">
+        <h2 className="panel-title">Context snapshot</h2>
+        <p className="panel-lead">
+          Ask the backend to resolve a target name (catalog) or Solar-System body coordinates for a given time — the
+          maths lives server-side.
+        </p>
+      </header>
       <p className="hint">
-        Mirrors <code>GET /telescopes/context/mcp</code> — resolves optional SIMBAD name and/or ephemeris body when
-        backend features are enabled.
+        Optional SIMBAD + ephemeris features must be enabled on the server; fields can stay empty if you only want a
+        boilerplate context.
       </p>
       <div className="row">
         <label>
-          <span>Catalog designation (optional)</span>
+          <span>Sky object name (optional)</span>
           <input
             type="text"
             value={designation}

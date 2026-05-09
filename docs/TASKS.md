@@ -174,6 +174,7 @@
 - TODO(P5-UI-MCP-OPERATOR): Operator SPA panels for MCP bootstrap + planning guide + MCP context snapshot and RA/Dec→Alt/Az conversion (parity with agent discovery / sky math). [DONE: `McpBootstrapPanel`, `McpContextPanel`, `CoordinatesPanel`, shared `formatJson`; wired in `frontend/src/App.tsx`]
 - TODO(P5-UI-MCP-EXECUTION-PLAN-SPA): Visualize MCP execution-plan steps (async/sync modes, disabled command filter) from `GET /telescopes/tools/mcp-execution-plan`. [DONE: `McpExecutionPlanPanel.tsx` + table summary in `frontend/src/App.tsx`]
 - TODO(P5-UI-MODEL-INFERENCE-SPA): Operator UI for Kafka model pipeline (`enqueue-and-wait`, enqueue + status/wait). [DONE: `ModelInferencePanel.tsx`, `telescopePostWithQuery` in `frontend/src/api.ts`]
+- TODO(P5-UI-WORKSPACE-ZONES): Reshape the operator SPA into N.I.N.A.-inspired **workspace zones** with flex-wrapped tiles (no cross-page grid holes) and an **imaging desk** that foregrounds live previews with a sticky note rail on wide screens; hide verbose JSON behind `<details>`. [DONE: `frontend/src/components/layout/DashboardZone.tsx`, `frontend/src/App.tsx`, `frontend/src/index.css`; design notes in `docs/PLAN.md` «Operator SPA ergonomics»]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

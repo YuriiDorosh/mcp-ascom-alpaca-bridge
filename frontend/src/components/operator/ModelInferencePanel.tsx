@@ -58,10 +58,16 @@ export function ModelInferencePanel({ withBusy, busy }: Props) {
 
   return (
     <div className="panel">
-      <h2>Model inference (Kafka pipeline)</h2>
+      <header className="panel-header">
+        <h2 className="panel-title">AI helper (model pipeline)</h2>
+        <p className="panel-lead">
+          Send natural-language prompts to your separate model-service through the API — useful demos, captions, quick
+          analysis. Safe to skip if Kafka / models are offline.
+        </p>
+      </header>
       <p className="hint">
-        Requires backend + Kafka + model-service (e.g. <code>make app-dev-with-model</code>). Uses the same HTTP
-        surface as MCP tools.
+        Stack needs backend + Kafka + model microservice (<code>make dev-with-model</code>). Same HTTP endpoints MCP
+        tools call.
       </p>
       <div className="row">
         <label className="stretch">
