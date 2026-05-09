@@ -222,7 +222,40 @@ def test_write_notes_includes_summary_and_follow_up(tmp_path: Path):
     assert "- Total checks: 2" in content
     assert "- Failed: 1" in content
     assert "`mcp.bootstrap`" in content
-    assert "Investigate failed checks before starting `P5-HW-SMOKE`." in content
+    assert "Investigate failed checks before advancing `P5-HW-SMOKE`." in content
+
+
+def test_write_notes_validation_task_and_live_success(tmp_path: Path):
+    ok = runner.CheckResult(
+        name="hardware.readiness",
+        method="GET",
+        url="http://localhost/readiness",
+        ok=True,
+        status_code=200,
+        error=None,
+        details=None,
+    )
+    notes_path = tmp_path / "v.md"
+    runner._write_notes(
+        notes_path,
+        [ok],
+        "http://127.0.0.1:8000",
+        primary_task_id="P5-HW-VALIDATION",
+        include_commands=False,
+    )
+    assert "Validation-focused dry-run is green" in notes_path.read_text(encoding="utf-8")
+
+    notes_path2 = tmp_path / "live.md"
+    runner._write_notes(
+        notes_path2,
+        [ok],
+        "http://127.0.0.1:8000",
+        primary_task_id="P5-HW-VALIDATION",
+        include_commands=True,
+    )
+    content2 = notes_path2.read_text(encoding="utf-8")
+    assert "Live command-inclusive run finished" in content2
+    assert "P5-HW-VALIDATION" in content2
 
 
 def test_run_check_reports_assertion_failure(monkeypatch: pytest.MonkeyPatch):

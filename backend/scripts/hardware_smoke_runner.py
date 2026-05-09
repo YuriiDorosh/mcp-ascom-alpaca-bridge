@@ -197,7 +197,14 @@ def _write_report(path: Path, results: list[CheckResult], base_url: str) -> None
     path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
 
-def _write_notes(path: Path, results: list[CheckResult], base_url: str) -> None:
+def _write_notes(
+    path: Path,
+    results: list[CheckResult],
+    base_url: str,
+    *,
+    primary_task_id: str = "P5-HW-SMOKE",
+    include_commands: bool = False,
+) -> None:
     failed = [item for item in results if not item.ok]
     lines = [
         "# Hardware Preflight Notes",
@@ -222,15 +229,28 @@ def _write_notes(path: Path, results: list[CheckResult], base_url: str) -> None:
             [
                 "",
                 "## Follow-up",
-                "- Investigate failed checks before starting `P5-HW-SMOKE`.",
+                f"- Investigate failed checks before advancing `{primary_task_id}`.",
             ],
         )
-    else:
+    elif include_commands:
         lines.extend(
             [
                 "",
                 "## Follow-up",
-                "- Dry-run preflight is green; keep this note for operator traceability.",
+                f"- Live command-inclusive run finished; archive JSON + this note alongside `{primary_task_id}` evidence.",
+            ],
+        )
+    else:
+        kind = (
+            "Validation-focused dry-run"
+            if primary_task_id == "P5-HW-VALIDATION"
+            else "Dry-run preflight"
+        )
+        lines.extend(
+            [
+                "",
+                "## Follow-up",
+                f"- {kind} is green; keep this note for operator traceability.",
             ],
         )
 
@@ -369,8 +389,15 @@ def main() -> int:
                 results.append(_run_check(name=name, method=method, url=url, validator=validator, body=body, headers=headers))
 
     _write_report(Path(args.report_path), results, base_url)
+    primary_task_id = "P5-HW-VALIDATION" if args.validation_only else "P5-HW-SMOKE"
     if args.notes_path:
-        _write_notes(Path(args.notes_path), results, base_url)
+        _write_notes(
+            Path(args.notes_path),
+            results,
+            base_url,
+            primary_task_id=primary_task_id,
+            include_commands=args.include_commands,
+        )
 
     failed = [item for item in results if not item.ok]
     for item in results:
