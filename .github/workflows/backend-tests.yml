@@ -1,0 +1,40 @@
+name: Backend tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unit tests (Docker + Poetry via Makefile)
+        working-directory: backend
+        run: make test-unit-local
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Integration tests (Docker + Poetry via Makefile)
+        working-directory: backend
+        run: make test-integration-local
