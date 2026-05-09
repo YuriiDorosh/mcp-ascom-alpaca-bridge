@@ -213,35 +213,65 @@ The project is intentionally testable without telescope hardware while `ALPACA_E
 
 ## Troubleshooting / Known Issues
 
-### Seestar: IP conflicts and stale ARP on Linux
+### Seestar / LAN telescope: lost connection, timeouts, and Linux ARP cache (MAC conflicts)
 
-On some LAN setups the Seestar’s DHCP lease can change, or another device can briefly use the same IPv4 address your notes still refer to as “the telescope”. Your machine may then keep an **incorrect neighbor (ARP) entry**: traffic to the “right” IP reaches the **wrong MAC**, so tools report `Connection timed out`, `nc`/`curl` hang, or `ping` shows **100% packet loss** even though the IP string in `ALPACA_ADDRESS` matches what the router UI showed earlier. The Alpaca API on port **32323** is especially easy to mistake for a “dead” device when this happens.
+This section covers “everything on Linux times out” scenarios: **Alpaca HTTP** (port **32323**), **RTSP** / `ffplay`, or any other TCP client from the same machine—**even when** the telescope stays online in the **router admin UI** and remains usable from the **vendor mobile app**.
 
-#### 1. Diagnosis (Linux)
+#### Symptoms
 
-Compare the kernel’s idea of the telescope IP with the **real** Seestar MAC from your router’s client list or the Seestar app.
+- Connections **time out**: `curl`, `nc`, browser, or your backend with `ALPACA_ENABLED=true` cannot reach the scope.
+- **`ping` fails** or shows **100% packet loss** toward the telescope IP.
+- **RTSP viewers** (e.g. `ffplay rtsp://…`) or other stream tools **cannot connect**.
+- The **router still lists** the telescope at that IP and the **mobile app** still reaches the device—so the problem is not “Wi‑Fi died” but often **how your Linux host routes L2 to that IP**.
+
+#### Cause (stale or wrong ARP / neighbor entry)
+
+The router may have correctly assigned the telescope’s IPv4 address, but **Linux still maps that IP to an old MAC** (a previously connected device that released the address, a clone, or a bad cache line). Packets leave your PC toward the **wrong Ethernet address**, so APIs, RTSP, and `ping` fail from Linux even though other paths (phone on Wi‑Fi, different ARP state) still work.
+
+DHCP lease churn, hotplugging another gadget that briefly conflicted, or sleep/resume on the laptop can all trigger this.
+
+#### Diagnosis (Linux)
+
+1. Read the **correct telescope MAC** from the **router DHCP client list** or the vendor app / device label.
+2. Compare with the kernel neighbor table:
 
 ```bash
 ip neigh show <TELESCOPE_IP>
 ```
 
-If the **lladdr** (MAC) in the output does **not** match the Seestar hardware MAC, you likely have a stale or conflicting neighbor entry—fix it before re-testing Alpaca.
+If **lladdr** does **not** match the real telescope MAC, treat the entry as **stale/wrong** before re-testing Alpaca, RTSP, or preview URLs.
 
-To see which interface reaches your LAN default gateway (use that name in the flush command below):
+Pick the **interface** you use on the home LAN (Wi‑Fi examples: `wlp7s0`, `wlan0`; Ethernet: `enpXs0`). You can derive it from the route to your gateway (replace with your router IP):
 
 ```bash
 ip route get 192.168.31.1
 ```
 
-#### 2. Quick fix (flush ARP cache for the interface)
+#### Solutions
 
-Clear neighbors on the Wi‑Fi or Ethernet interface your PC uses on the home LAN (examples: `wlp7s0`, `wlan0`, `enpXs0`):
+1. **Quick fix — flush the neighbor (ARP) cache on that interface**
 
-```bash
-sudo ip neigh flush dev <your_network_interface>
-```
+   ```bash
+   sudo ip neigh flush dev <your_network_interface>
+   ```
 
-Then retry connectivity:
+   Examples: `wlp7s0`, `wlan0`, `enp3s0`.
+
+2. **Local fix — pin the correct MAC for that IP (until reboot or table change)**
+
+   Forces Linux to send L2 frames to the telescope you expect (useful right after a collision, or when flush alone is not enough):
+
+   ```bash
+   sudo ip neigh replace <TELESCOPE_IP> lladdr <TELESCOPE_MAC> dev <your_network_interface> nud permanent
+   ```
+
+   Replace `<TELESCOPE_MAC>` with the colon-separated MAC from the router (e.g. `aa:bb:cc:dd:ee:ff`). This is **not** a substitute for a router-side reservation: it is host-local and can be lost on reboot or significant network changes—use it to **unblock debugging** and confirm ARP was the issue.
+
+3. **Global fix (recommended) — static DHCP reservation on the router**
+
+   In the router admin panel, create a **DHCP static lease**: bind the telescope’s **MAC** to a single **LAN IP** so the address does not float and another device cannot legitimately claim the same lease. After any IP change, update `ALPACA_ADDRESS` in `backend/.env` (and any preview/RTSP bookmarks) to match.
+
+#### After any fix — quick re-check
 
 ```bash
 ping -c 3 <TELESCOPE_IP>
@@ -249,9 +279,7 @@ nc -zv -w2 <TELESCOPE_IP> 32323
 curl -m 3 -s "http://<TELESCOPE_IP>:32323/management/v1/configureddevices"
 ```
 
-#### 3. Permanent fix (recommended)
-
-**Reserve a static DHCP lease** on your router: bind the Seestar’s **MAC address** to a fixed **LAN IP** so the address does not float and other clients cannot legitimately take the same lease. After any IP change, update `ALPACA_ADDRESS` in `backend/.env` to match the reserved address.
+For RTSP, retry your `ffplay`/player command once `ip neigh show` shows the **correct** lladdr.
 
 ## Postman Starter Kit
 
