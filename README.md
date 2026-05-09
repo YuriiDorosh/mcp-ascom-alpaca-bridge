@@ -39,11 +39,19 @@ make dev-with-model-down
 
 ## What this looks like
 
-Here is how the project looks in the browser with the operator UI and the backend OpenAPI docs.
+The backend exposes **Swagger UI** (FastAPI’s **`/api/docs`**): every telescope route you can hit from curl, Postman, or MCP clients appears here with schemas and try-it-out calls.
 
-![Operator dashboard](docs/media/operator-dashboard-live-preview.png)
+![FastAPI OpenAPI (Swagger UI)](docs/media/backend-openapi-swagger-ui.png)
 
-![Swagger UI](docs/media/backend-openapi-swagger-ui.png)
+The **`frontend/`** SPA is **React (Vite)**: it drives the same telescope API from the browser. Highlights:
+
+- **Session** — API base URL (like `VITE_API_BASE`) and optional **command token** when the backend guards dangerous routes.
+- **Observatory** — **hardware preflight**, **capabilities/status** JSON pulls, **operator WebSocket** for pushed status.
+- **Imaging desk** — **live view / stream** placeholders (MJPEG gateway + optional still preview from **`OPERATOR_LIVE_VIEW_IMAGE_URL`**).
+- **Mount** — ICRS **slew**, **sync**, **tracking** plus **equatorial nudge presets** (“joystick” jogging in sidereal ΔRA /″ ΔDec steps).
+- **Agents & automation** — **MCP bootstrap & context**, coordinates maths, printable **execution plan**, and **model inference** (questions to your **local model-service** via the backend Kafka flow when enabled).
+
+![React operator dashboard](docs/media/operator-dashboard-live-preview.png)
 
 <a id="linux-arp-lan-telescope"></a>
 
