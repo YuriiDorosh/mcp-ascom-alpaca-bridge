@@ -1,11 +1,30 @@
 from dataclasses import dataclass
 
-from domain.ports.alpaca_client import IAlpacaClient
+from domain.entities.telescope import Telescope
+from domain.ports.alpaca_client import (
+    AlpacaLiveSnapshot,
+    IAlpacaClient,
+)
 from infra.repositories.telescope.base import BaseTelescopeRepository
 from logic.queries.base import (
     BaseQuery,
     BaseQueryHandler,
 )
+
+
+def _status_connection_state(persisted: Telescope, live: AlpacaLiveSnapshot | None) -> str:
+    """Merge Mongo-backed session state with a live Alpaca snapshot for API responses."""
+
+    stored = persisted.connection_state
+    if live is None:
+        return stored
+    if live.reachable and live.connected is True:
+        return 'connected'
+    if not live.reachable:
+        return 'disconnected'
+    if live.connected is False:
+        return 'disconnected'
+    return stored
 
 
 @dataclass(frozen=True)
@@ -51,7 +70,7 @@ class GetTelescopeStatusQueryHandler(BaseQueryHandler[GetTelescopeStatusQuery, d
         return {
             'oid': telescope.oid,
             'name': telescope.name,
-            'connection_state': telescope.connection_state,
+            'connection_state': _status_connection_state(telescope, live),
             'tracking_enabled': telescope.tracking_enabled,
             'created_at': telescope.created_at.isoformat(),
             'alpaca_live': alpaca_live,

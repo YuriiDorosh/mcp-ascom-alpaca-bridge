@@ -13,8 +13,11 @@ from logic.queries.telescope import (
 
 
 class FakeRepo(BaseTelescopeRepository):
+    def __init__(self, telescope: Telescope | None = None):
+        self._scope = telescope or Telescope()
+
     async def get_primary(self) -> Telescope:
-        return Telescope()
+        return self._scope
 
     async def save_primary(self, telescope: Telescope) -> Telescope:
         return telescope
@@ -70,3 +73,42 @@ async def test_status_query_defaults_capabilities_when_alpaca_disabled():
         'supports_tracking': False,
         'source': 'default-disabled',
     }
+
+
+@pytest.mark.asyncio
+async def test_status_connection_state_reflects_live_alpaca_connected():
+    telescope = Telescope()
+    telescope.set_connection_state('disconnected')
+    handler = GetTelescopeStatusQueryHandler(
+        telescope_repository=FakeRepo(telescope),
+        alpaca_client=FakeAlpacaClient(
+            AlpacaLiveSnapshot(
+                reachable=True,
+                connected=True,
+                tracking=False,
+                supports_slew=True,
+                supports_sync=True,
+                supports_tracking=True,
+                device_name='HW',
+            ),
+        ),
+    )
+    payload = await handler.handle(GetTelescopeStatusQuery())
+    assert payload['connection_state'] == 'connected'
+
+
+@pytest.mark.asyncio
+async def test_status_connection_state_disconnected_when_alpaca_unreachable():
+    telescope = Telescope()
+    telescope.set_connection_state('connected')
+    handler = GetTelescopeStatusQueryHandler(
+        telescope_repository=FakeRepo(telescope),
+        alpaca_client=FakeAlpacaClient(
+            AlpacaLiveSnapshot(
+                reachable=False,
+                error_hint='timeout',
+            ),
+        ),
+    )
+    payload = await handler.handle(GetTelescopeStatusQuery())
+    assert payload['connection_state'] == 'disconnected'
