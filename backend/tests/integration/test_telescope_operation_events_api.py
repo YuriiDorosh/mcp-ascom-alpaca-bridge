@@ -251,3 +251,31 @@ def test_nudge_equatorial_publishes_and_returns_targets(monkeypatch):
     published = orjson.loads(broker.messages[0][2])
     assert published['operation'] == 'nudge-equatorial'
     assert published['target_ra_hours'] == 6.0
+
+
+def test_nudge_equatorial_accepts_ra_twelve_sidereal_hours(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch)
+    client = TestClient(app)
+
+    r = client.post(
+        '/telescopes/commands/nudge-equatorial',
+        json={'delta_ra_sidereal_seconds': 43_200.0, 'delta_dec_arcseconds': 0.0},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body['prior_ra_hours'] == 5.0
+    assert body['target_ra_hours'] == pytest.approx(17.0)
+    assert body['delta_ra_sidereal_seconds'] == 43_200.0
+
+
+def test_nudge_equatorial_validation_rejects_ra_over_ceiling(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch)
+    client = TestClient(app)
+
+    r = client.post(
+        '/telescopes/commands/nudge-equatorial',
+        json={'delta_ra_sidereal_seconds': 50_000.0, 'delta_dec_arcseconds': 0.0},
+    )
+    assert r.status_code == 422

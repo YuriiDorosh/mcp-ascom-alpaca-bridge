@@ -77,17 +77,27 @@ class MountIcrsEquatorialSchema(BaseModel):
 
 
 class NudgeEquatorialRequestSchema(BaseModel):
-    """Relative bump in sidereal RA seconds (east-positive) and declination arcseconds (north-positive)."""
+    """Relative bump in sidereal RA seconds (east-positive) and declination arcseconds (north-positive).
+
+    Larger bounds than early Alpaca stubs: ΔRA ±12 sidereal hours is ≈±180° at the celestial equator
+    (ΔRA_hours×15°). ΔDec ±180° in arcseconds is clamped downstream to the mount poles (±90°).
+    """
 
     delta_ra_sidereal_seconds: float = Field(
-        ge=-3600,
-        le=3600,
-        description='RA offset as sidereal-time seconds mapped to ΔRA_hours = Δ/3600 (wraps within 24h).',
+        ge=-43_200,
+        le=43_200,
+        description=(
+            'RA offset as sidereal-time seconds; ΔRA_hours = Δ/3600 wraps in [0h,24h). '
+            '|Δ|≤43200s is twelve sidereal hours (≈180° sky motion along RA at δ≈0).'
+        ),
     )
     delta_dec_arcseconds: float = Field(
-        ge=-21600,
-        le=21600,
-        description='Declination offset in arcseconds mapped to ΔDec_degrees = Δ/3600 (clamped ±90°).',
+        ge=-648_000,
+        le=648_000,
+        description=(
+            'Declination offset in arcseconds mapped to ΔDec_degrees = Δ/3600; handler clamps ±90°. '
+            '|Δ|≤648000″ allows up to ±180° before clamping prevents impossible latitudes.'
+        ),
     )
 
 
