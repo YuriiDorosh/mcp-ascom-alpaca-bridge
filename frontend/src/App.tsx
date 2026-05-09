@@ -167,7 +167,7 @@ export default function App() {
           </span>
           <a
             className="docs-link"
-            href={`${getApiBase()}/docs`}
+            href={`${getApiBase()}/api/docs`}
             target="_blank"
             rel="noreferrer"
           >
