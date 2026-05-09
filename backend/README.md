@@ -73,7 +73,7 @@ Until step 5, **no physical interaction** with the Seestar beyond normal power/n
 
 ### Operator UI (React MVP)
 
-The UI lives in **`../frontend/`** with its own **`Makefile`** and **`docker-compose.yaml`**. From the **repository root**, `make dev` starts API + Kafka and then the UI container; `make dev-down` stops UI then API stack. Details: `frontend/README.md`.
+The UI lives in **`../frontend/`** with its own **`Makefile`** and **`docker-compose.yaml`**. From the **repository root**, run **`make help`** for orchestration (e.g. `make dev`, `make dev-down`, `make logs`, `make up-backend` / `down-frontend`, `make ps`). Details: `frontend/README.md`.
 
 ## Recommended Local Startup Order
 

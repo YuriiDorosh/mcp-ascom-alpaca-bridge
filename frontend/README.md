@@ -21,17 +21,20 @@ Stop: `make down`.
 From the **project root** (parent of `backend/` and `frontend/`):
 
 ```bash
-make dev
+make help           # list all root targets
+make dev            # API + Kafka, then UI
+make dev-down       # stop UI, then API + Kafka
+make logs           # follow logs from backend + frontend (interleaved)
+make ps             # container status for both compose projects
 ```
-
-Starts `backend` app-dev (API + Kafka) then `frontend` Docker UI.  
-Stop: `make dev-down`.
 
 With model-service:
 
 ```bash
 make dev-with-model
 make dev-with-model-down
+make logs-with-model
+make ps-with-model
 ```
 
 ## Host Node (hot reload, no Docker UI)
