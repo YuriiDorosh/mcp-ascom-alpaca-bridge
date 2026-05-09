@@ -13,13 +13,16 @@ Local-first **FastAPI** backend for ASCOM Alpaca telescope control, optional **K
 ```bash
 git clone https://github.com/YuriiDorosh/mcp-ascom-alpaca-bridge.git
 cd mcp-ascom-alpaca-bridge
-cp backend/.env.example backend/.env   # edit Mongo/Kafka/Alpaca as needed
+cp backend/.env.example backend/.env    # edit Mongo/Kafka/Alpaca as needed
+cp frontend/.env.example frontend/.env # UI port + VITE_API_BASE (defaults OK for local API :8000)
 make help
-make dev                                # API + Kafka, then UI (nginx)
+make dev                                 # API + Kafka, then UI (nginx)
 ```
 
+Compose reads **`frontend/.env`** for `FRONTEND_PORT` and build-arg **`VITE_API_BASE`** (where the **browser** reaches the API). If you skip copying, defaults from `frontend/docker-compose.yaml` still work for a typical local setup.
+
 - **API / Swagger:** http://localhost:8000/api/docs  
-- **Operator UI:** http://localhost:5173 (or `FRONTEND_PORT` in `frontend/.env`)
+- **Operator UI:** http://localhost:5173 (override with `FRONTEND_PORT` in `frontend/.env`)
 
 Stop stacks:
 

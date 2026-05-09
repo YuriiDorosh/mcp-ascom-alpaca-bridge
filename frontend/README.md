@@ -4,10 +4,10 @@ Vite + React SPA. **Compose and Make targets live here** (not under `backend/`).
 
 ## Docker (recommended)
 
-From **`frontend/`**:
+From **`frontend/`** (or copy **`frontend/.env.example`** → **`frontend/.env`** from the repo root before **`make dev`**):
 
 ```bash
-cp .env.example .env   # optional — defaults match local API on :8000
+cp .env.example .env   # FRONTEND_PORT, VITE_API_BASE — defaults match API at http://127.0.0.1:8000
 make up
 ```
 
@@ -18,7 +18,7 @@ Stop: `make down`.
 
 ## Full stack from repo root
 
-From the **project root** (parent of `backend/` and `frontend/`):
+From the **project root** (parent of `backend/` and `frontend/`): use **`backend/.env`** and **`frontend/.env`** (see root **`README.md`** quick start), then:
 
 ```bash
 make help           # list all root targets
