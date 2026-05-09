@@ -40,3 +40,12 @@ class Config(BaseSettings):
 
     # Optional absolute http(s) URL for operator FOV still/MJPEG; exposed via GET /telescopes/operator/live-view.
     operator_live_view_image_url: str | None = Field(default=None, alias='OPERATOR_LIVE_VIEW_IMAGE_URL')
+
+    # RTSP telescope camera relay (JPEG over multipart MJPEG HTTP). Leave unset to disable /api/v1/telescope/stream.
+    telescope_rtsp_url: str | None = Field(default=None, alias='TELESCOPE_RTSP_URL')
+    telescope_rtsp_transport_tcp: bool = Field(default=True, alias='TELESCOPE_RTSP_TRANSPORT_TCP')
+    # Downscale frames when wider than this (aspect preserved); None keeps the camera-native size.
+    telescope_rtsp_max_frame_width: int | None = Field(default=None, alias='TELESCOPE_RTSP_MAX_FRAME_WIDTH')
+    telescope_rtsp_jpeg_quality: int = Field(default=80, ge=1, le=100, alias='TELESCOPE_RTSP_JPEG_QUALITY')
+    telescope_rtsp_reconnect_initial_seconds: float = Field(default=0.5, gt=0, alias='TELESCOPE_RTSP_RECONNECT_INITIAL')
+    telescope_rtsp_reconnect_max_seconds: float = Field(default=5.0, gt=0, alias='TELESCOPE_RTSP_RECONNECT_MAX')

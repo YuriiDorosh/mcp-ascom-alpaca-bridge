@@ -320,6 +320,19 @@ export default function App() {
             Refresh live-view metadata
           </button>
         </div>
+        <h3 className="subhead">RTSP relay (MJPEG)</h3>
+        <p className="hint">
+          When <code>TELESCOPE_RTSP_URL</code> is set on the API, this frame loads{' '}
+          <code>GET /api/v1/telescope/stream</code> as a multipart JPEG stream (503 if unset).
+        </p>
+        <div className="live-view-frame">
+          <img
+            className="live-view-img"
+            alt="Telescope RTSP relay (configure TELESCOPE_RTSP_URL if this stays blank)"
+            src={`${getApiBase().replace(/\/+$/, '')}/api/v1/telescope/stream`}
+            key={apiBaseInput}
+          />
+        </div>
         {liveViewMeta ? (
           <>
             <p className="live-view-meta">
