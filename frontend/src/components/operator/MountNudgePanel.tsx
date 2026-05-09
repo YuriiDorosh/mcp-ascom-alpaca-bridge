@@ -15,26 +15,26 @@ type StepPreset = {
  * Backend caps roughly ±3600s RA · ±21600″ Dec — we stay safely inside both.
  */
 const STEP_PRESETS: readonly StepPreset[] = [
-  { id: 'm03', group: 'Найтонше (повільне підлагоджування)', raSec: 0.03, decArcsec: 0.12 },
-  { id: 'm06', group: 'Найтонке', raSec: 0.06, decArcsec: 0.25 },
-  { id: 'm10', group: 'Найтонке', raSec: 0.1, decArcsec: 0.5 },
-  { id: 'm25', group: 'Найтонке', raSec: 0.25, decArcsec: 1 },
-  { id: 'm05_2', group: 'Найтонке', raSec: 0.5, decArcsec: 2 },
-  { id: 'm1_4', group: 'Дуже дрібне', raSec: 1, decArcsec: 4 },
-  { id: 'm2_8', group: 'Дуже дрібне', raSec: 2, decArcsec: 8 },
-  { id: 'm5_20', group: 'Дрібне', raSec: 5, decArcsec: 20 },
-  { id: 'm12_48', group: 'Дрібне', raSec: 12, decArcsec: 48 },
-  { id: 'm24_96', group: 'Мале', raSec: 24, decArcsec: 96 },
-  { id: 'm42_168', group: 'Мале', raSec: 42, decArcsec: 168 },
-  { id: 'm72_288', group: 'Середнє-', raSec: 72, decArcsec: 288 },
-  { id: 'm120_480', group: 'Середнє', raSec: 120, decArcsec: 480 },
-  { id: 'm210_840', group: 'Середнє', raSec: 210, decArcsec: 840 },
-  { id: 'm330_1320', group: 'Середнє+', raSec: 330, decArcsec: 1320 },
-  { id: 'm480_1920', group: 'Велике-', raSec: 480, decArcsec: 1920 },
-  { id: 'm780_3120', group: 'Велике', raSec: 780, decArcsec: 3120 },
-  { id: 'm1200_4800', group: 'Велике', raSec: 1200, decArcsec: 4800 },
-  { id: 'm1650_6600', group: 'Велике+', raSec: 1650, decArcsec: 6600 },
-  { id: 'm2280_9120', group: 'Найбільші кроки (дуже широкі стрибки)', raSec: 2280, decArcsec: 9120 },
+  { id: 'm03', group: 'Ultrafine (slow trim)', raSec: 0.03, decArcsec: 0.12 },
+  { id: 'm06', group: 'Ultrafine', raSec: 0.06, decArcsec: 0.25 },
+  { id: 'm10', group: 'Ultrafine', raSec: 0.1, decArcsec: 0.5 },
+  { id: 'm25', group: 'Ultrafine', raSec: 0.25, decArcsec: 1 },
+  { id: 'm05_2', group: 'Ultrafine', raSec: 0.5, decArcsec: 2 },
+  { id: 'm1_4', group: 'Very small', raSec: 1, decArcsec: 4 },
+  { id: 'm2_8', group: 'Very small', raSec: 2, decArcsec: 8 },
+  { id: 'm5_20', group: 'Small', raSec: 5, decArcsec: 20 },
+  { id: 'm12_48', group: 'Small', raSec: 12, decArcsec: 48 },
+  { id: 'm24_96', group: 'Modest', raSec: 24, decArcsec: 96 },
+  { id: 'm42_168', group: 'Modest', raSec: 42, decArcsec: 168 },
+  { id: 'm72_288', group: 'Medium−', raSec: 72, decArcsec: 288 },
+  { id: 'm120_480', group: 'Medium', raSec: 120, decArcsec: 480 },
+  { id: 'm210_840', group: 'Medium', raSec: 210, decArcsec: 840 },
+  { id: 'm330_1320', group: 'Medium+', raSec: 330, decArcsec: 1320 },
+  { id: 'm480_1920', group: 'Large−', raSec: 480, decArcsec: 1920 },
+  { id: 'm780_3120', group: 'Large', raSec: 780, decArcsec: 3120 },
+  { id: 'm1200_4800', group: 'Large', raSec: 1200, decArcsec: 4800 },
+  { id: 'm1650_6600', group: 'Large+', raSec: 1650, decArcsec: 6600 },
+  { id: 'm2280_9120', group: 'Largest bumps (wide steps)', raSec: 2280, decArcsec: 9120 },
 ] as const
 
 const DEFAULT_STEP_ID = 'm2_8'
@@ -125,7 +125,7 @@ export function MountNudgePanel(props: Props) {
           nearlyEq(priorDec, targetDec, 7 / 36_000)
         ) {
           setStaleHint(
-            'Цільова позиція збіглась з попередньою з точністю драйвера — рух могло бути не видно. Спробуй більший крок або перевір статус альпака.',
+            'Target matches prior within driver precision — any motion may be invisible. Try a larger step or check Alpaca / mount status.',
           )
         }
 
@@ -147,27 +147,22 @@ export function MountNudgePanel(props: Props) {
       <header className="panel-header">
         <h2 className="panel-title">Mount jog · ICRS equatorial bumps</h2>
         <p className="panel-lead">
-          Читає поточний Alpaca{' '}
-          <code>
-            RightAscension
-          </code> /{' '}
-          <code>
-            Declination
-          </code>{' '}
-          і робить короткий slew до нової екваторіальної цілі. Це <strong>монтування телескопа</strong>, не керування
-          дзеркальною камерою pan/tilt.
+          Reads the current Alpaca <code>RightAscension</code>/<code>Declination</code>, then executes a short slew to a new
+          equatorial target. This moves the <strong>telescope mount</strong>, not a separate PTZ steer for the imaging
+          camera.
         </p>
       </header>
 
       <p className="hint mount-nudge-orientation">
-        <strong>Стрілки на кнопках</strong> — напрямок на <strong>небесній сфері</strong> (ICRS): N/S змінюють
-        declination (↑ північний полюс сфери, ↓ південь), E/W — right ascension (→ схід, тобто більша година RA; ←
-        захід). Кадр Seestar може бути повернутий і обрізаний, тому «вгорі кнопки N» не означає «вгору по зображенню».
+        <strong>Button arrows</strong> describe motion on the <strong>sky sphere</strong> (ICRS): N/S bump declination (↑
+        toward the north celestial pole, ↓ south), while E/W change right ascension (→ east, higher RA hour value; ←
+        west). A Seestar preview can be cropped or rotated — “N above the keypad” does <em>not</em> imply “toward the
+        top edge of your image”.
       </p>
 
       <div className="row mount-nudge-toolbar">
         <label className="mount-nudge-select-wrap">
-          <span>Крок (градація)</span>
+          <span>Step size</span>
           <select value={presetId} onChange={(e) => setPresetId(e.target.value)} disabled={busy}>
             {optionsGrouped.map(([group, items]) => (
               <optgroup key={group} label={group}>
@@ -192,7 +187,7 @@ export function MountNudgePanel(props: Props) {
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
             disabled={busy}
-            title={`Північ по Dec: +${decArcsec}″ declination`}
+            title={`North on Dec axis: +${decArcsec}″ declination`}
             onClick={() => void nudge(0, decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -207,7 +202,7 @@ export function MountNudgePanel(props: Props) {
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
             disabled={busy}
-            title={`Захід: −${raSec}s RA (менша година)`}
+            title={`West: −${raSec}s sidereal RA (earlier RA hours)`}
             onClick={() => void nudge(-raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -225,7 +220,7 @@ export function MountNudgePanel(props: Props) {
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
             disabled={busy}
-            title={`Схід: +${raSec}s RA (більша година)`}
+            title={`East: +${raSec}s sidereal RA (later RA hours)`}
             onClick={() => void nudge(raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -240,7 +235,7 @@ export function MountNudgePanel(props: Props) {
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
             disabled={busy}
-            title={`Південь по Dec: −${decArcsec}″ declination`}
+            title={`South on Dec axis: −${decArcsec}″ declination`}
             onClick={() => void nudge(0, -decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -254,23 +249,23 @@ export function MountNudgePanel(props: Props) {
       </div>
 
       <p className="hint">
-        Якщо увімкнено{' '}
-        <code>COMMAND_AUTH_TOKEN</code>, потрібен заголовок токена. Як поспішають короткі nudge підряд, деякі драйвери
-        все одно роблять повний асинхронний slew (~секунди) — тривалість запиту не завжди залежить від розміру кроку.
-        Після кожної серії затиснень є сенс натиснути «GET mount», щоб зчитати факт RA/Dec.
+        When <code>COMMAND_AUTH_TOKEN</code> is set, callers must supply the matching header. Even tiny back-to-back
+        nudges often pay the cost of one async Alpaca slew cycle (often seconds)—request latency is not proportional to
+        step size on every rig. Between bursts, tap <strong>GET mount/icrs-equatorial</strong> to confirm the RA/Dec the
+        driver reports.
       </p>
 
       {staleHint ? <p className="hint hint--callout">{staleHint}</p> : null}
 
       {lastRead ? (
         <>
-          <h3 className="subhead">Остання позиція монту</h3>
+          <h3 className="subhead">Last mount position</h3>
           <pre className="json mount-nudge-json">{lastRead}</pre>
         </>
       ) : null}
       {lastNudge ? (
         <>
-          <h3 className="subhead">Остання відповідь nudge</h3>
+          <h3 className="subhead">Last nudge response</h3>
           <pre className="json mount-nudge-json">{lastNudge}</pre>
         </>
       ) : null}
