@@ -1,9 +1,8 @@
+# Pre-release: automatic CI on every push/PR is disabled to limit hosted runner spend.
+# Run tests locally (`make test-backend-local`, `model-service` Makefile) or trigger this workflow manually in GitHub Actions.
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
