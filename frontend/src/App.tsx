@@ -1,5 +1,7 @@
-import { useCallback, useState } from 'react'
-import { getApiBase, setRuntimeApiBase, telescopeGet, telescopePost } from './api'
+import { useCallback, useEffect, useState } from 'react'
+import { apiGet, getApiBase, setRuntimeApiBase, telescopeGet, telescopePost } from './api'
+
+type ApiHealth = { state: 'idle' | 'ok' | 'fail'; detail?: string }
 
 function formatJson(data: unknown): string {
   return JSON.stringify(data, null, 2)
@@ -19,11 +21,34 @@ export default function App() {
 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [apiHealth, setApiHealth] = useState<ApiHealth>({ state: 'idle' })
+
+  const checkApiHealth = useCallback(async () => {
+    setApiHealth({ state: 'idle' })
+    try {
+      const j = (await apiGet('/health')) as { status?: string }
+      if (j?.status === 'ok') {
+        setApiHealth({ state: 'ok' })
+      } else {
+        setApiHealth({ state: 'fail', detail: 'Unexpected /health response' })
+      }
+    } catch (e) {
+      setApiHealth({
+        state: 'fail',
+        detail: e instanceof Error ? e.message : String(e),
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    void checkApiHealth()
+  }, [checkApiHealth])
 
   const applyApiBase = useCallback(() => {
     setRuntimeApiBase(apiBaseInput)
     setError(null)
-  }, [apiBaseInput])
+    void checkApiHealth()
+  }, [apiBaseInput, checkApiHealth])
 
   const withBusy = async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
     setError(null)
@@ -82,7 +107,27 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>Alpaca Astro Center — operator (local)</h1>
+      <div className="app-header">
+        <h1>Alpaca Astro Center — operator (local)</h1>
+        <div className="header-actions">
+          <span
+            className={`api-pill api-pill--${apiHealth.state === 'ok' ? 'ok' : apiHealth.state === 'fail' ? 'fail' : 'idle'}`}
+            title={apiHealth.detail}
+          >
+            {apiHealth.state === 'ok' && 'API /health OK'}
+            {apiHealth.state === 'fail' && (apiHealth.detail ? `API fault: ${apiHealth.detail}` : 'API unreachable')}
+            {apiHealth.state === 'idle' && 'Checking API…'}
+          </span>
+          <a
+            className="docs-link"
+            href={`${getApiBase()}/docs`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            OpenAPI docs
+          </a>
+        </div>
+      </div>
 
       <div className="panel">
         <h2>Connection</h2>
@@ -98,6 +143,9 @@ export default function App() {
           </label>
           <button type="button" className="secondary" onClick={applyApiBase}>
             Use
+          </button>
+          <button type="button" className="secondary" disabled={busy} onClick={() => void checkApiHealth()}>
+            Ping /health
           </button>
         </div>
         <div className="row">
