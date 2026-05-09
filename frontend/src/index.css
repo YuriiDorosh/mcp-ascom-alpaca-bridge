@@ -138,6 +138,57 @@ h1 {
   border: 1px solid #2a6b4a;
 }
 
+.ws-status {
+  font-size: 0.82rem;
+  color: #8b99a8;
+  font-weight: 600;
+}
+
+pre.json.ws-log {
+  max-height: 200px;
+}
+
+.live-view-meta {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.live-flag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+}
+
+.live-flag--ok {
+  background: #14261c;
+  color: #8fd4a6;
+  border: 1px solid #2a6b4a;
+}
+
+.live-flag--muted {
+  background: #242a32;
+  color: #9aaaba;
+  border: 1px solid #3a4a5e;
+}
+
+.live-view-frame {
+  margin: 0.5rem 0;
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.live-view-img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background: #0a0e12;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

@@ -101,22 +101,26 @@ Expose telescope control as MCP tools and integrate local AI inference through K
 ## Phase 5 - WebSockets and Frontend Integration
 
 ### Goal
-Provide real-time user-facing interaction and operational observability.
+Provide real-time user-facing interaction and operational observability so operators (and MCP-assisted flows) are not limited to blind HTTP polling—especially when slewing, syncing, or verifying aim.
 
 ### Deliverables
 - **MVP operator UI** (`frontend/`, Vite + React): own `docker-compose.yaml` + `Makefile`; repo root `Makefile` runs API + UI (`make dev`); backend CORS for local dev (`CORS_ALLOWED_ORIGINS`).
-- WebSocket streams for telescope state, command progress, and alerts (future hardening).
+- **Backend ↔ browser WebSocket channel** for operator telemetry: push telescope status snapshots and (later) command/alert events so the SPA tracks ongoing operations without manual refresh spam. Plain REST remains for commands and heavy reads.
+- **Live / still field of view (FOV) for situational awareness:** at minimum, an operator control that can show **a telescope image or stream** (still URL, MJPEG, or future Alpaca Camera / Seestar-specific path) so manual targeting and MCP-assisted moves are not “working in the blind.” Initial milestones may expose only metadata and placeholders until the concrete Seestar or Alpaca camera surface is wired.
 - Richer dashboard workflows: target selection, movement presets, live diagnostics (iterations after MVP).
 - Basic operator UX for model profile selection and diagnostics visibility (extends MCP/model HTTP today).
 
 ### Readiness Criteria
-- Frontend receives real-time updates for ongoing telescope operations.
+- The SPA can open a **WebSocket** to the main backend and receive **streaming or periodic** telescope state suitable for operator dashboards.
+- There is a **documented HTTP contract** (and UI affordance) for **live-view / still capture** availability; when `image_url` (or equivalent) is populated, the operator UI displays it on demand (e.g. one click to refresh the frame).
 - Critical control workflows are testable end-to-end.
 - Documentation provides reproducible local startup and operation steps.
 - Hardware gate passed: Seestar HIL smoke/validation tasks from `docs/TASKS.md` are completed.
 
 ### Risks and Dependencies
+- **Seestar S30 Pro** live view may **not** map 1:1 to generic Alpaca Camera APIs; expect a **provider-specific** path (vendor protocol, RTSP, or companion contract) alongside Alpaca where applicable—`docs/TASKS.md` tracks investigation and integration milestones.
 - Real-time state synchronization complexity across backend, Kafka, and UI.
+- Browser WebSockets use `ws`/`wss` (not CORS); operators must point the UI at the correct API host/port (same as REST `VITE_API_BASE`).
 - Additional security and safety checks required before broad usage.
 
 ## Deployment and Runtime Strategy (Cross-Phase)

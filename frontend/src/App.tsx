@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
-import { apiGet, getApiBase, setRuntimeApiBase, telescopeGet, telescopePost } from './api'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  apiGet,
+  getApiBase,
+  getOperatorWebSocketUrl,
+  setRuntimeApiBase,
+  telescopeGet,
+  telescopePost,
+} from './api'
 
 type ApiHealth = { state: 'idle' | 'ok' | 'fail'; detail?: string }
+
+type WsUiState = 'off' | 'connecting' | 'open' | 'error'
 
 function formatJson(data: unknown): string {
   return JSON.stringify(data, null, 2)
@@ -58,6 +67,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [apiHealth, setApiHealth] = useState<ApiHealth>({ state: 'idle' })
 
+  const wsRef = useRef<WebSocket | null>(null)
+  const [wsUi, setWsUi] = useState<{ state: WsUiState; detail?: string }>({ state: 'off' })
+  const [wsLog, setWsLog] = useState<string>('')
+
+  const [liveViewMeta, setLiveViewMeta] = useState<Record<string, unknown> | null>(null)
+
   const checkApiHealth = useCallback(async () => {
     setApiHealth({ state: 'idle' })
     try {
@@ -84,6 +99,45 @@ export default function App() {
     setError(null)
     void checkApiHealth()
   }, [apiBaseInput, checkApiHealth])
+
+  const disconnectOperatorWs = useCallback(() => {
+    wsRef.current?.close()
+    wsRef.current = null
+    setWsUi({ state: 'off' })
+    setWsLog('')
+  }, [])
+
+  const connectOperatorWs = useCallback(() => {
+    disconnectOperatorWs()
+    setWsUi({ state: 'connecting' })
+    try {
+      const ws = new WebSocket(getOperatorWebSocketUrl())
+      wsRef.current = ws
+      ws.onopen = () => setWsUi({ state: 'open' })
+      ws.onerror = () => setWsUi({ state: 'error', detail: 'WebSocket error (check API base / mixed content)' })
+      ws.onmessage = (ev) => {
+        try {
+          const j = JSON.parse(ev.data as string) as unknown
+          setWsLog(formatJson(j))
+        } catch {
+          setWsLog(String(ev.data))
+        }
+      }
+      ws.onclose = () => {
+        wsRef.current = null
+        setWsUi({ state: 'off' })
+      }
+    } catch (e) {
+      setWsUi({ state: 'error', detail: e instanceof Error ? e.message : String(e) })
+    }
+  }, [disconnectOperatorWs])
+
+  useEffect(() => {
+    return () => {
+      wsRef.current?.close()
+      wsRef.current = null
+    }
+  }, [])
 
   const withBusy = async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
     setError(null)
@@ -120,6 +174,12 @@ export default function App() {
     withBusy(async () => {
       const j = await telescopeGet('/telescopes/hardware/overview')
       setOverviewData(j)
+    })
+
+  const loadLiveViewMeta = () =>
+    withBusy(async () => {
+      const j = await telescopeGet('/telescopes/operator/live-view')
+      setLiveViewMeta(j as Record<string, unknown>)
     })
 
   const sendSlew = () =>
@@ -240,6 +300,68 @@ export default function App() {
             <pre className="json">{formatJson(overviewData)}</pre>
           </>
         )}
+      </div>
+
+      <div className="panel">
+        <h2>Operator WebSocket (backend → browser)</h2>
+        <p className="hint">
+          Connects to <code>{getOperatorWebSocketUrl()}</code> — periodic <code>telescope_status</code> JSON (same
+          contract as REST). Close before changing API base.
+        </p>
+        <div className="row">
+          <button type="button" disabled={busy || wsUi.state === 'connecting'} onClick={connectOperatorWs}>
+            Connect
+          </button>
+          <button type="button" className="secondary" disabled={busy} onClick={disconnectOperatorWs}>
+            Disconnect
+          </button>
+          <span className="ws-status">
+            {wsUi.state === 'off' && 'disconnected'}
+            {wsUi.state === 'connecting' && 'connecting…'}
+            {wsUi.state === 'open' && 'connected'}
+            {wsUi.state === 'error' && (wsUi.detail ? `error: ${wsUi.detail}` : 'error')}
+          </span>
+        </div>
+        {wsLog ? (
+          <>
+            <h3 className="subhead">Last WebSocket message</h3>
+            <pre className="json ws-log">{wsLog}</pre>
+          </>
+        ) : null}
+      </div>
+
+      <div className="panel">
+        <h2>Live view (FOV)</h2>
+        <p className="hint">
+          Loads <code>GET /telescopes/operator/live-view</code>. When the backend exposes an <code>image_url</code>{' '}
+          (still or stream URL), it renders here so you are not slewing blind. Seestar-specific video may need a
+          follow-up integration task.
+        </p>
+        <div className="row">
+          <button type="button" className="secondary" disabled={busy} onClick={loadLiveViewMeta}>
+            Refresh live-view metadata
+          </button>
+        </div>
+        {liveViewMeta ? (
+          <>
+            <p className="live-view-meta">
+              {liveViewMeta.available === true ? (
+                <span className="live-flag live-flag--ok">preview URL available</span>
+              ) : (
+                <span className="live-flag live-flag--muted">no preview URL yet (API placeholder)</span>
+              )}{' '}
+              <code>provider={(liveViewMeta.provider as string) ?? '?'}</code>
+            </p>
+            {typeof liveViewMeta.notes === 'string' ? <p className="hint">{liveViewMeta.notes}</p> : null}
+            {typeof liveViewMeta.image_url === 'string' && liveViewMeta.image_url.length > 0 ? (
+              <div className="live-view-frame">
+                <img className="live-view-img" alt="Telescope live view" src={liveViewMeta.image_url} />
+              </div>
+            ) : null}
+            <h3 className="subhead">Contract JSON</h3>
+            <pre className="json">{formatJson(liveViewMeta)}</pre>
+          </>
+        ) : null}
       </div>
 
       <div className="panel">

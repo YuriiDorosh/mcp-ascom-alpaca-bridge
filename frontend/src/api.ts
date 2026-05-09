@@ -15,6 +15,18 @@ export function getApiBase(): string {
   return 'http://127.0.0.1:8000'
 }
 
+/** WebSocket URL for operator telemetry (`/telescopes/ws/operator` on the API host). */
+export function getOperatorWebSocketUrl(): string {
+  const base = getApiBase()
+  if (base.startsWith('https://')) {
+    return `wss://${base.slice('https://'.length)}/telescopes/ws/operator`
+  }
+  if (base.startsWith('http://')) {
+    return `ws://${base.slice('http://'.length)}/telescopes/ws/operator`
+  }
+  return `${base}/telescopes/ws/operator`
+}
+
 function headersRead(token?: string): Record<string, string> {
   const h: Record<string, string> = { Accept: 'application/json' }
   if (token) {

@@ -167,6 +167,9 @@
 - TODO(P5-UI-DOCKER-LAYOUT): Keep frontend Compose/Make under `frontend/`; remove blended backend targets; add repo-root orchestration only. [DONE: deleted `backend/docker_compose/frontend.yaml`; `frontend/docker-compose.yaml` with `context: .`; root `Makefile`; backend README no longer owns UI bring-up]
 - TODO(P5-UI-API-HEALTH): Surface backend liveness in the operator SPA (`GET /health` pill, ping control, link to `/api/docs`). [DONE: `apiGet`, header status + OpenAPI link + Ping `/health` in `frontend/src/App.tsx`]
 - TODO(P5-UI-HARDWARE-PREFLIGHT): Expose read-only hardware readiness + overview in the operator SPA for Seestar gate visibility without motion commands. [DONE: readiness summary + `/hardware/readiness` and `/hardware/overview` in `frontend/src/App.tsx`]
+- TODO(P5-UI-WS-OPERATOR): Browser WebSocket from main backend with pushed telescope status for operator situational awareness (reduces blind polling). [DONE: `GET /telescopes/ws/operator` pushes `telescope_status`; SPA connect/log panel in `frontend/src/App.tsx`; integration test in `test_telescope_status_endpoint.py`]
+- TODO(P5-UI-LIVEVIEW-CONTRACT): HTTP contract + UI affordance for telescope FOV / still preview so manual slews and MCP assists are not fully blind. [DONE: `GET /telescopes/operator/live-view` + `OperatorLiveViewSchema`; SPA refresh + renders `image_url` when present; integration test]
+- TODO(P5-UI-LIVEVIEW-SEESTAR): Wire real Seestar S30 Pro (or Alpaca Camera) still/RTSP/MJPEG into `operator/live-view` and validate on LAN with the mount powered. [OPEN — requires physical Seestar + chosen vendor/Alpaca capture path]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 

@@ -88,6 +88,8 @@ Then verify:
 - Kafka UI: <http://localhost:8090>
 - Model service health: `GET http://localhost:8010/health`
 - Telescope status JSON: `GET http://localhost:8000/telescopes/status`
+- Operator WebSocket (browser ↔ backend, periodic `telescope_status` JSON): `ws://127.0.0.1:8000/telescopes/ws/operator` (use `wss://` when the API is served over HTTPS)
+- Live-view / FOV contract (still or stream URL when integrated; placeholder until camera path is wired): `GET http://localhost:8000/telescopes/operator/live-view`
 - Telescope capability flags (MCP-safe gating surface): `GET http://localhost:8000/telescopes/capabilities`
 - MCP tool manifest (tool definitions + capability/auth requirements): `GET http://localhost:8000/telescopes/tools/mcp-manifest`
   - now includes both telescope tools and model inference tools for MCP planning.
