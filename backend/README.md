@@ -109,7 +109,8 @@ Then verify:
 - Hardware validation plan template (machine-readable P5-HW-VALIDATION checklist): `GET http://localhost:8000/telescopes/hardware/validation-plan`
 - Hardware overview bundle (readiness + both plans in one call): `GET http://localhost:8000/telescopes/hardware/overview`
   - both responses include `schema_version` for forward-compatible contract evolution.
-- MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris): `GET http://localhost:8000/telescopes/context/mcp`
+- MCP-ready context snapshot (status + capabilities + optional catalog/ephemeris + optional coarse weather when `weather_lat` / `weather_lon` are supplied and `WEATHER_PROVIDER=openweather`): `GET http://localhost:8000/telescopes/context/mcp`
+- Site-scale weather snapshot (OpenWeather-backed when configured; advisory quality only): `GET http://localhost:8000/telescopes/weather/current`
 - RA/Dec → Alt/Az (ICRS → local horizontal): `POST http://localhost:8000/telescopes/coordinates/radec-to-altaz`
 - slew / sync / tracking (Alpaca HTTP; requires `ALPACA_ENABLED`): `POST /telescopes/commands/slew-icrs`, `POST /telescopes/commands/sync-icrs`, `POST /telescopes/commands/tracking`
 - **Alpaca note:** networked Alpaca hosts (including **Seestar S30 Pro**) do not implement synchronous `SlewToCoordinates`; the backend uses **`SlewToCoordinatesAsync`** and polls **`Slewing`** until the move completes. Tune **`ALPACA_SLEW_TIMEOUT_SECONDS`** / **`ALPACA_SLEW_POLL_INTERVAL_SECONDS`** if very long slews hit timeouts.

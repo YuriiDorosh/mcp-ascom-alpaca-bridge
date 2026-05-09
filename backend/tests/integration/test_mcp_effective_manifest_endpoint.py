@@ -64,6 +64,8 @@ def test_effective_mcp_manifest_marks_capability_gated_tools_disabled(monkeypatc
     assert tools['telescope.set_tracking']['disabled_reason'] == 'missing_capability:supports_tracking'
     assert tools['model.enqueue_inference']['enabled'] is True
     assert tools['model.enqueue_inference']['disabled_reason'] is None
+    assert tools['telescope.get_site_weather']['enabled'] is True
+    assert tools['telescope.get_site_weather']['disabled_reason'] is None
 
 
 def test_effective_mcp_manifest_falls_back_to_disabled_capabilities_on_status_error(monkeypatch):
@@ -86,3 +88,4 @@ def test_effective_mcp_manifest_falls_back_to_disabled_capabilities_on_status_er
     assert tools['telescope.set_tracking']['disabled_reason'] == 'missing_capability:supports_tracking'
     assert tools['telescope.get_status']['enabled'] is True
     assert tools['telescope.get_status']['disabled_reason'] is None
+    assert tools['telescope.get_site_weather']['enabled'] is True

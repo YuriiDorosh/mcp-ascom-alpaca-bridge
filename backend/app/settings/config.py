@@ -36,6 +36,11 @@ class Config(BaseSettings):
     ephemeris_enabled: bool = Field(default=False, alias='EPHEMERIS_ENABLED')
     ephemeris_kernel: str = Field(default='de421.bsp', alias='EPHEMERIS_KERNEL')
 
+    # Weather: optional MCP context enrichment (none | openweather)
+    weather_provider: str = Field(default='none', alias='WEATHER_PROVIDER')
+    openweather_api_key: str | None = Field(default=None, alias='OPENWEATHER_API_KEY')
+    openweather_timeout_seconds: float = Field(default=12.0, ge=2.0, le=120.0, alias='OPENWEATHER_TIMEOUT_SECONDS')
+
     command_auth_token: str | None = Field(default=None, alias='COMMAND_AUTH_TOKEN')
 
     # Comma-separated browser origins for the Vite/React UI. None = default localhost dev ports; '' disables CORS middleware.

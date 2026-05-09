@@ -44,6 +44,7 @@ def test_mcp_tool_manifest_exposes_capability_and_auth_requirements(monkeypatch)
         'required_capability': None,
         'requires_command_token': False,
     }
+    assert tools['telescope.get_site_weather']['endpoint'] == '/telescopes/weather/current'
     assert tools['model.enqueue_inference']['requirements'] == {
         'required_capability': None,
         'requires_command_token': False,

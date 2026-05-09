@@ -61,3 +61,23 @@ class CatalogLookupTimeoutException(ApplicationException):
     @property
     def message(self) -> str:
         return 'Object name resolution timed out (check CATALOG_RESOLVE_TIMEOUT_SECONDS and network)'
+
+
+@dataclass(eq=False)
+class WeatherDisabledException(ApplicationException):
+
+    @property
+    def message(self) -> str:
+        return (
+            'Weather enrichment is off (defaults to WEATHER_PROVIDER=none). '
+            'Set WEATHER_PROVIDER=openweather plus OPENWEATHER_API_KEY when you want OpenWeather lookups.'
+        )
+
+
+@dataclass(eq=False)
+class WeatherUnavailableException(ApplicationException):
+    reason: str
+
+    @property
+    def message(self) -> str:
+        return self.reason

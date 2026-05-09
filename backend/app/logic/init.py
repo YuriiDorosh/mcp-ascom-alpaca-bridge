@@ -19,9 +19,11 @@ from domain.ports.catalog_resolve import ICatalogResolveService
 from domain.ports.coordinate_transform import ICoordinateTransformService
 from domain.ports.ephemeris import IEphemerisService
 from domain.ports.telescope_video_stream import ITelescopeVideoStreamRelay
+from domain.ports.weather_observation import IWeatherObservationService
 from infra.integrations.alpaca.telescope_client import AlpycaTelescopeClient
 from infra.integrations.astroquery.catalog_resolve import SesameBackedCatalogResolveService
 from infra.integrations.astropy.coordinate_transform import AstropyCoordinateTransformService
+from infra.integrations.openweather.observation import OpenWeatherObservationService
 from infra.integrations.skyfield.ephemeris import SkyfieldEphemerisService
 from infra.integrations.telescope.rtsp_cv2_relay import Cv2RtspTelescopeVideoRelay
 from infra.message_brokers.base import BaseMessageBroker
@@ -65,6 +67,10 @@ from logic.queries.ephemeris import (
 from logic.queries.model_inference import (
     GetModelInferenceResultQuery,
     GetModelInferenceResultQueryHandler,
+)
+from logic.queries.weather import (
+    GetSiteWeatherObservationHandler,
+    GetSiteWeatherObservationQuery,
 )
 from logic.queries.telescope import (
     GetMountIcrsEquatorialQuery,
@@ -147,6 +153,9 @@ def _init_container() -> Container:
         scope=Scope.singleton,
     )
 
+    openweather_snapshot = OpenWeatherObservationService(config=config)
+    container.register(IWeatherObservationService, instance=openweather_snapshot, scope=Scope.singleton)
+
     def init_mediator() -> Mediator:
         mediator = Mediator()
 
@@ -205,6 +214,9 @@ def _init_container() -> Container:
         get_solar_body_handler = GetSolarSystemBodyIcrsQueryHandler(
             ephemeris=container.resolve(IEphemerisService),
         )
+        get_site_weather_handler = GetSiteWeatherObservationHandler(
+            observation=container.resolve(IWeatherObservationService),
+        )
 
         mediator.register_query(
             GetTelescopeStatusQuery,
@@ -229,6 +241,10 @@ def _init_container() -> Container:
         mediator.register_query(
             GetSolarSystemBodyIcrsQuery,
             get_solar_body_handler,
+        )
+        mediator.register_query(
+            GetSiteWeatherObservationQuery,
+            get_site_weather_handler,
         )
         mediator.register_query(
             GetMountIcrsEquatorialQuery,

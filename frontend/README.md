@@ -18,7 +18,7 @@ The SPA can load **hardware readiness / overview** (`GET /telescopes/hardware/*`
 
 Use **Connect** under *Operator WebSocket* for pushed `telescope_status` updates (same payload shape as `GET /telescopes/status`). Use **Live view** to fetch `GET /telescopes/operator/live-view`; when the backend fills in `image_url`, the UI shows the frame (placeholder until Seestar/Alpaca camera integration lands).
 
-**MCP bootstrap & planning** load `/telescopes/tools/mcp-bootstrap` and `/telescopes/tools/mcp-planning-guide`. **MCP context** calls `/telescopes/context/mcp` with optional SIMBAD designation and ephemeris body. **ICRS → Alt/Az** uses `/telescopes/coordinates/radec-to-altaz` with observer latitude/longitude/elevation — set real site coordinates for meaningful horizons.
+**MCP bootstrap & planning** load `/telescopes/tools/mcp-bootstrap` and `/telescopes/tools/mcp-planning-guide`. **MCP context** calls `/telescopes/context/mcp` with optional SIMBAD designation, ephemeris body, and (when configured) **paired `weather_lat` / `weather_lon`** for OpenWeather-backed advisories surfaced as `weather_observation` / `weather_advisories`. **ICRS → Alt/Az** uses `/telescopes/coordinates/radec-to-altaz` with observer latitude/longitude/elevation — set real site coordinates for meaningful horizons.
 
 **MCP execution plan** renders `/telescopes/tools/mcp-execution-plan` as a step table (`async` / `sync`, optional runnable-only filter). **Model inference** exercises enqueue-and-wait and the async enqueue → status/wait loop (needs Kafka + `model-service`).
 

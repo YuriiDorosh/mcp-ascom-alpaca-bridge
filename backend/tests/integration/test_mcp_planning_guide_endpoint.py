@@ -14,7 +14,8 @@ def test_mcp_planning_guide_exposes_inference_sequence_and_timeout_policy():
     payload = response.json()
 
     assert payload['objective']
-    assert len(payload['safety_notes']) >= 2
+    assert len(payload['safety_notes']) >= 4
+    assert any('Weather' in note for note in payload['safety_notes'])
 
     steps = payload['inference_flow']
     assert [step['tool_name'] for step in steps] == [

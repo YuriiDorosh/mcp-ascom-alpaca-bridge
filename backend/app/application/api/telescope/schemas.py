@@ -148,8 +148,26 @@ class EphemerisIcrsResponseSchema(BaseModel):
     dec_degrees: float
 
 
+class SiteWeatherObservationSchema(BaseModel):
+    """Portable surface-ish snapshot aligned with MCP context payloads (OpenWeather-backed today)."""
+
+    schema_version: str = 'v1'
+    provider: Literal['openweather']
+    latitude: float
+    longitude: float
+    fetched_at_utc: str
+    conditions_summary: str | None = None
+    temperature_celsius: float | None = None
+    cloud_cover_percent: float | None = None
+    relative_humidity_percent: float | None = None
+    wind_speed_m_per_s: float | None = None
+    wind_direction_degrees: float | None = None
+    visibility_meters: float | None = None
+    surface_pressure_hpa: float | None = None
+
+
 class McpContextWarningSchema(BaseModel):
-    source: Literal['catalog', 'ephemeris', 'status']
+    source: Literal['catalog', 'ephemeris', 'status', 'weather']
     code: str
     message: str
 
@@ -159,6 +177,8 @@ class TelescopeMcpContextSchema(BaseModel):
     telescope_status: TelescopeStatusSchema | None = None
     catalog_target: ResolvedCatalogIcrsSchema | None = None
     ephemeris_target: EphemerisIcrsResponseSchema | None = None
+    weather_observation: SiteWeatherObservationSchema | None = None
+    weather_advisories: list[str] = []
     warnings: list[McpContextWarningSchema] = []
 
 
