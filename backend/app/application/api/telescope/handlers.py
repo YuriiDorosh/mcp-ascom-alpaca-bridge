@@ -5,6 +5,8 @@ from fastapi import APIRouter
 from fastapi import Header
 from fastapi import HTTPException
 from fastapi import Query
+from fastapi import WebSocket
+from starlette.websockets import WebSocketDisconnect
 
 from domain.exceptions.infrastructure import InfrastructureUnavailableException
 from domain.exceptions.telescope import AlpacaDriverException
@@ -20,6 +22,7 @@ from application.api.telescope.schemas import (
     EphemerisIcrsResponseSchema,
     HorizontalCoordsResponseSchema,
     IcrsHourAngleDecSchema,
+    OperatorLiveViewSchema,
     McpExecutionPlanStepSchema,
     McpContextWarningSchema,
     ModelInferenceEnqueuedSchema,
@@ -487,6 +490,59 @@ async def get_hardware_validation_plan():
 @router.get('/hardware/overview', response_model=TelescopeHardwareOverviewSchema)
 async def get_hardware_overview():
     return _build_hardware_overview()
+
+
+_OPERATOR_WS_TICK_SECONDS = 2.0
+
+_LIVE_VIEW_PLACEHOLDER_NOTES = (
+    'Live FOV preview is not wired to a camera/stream URL yet. '
+    'Planned: Alpaca Camera still/MJPEG and/or Seestar-specific LAN preview when a stable surface is available.'
+)
+
+
+@router.websocket('/ws/operator')
+async def ws_operator_telemetry(websocket: WebSocket):
+    """Browser WebSocket: periodic telescope status snapshots for operator situational awareness."""
+
+    await websocket.accept()
+    await websocket.send_json(
+        {
+            'type': 'hello',
+            'interval_seconds': _OPERATOR_WS_TICK_SECONDS,
+            'channel': 'telescope_status',
+        },
+    )
+    container = init_container()
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        while True:
+            await asyncio.sleep(_OPERATOR_WS_TICK_SECONDS)
+            try:
+                raw = await mediator.handle_query(GetTelescopeStatusQuery())
+                payload = TelescopeStatusSchema(**raw).model_dump()
+                await websocket.send_json({'type': 'telescope_status', 'payload': payload})
+            except InfrastructureUnavailableException as exc:
+                await websocket.send_json(
+                    {'type': 'error', 'code': 'infrastructure', 'message': exc.message},
+                )
+            except WebSocketDisconnect:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                await websocket.send_json({'type': 'error', 'code': 'internal', 'message': str(exc)})
+    except WebSocketDisconnect:
+        return
+
+
+@router.get('/operator/live-view', response_model=OperatorLiveViewSchema)
+async def get_operator_live_view():
+    """Machine-readable live-view availability; UI uses this before embedding an image/stream."""
+
+    return OperatorLiveViewSchema(
+        available=False,
+        provider='none',
+        image_url=None,
+        notes=_LIVE_VIEW_PLACEHOLDER_NOTES,
+    )
 
 
 def _require_command_auth(x_command_token: str | None):

@@ -162,3 +162,31 @@ def test_telescope_status_reachable_but_not_connected_forces_disconnected_and_no
     assert payload['tracking_enabled'] is False
     assert payload['alpaca_live']['connected'] is False
     assert_telescope_status_payload_matches_contract(payload)
+
+
+def test_ws_operator_streams_telescope_status(monkeypatch):
+    telescope = Telescope()
+    monkeypatch.setattr(telescope_handlers, '_OPERATOR_WS_TICK_SECONDS', 0.05)
+    client = _client_for_telescope(monkeypatch, telescope, None)
+
+    with client.websocket_connect('/telescopes/ws/operator') as session:
+        hello = session.receive_json()
+        assert hello['type'] == 'hello'
+        assert hello['channel'] == 'telescope_status'
+        nxt = session.receive_json()
+        assert nxt['type'] == 'telescope_status'
+        assert 'payload' in nxt
+        assert nxt['payload']['connection_state'] is not None
+
+
+def test_operator_live_view_placeholder_contract(monkeypatch):
+    telescope = Telescope()
+    client = _client_for_telescope(monkeypatch, telescope, None)
+
+    response = client.get('/telescopes/operator/live-view')
+    assert response.status_code == 200
+    body = response.json()
+    assert body['schema_version'] == 'v1'
+    assert body['available'] is False
+    assert body['image_url'] is None
+    assert 'notes' in body and len(body['notes']) > 0

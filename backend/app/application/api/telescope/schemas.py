@@ -32,6 +32,19 @@ class TelescopeStatusSchema(BaseModel):
     capabilities: TelescopeCapabilitiesSchema
 
 
+class OperatorLiveViewSchema(BaseModel):
+    """HTTP contract for operator FOV / still-frame preview (incremental rollout)."""
+
+    schema_version: str = 'v1'
+    available: bool = False
+    provider: Literal['none', 'alpaca_camera', 'http_still', 'seestar_vendor', 'mjpeg'] = 'none'
+    image_url: str | None = Field(
+        default=None,
+        description='When set, a URL the browser may load for a still or stream endpoint on the LAN.',
+    )
+    notes: str = Field(description='Human-readable status and integration notes for operators.')
+
+
 class RadecToAltAzRequestSchema(BaseModel):
     ra_hours: float = Field(ge=0, lt=24, description='ICRS right ascension in decimal hours.')
     dec_degrees: float = Field(ge=-90, le=90, description='ICRS declination in degrees.')
