@@ -37,6 +37,15 @@ poetry install
 poetry run uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 ```
 
+## Tests (CI-like, Docker)
+
+Same pattern as the main backend: one ephemeral Python 3.12 container, Poetry install, then pytest.
+
+```bash
+cd model-service
+make test-local
+```
+
 ## API
 
 - `GET /health` - service health probe
