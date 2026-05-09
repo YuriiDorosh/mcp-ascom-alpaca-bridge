@@ -124,6 +124,30 @@ Then verify:
 - Kafka contracts include `schema_version` and `correlation_id` fields for event evolution and traceability.
 - Mongo Express (if `make ui` was started): <http://localhost:28081>
 
+## Operator camera preview (`OPERATOR_LIVE_VIEW_IMAGE_URL`)
+
+The SPA can only show “what the camera sees” if you configure a **fixed `http://` or `https://` URL** that already returns image data: a single still (`image/jpeg`, `image/png`, …) or a Motion-JPEG stream (`multipart/x-mixed-replace` is common). The backend **does not auto-discover** your telescope’s camera. It reads `OPERATOR_LIVE_VIEW_IMAGE_URL` from `backend/.env`, validates the scheme, and returns that string as `image_url` from `GET /telescopes/operator/live-view` so the browser can render `<img src="...">`.
+
+**Do I need an HTTP endpoint on the telescope right now?**
+
+- **You need some LAN-reachable HTTP(S) picture URL** if you want this feature to work today. Often that is **on the device** (built-in IP camera behaviour) or **not exposed at all** by the vendor.
+- **Alpaca on port `32323`** (Seestar LAN control) is for **driver-style commands and status**, not guaranteed to expose a trivial “live JPEG at `/foo`”. A preview path may be undocumented, behind the vendor app only, or absent.
+- If you **cannot find** a URL that loads in a browser tab (or returns image headers with `curl -sSI`), leave the variable unset; the UI stays on the placeholder until you have a URL or until a dedicated integration (see `P5-UI-LIVEVIEW-SEESTAR` in `docs/TASKS.md`) implements a supported capture path.
+
+**How to sanity-check a candidate URL**
+
+1. From the same PC/LAN, open it in a normal browser tab, or run:
+   ```bash
+   curl -sSI "http://YOUR_HOST:PORT/your/path"
+   ```
+   and look for an image-friendly `Content-Type` or a streaming MJPEG content type.
+2. If the stream **requires login, cookies, or a proprietary protocol** only the vendor app understands, a plain `<img>` will usually **fail** until you add a proxy or a different integration.
+
+**Workarounds people use before native Seestar video is wired**
+
+- A **separate IP camera** or NVR on the LAN with a known snapshot/MJPEG URL.
+- An **`ffmpeg` (or similar) restream** on your network that exposes `http://…` MJPEG or repeated stills—point `OPERATOR_LIVE_VIEW_IMAGE_URL` at that URL.
+
 ## Kafka Startup Troubleshooting
 
 If `make app-dev` fails with `container ... kafka ... exited (1)`:
