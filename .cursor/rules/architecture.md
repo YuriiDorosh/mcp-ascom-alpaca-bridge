@@ -58,5 +58,5 @@ alwaysApply: false
 
 - **`docs/PROJECT_CONTEXT.md`** — mission, terminology, stack, invariants.
 - **`docs/PLAN.md`** — phased roadmap (MCP, model service, frontend).
-- **`docs/TASKS.md`** — granular checklist + branching note.
+- **`docs/TASKS.md`** — checklist + git workflow note (batched PRs).
 - **`docs/MIGRATION_NOTES.md`** — template → telescope migration context.

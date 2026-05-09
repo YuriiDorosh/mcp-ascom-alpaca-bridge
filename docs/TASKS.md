@@ -1,6 +1,6 @@
 # Alpaca Astro Center - Implementation Tasks
 
-> **Branching convention:** merge work through **`feature/<short-topic>` branches** and GitHub PRs rather than committing everything directly onto `main`, unless fixing an urgent breakage.
+> **Git workflow (velocity):** put **related changes together** on **`feature/<short-topic>`** branches (one theme or milestone per branch is fine). Open **fewer, larger pull requests**—batch doc + code + tests for the same step—instead of a PR per tiny edit. Merge to **`main`** when a **logical chunk** is done. Pushing directly to `main` stays reserved for **urgent hotfixes** only.
 
 ## Phase 1 - Template Adaptation and Cleanup
 
@@ -102,6 +102,7 @@
 - TODO(P4-CI-DEPENDABOT): Enable Dependabot for GitHub Actions so action updates surface as automated PRs. [DONE: `.github/dependabot.yml` weekly `package-ecosystem: github-actions` at repo root]
 - TODO(P4-CI-MANUAL-ONLY): Suspend automatic CI on push/PR until first release to reduce GitHub Actions runner cost; keep on-demand `workflow_dispatch`. [DONE: `.github/workflows/ci.yml` triggers only `workflow_dispatch`; use `make test-backend-local` / model-service tests locally]
 - TODO(P4-DX-CI-LOCAL): Add one-command local gate that runs backend + model-service pytest (parity with dispatched `ci.yml` jobs). [DONE: `make ci-local` in `backend/Makefile` chains `test-backend-local` and `model-service/Makefile` `test-local`; `model-service/Makefile` uses `CURDIR` for the Docker bind mount so `make -C model-service test-local` mounts the correct tree]
+- TODO(P4-DX-GIT-VELOCITY): Document preference for batched/larger PRs and fewer merges to reduce integration overhead. [DONE: branching block in `docs/TASKS.md`, `backend/README.md` «Git workflow», `.cursor/rules/tech-stack.md`]
 - TODO(P4-DX-POSTMAN): Add one-command stack bring-up + smoke runner targets for faster local validation loops. [DONE-hardening: added `make postman-smoke-up` and `make postman-smoke-up-clean` targets]
 - TODO(P4-MCP-TOOLS): Extend MCP manifest to include model inference tool surface so agents can orchestrate async model flows from one capability map. [DONE-hardening: `/telescopes/tools/mcp-manifest` now includes enqueue/status/wait/enqueue-and-wait model tools]
 - TODO(P4-MCP-TOOLS): Add MCP planning guide endpoint documenting recommended model inference tool order and timeout bounds for safer agent orchestration. [DONE-hardening: added `GET /telescopes/tools/mcp-planning-guide` with structured flow and integration test]
