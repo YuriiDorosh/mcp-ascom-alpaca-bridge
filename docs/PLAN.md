@@ -94,6 +94,10 @@ Expose telescope control as MCP tools and integrate local AI inference through K
 - Latency and timeout management across async boundaries.
 - Hardware profile differences (NVIDIA/AMD/CPU) affect model selection and response times.
 
+## Phase numbering vs `TASKS.md` (hardware gate)
+
+`docs/TASKS.md` uses **Phase 5 Hardware Gate (Seestar Trigger)** for hardware-in-the-loop (HIL) validation on a real device. That checklist is **orthogonal** to the milestone named **Phase 5** in this file (WebSockets + React UI): you can drive the telescope through the **HTTP/MCP API** before a custom frontend exists, but the Seestar HIL items in `TASKS.md` should be treated as the **safety/readiness gate** before calling a stack “telescope-ready” for end users.
+
 ## Phase 5 - WebSockets and Frontend Integration
 
 ### Goal

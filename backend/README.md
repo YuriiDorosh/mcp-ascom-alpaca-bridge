@@ -57,6 +57,19 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make hardware-validation-live-run` - run validation-focused CLI with command checks (`P5-HW-VALIDATION` track) and save `artifacts/hardware-validation-live-run.{json,md}`
 - `make alpaca-lan-probe` - read-only `GET .../management/v1/configureddevices` against `ALPACA_ADDRESS` from `backend/.env` (no slew/sync/tracking; quick LAN + Alpaca reachability check)
 
+### Seestar S30 Pro on LAN — suggested operator sequence
+
+Use this order so you verify **reachability** and **read-only contracts** before anything that **slews** the mount (see `docs/TASKS.md` Phase 5 Hardware Gate).
+
+1. Copy and edit `backend/.env` from `.env.example`. Set `ALPACA_ADDRESS` to `<telescope-lan-ip>:32323` and `ALPACA_ENABLED=true` when you want live Alpaca polling from the backend.
+2. Start the stack (`make app-dev` or `make app-dev-with-model`).
+3. **Read-only Alpaca probe (no motion):** `make alpaca-lan-probe` from `backend/` (uses `ALPACA_ADDRESS` / `ALPACA_PROTOCOL`).
+4. **Read-only API preflight (no motion):** `make hardware-preflight-dry-run` or `make hardware-preflight-dry-run-with-notes`.
+5. **Live command checks (requires safe sky/site, charged mount, clear obstacles):** `make hardware-smoke-live-run`; pass `COMMAND_TOKEN=…` when `COMMAND_AUTH_TOKEN` is set. Capture notes with `docs/hardware/p5_hw_smoke_baseline_template.md`.
+6. **Validation track on hardware (auth/audit focus):** `make hardware-validation-live-run` after smoke baseline, same safety expectations.
+
+Until step 5, **no physical interaction** with the Seestar beyond normal power/network is strictly required for tooling; steps 5–6 intentionally move the mount and must be run only when observation safety is satisfied.
+
 ## Recommended Local Startup Order
 
 ```bash
