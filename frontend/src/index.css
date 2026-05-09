@@ -97,6 +97,47 @@ h1 {
   color: #b8c5d6;
 }
 
+.panel h3.subhead {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: #9aaaba;
+}
+
+.preflight-summary {
+  margin: 0.65rem 0 0.25rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #c4d0e0;
+}
+
+.preflight-action {
+  display: inline-block;
+  margin-top: 0.35rem;
+  color: #8b99a8;
+  font-size: 0.78rem;
+}
+
+.req-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 650;
+  font-size: 0.78rem;
+}
+
+.req-pill--yes {
+  background: #2a2218;
+  color: #f0c090;
+  border: 1px solid #5c4830;
+}
+
+.req-pill--no {
+  background: #14261c;
+  color: #8fd4a6;
+  border: 1px solid #2a6b4a;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

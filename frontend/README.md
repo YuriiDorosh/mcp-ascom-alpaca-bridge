@@ -14,6 +14,8 @@ make up
 Open **http://localhost:5173** (or `FRONTEND_PORT` from `.env`).  
 After changing **`VITE_API_BASE`**, rebuild: `make down && make up`.
 
+The SPA can load **hardware readiness / overview** (`GET /telescopes/hardware/*`) and scope status without moving the mount — useful for the same checks you run from Postman/CLI before a live Seestar run.
+
 Stop: `make down`.
 
 ## Full stack from repo root
