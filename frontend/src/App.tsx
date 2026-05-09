@@ -11,6 +11,8 @@ import { ReadinessSummary } from './components/ReadinessSummary'
 import { CoordinatesPanel } from './components/mcp/CoordinatesPanel'
 import { McpBootstrapPanel } from './components/mcp/McpBootstrapPanel'
 import { McpContextPanel } from './components/mcp/McpContextPanel'
+import { McpExecutionPlanPanel } from './components/operator/McpExecutionPlanPanel'
+import { ModelInferencePanel } from './components/operator/ModelInferencePanel'
 import { formatJson } from './formatJson'
 
 type ApiHealth = { state: 'idle' | 'ok' | 'fail'; detail?: string }
@@ -245,6 +247,9 @@ export default function App() {
       <McpBootstrapPanel withBusy={withBusy} busy={busy} />
       <McpContextPanel withBusy={withBusy} busy={busy} />
       <CoordinatesPanel withBusy={withBusy} busy={busy} />
+
+      <McpExecutionPlanPanel withBusy={withBusy} busy={busy} />
+      <ModelInferencePanel withBusy={withBusy} busy={busy} />
 
       <div className="panel">
         <h2>Hardware preflight (read-only API)</h2>

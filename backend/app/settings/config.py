@@ -37,3 +37,6 @@ class Config(BaseSettings):
 
     # Comma-separated browser origins for the Vite/React UI. None = default localhost dev ports; '' disables CORS middleware.
     cors_allowed_origins: str | None = Field(default=None, alias='CORS_ALLOWED_ORIGINS')
+
+    # Optional absolute http(s) URL for operator FOV still/MJPEG; exposed via GET /telescopes/operator/live-view.
+    operator_live_view_image_url: str | None = Field(default=None, alias='OPERATOR_LIVE_VIEW_IMAGE_URL')

@@ -499,6 +499,24 @@ _LIVE_VIEW_PLACEHOLDER_NOTES = (
     'Planned: Alpaca Camera still/MJPEG and/or Seestar-specific LAN preview when a stable surface is available.'
 )
 
+_LIVE_VIEW_CONFIGURED_NOTES = (
+    'Configured via OPERATOR_LIVE_VIEW_IMAGE_URL (http or https). '
+    'The SPA loads this URL in an <img>; ensure the browser trusts the host certificate and mixed-content rules '
+    '(https page cannot load http images). MJPEG or refreshed still endpoints are typical for LAN mounts.'
+)
+
+
+def _normalized_operator_live_view_url(raw: str | None) -> str | None:
+    if raw is None:
+        return None
+    url = raw.strip()
+    if not url:
+        return None
+    lower = url.lower()
+    if lower.startswith('http://') or lower.startswith('https://'):
+        return url
+    return None
+
 
 @router.websocket('/ws/operator')
 async def ws_operator_telemetry(websocket: WebSocket):
@@ -537,6 +555,16 @@ async def ws_operator_telemetry(websocket: WebSocket):
 async def get_operator_live_view():
     """Machine-readable live-view availability; UI uses this before embedding an image/stream."""
 
+    container = init_container()
+    config: Config = container.resolve(Config)
+    url = _normalized_operator_live_view_url(config.operator_live_view_image_url)
+    if url:
+        return OperatorLiveViewSchema(
+            available=True,
+            provider='http_still',
+            image_url=url,
+            notes=_LIVE_VIEW_CONFIGURED_NOTES,
+        )
     return OperatorLiveViewSchema(
         available=False,
         provider='none',

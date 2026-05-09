@@ -169,8 +169,11 @@
 - TODO(P5-UI-HARDWARE-PREFLIGHT): Expose read-only hardware readiness + overview in the operator SPA for Seestar gate visibility without motion commands. [DONE: readiness summary + `/hardware/readiness` and `/hardware/overview` in `frontend/src/App.tsx`]
 - TODO(P5-UI-WS-OPERATOR): Browser WebSocket from main backend with pushed telescope status for operator situational awareness (reduces blind polling). [DONE: `GET /telescopes/ws/operator` pushes `telescope_status`; SPA connect/log panel in `frontend/src/App.tsx`; integration test in `test_telescope_status_endpoint.py`]
 - TODO(P5-UI-LIVEVIEW-CONTRACT): HTTP contract + UI affordance for telescope FOV / still preview so manual slews and MCP assists are not fully blind. [DONE: `GET /telescopes/operator/live-view` + `OperatorLiveViewSchema`; SPA refresh + renders `image_url` when present; integration test]
+- TODO(P5-UI-LIVEVIEW-ENV-URL): Operator-configurable LAN still/MJPEG URL via `OPERATOR_LIVE_VIEW_IMAGE_URL` surfaced through `operator/live-view` without Seestar-native decoding. [DONE: `settings.config`; compose env passthrough; http/https sanitization; integration tests]
 - TODO(P5-UI-LIVEVIEW-SEESTAR): Wire real Seestar S30 Pro (or Alpaca Camera) still/RTSP/MJPEG into `operator/live-view` and validate on LAN with the mount powered. [OPEN — requires physical Seestar + chosen vendor/Alpaca capture path]
 - TODO(P5-UI-MCP-OPERATOR): Operator SPA panels for MCP bootstrap + planning guide + MCP context snapshot and RA/Dec→Alt/Az conversion (parity with agent discovery / sky math). [DONE: `McpBootstrapPanel`, `McpContextPanel`, `CoordinatesPanel`, shared `formatJson`; wired in `frontend/src/App.tsx`]
+- TODO(P5-UI-MCP-EXECUTION-PLAN-SPA): Visualize MCP execution-plan steps (async/sync modes, disabled command filter) from `GET /telescopes/tools/mcp-execution-plan`. [DONE: `McpExecutionPlanPanel.tsx` + table summary in `frontend/src/App.tsx`]
+- TODO(P5-UI-MODEL-INFERENCE-SPA): Operator UI for Kafka model pipeline (`enqueue-and-wait`, enqueue + status/wait). [DONE: `ModelInferencePanel.tsx`, `telescopePostWithQuery` in `frontend/src/api.ts`]
 
 ## Phase 6+ Candidate Backlog (Post-Frontend / v2.0)
 
