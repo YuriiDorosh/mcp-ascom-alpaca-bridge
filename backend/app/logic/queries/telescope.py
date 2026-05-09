@@ -27,6 +27,21 @@ def _status_connection_state(persisted: Telescope, live: AlpacaLiveSnapshot | No
     return stored
 
 
+def _status_tracking_enabled(persisted: Telescope, live: AlpacaLiveSnapshot | None) -> bool:
+    """Prefer live mount tracking when Alpaca probing shows a linked scope."""
+
+    stored = persisted.tracking_enabled
+    if live is None:
+        return stored
+    if not live.reachable:
+        return stored
+    if live.connected is False:
+        return False
+    if live.connected is True and live.tracking is not None:
+        return bool(live.tracking)
+    return stored
+
+
 @dataclass(frozen=True)
 class GetTelescopeStatusQuery(BaseQuery):
     ...
@@ -71,7 +86,7 @@ class GetTelescopeStatusQueryHandler(BaseQueryHandler[GetTelescopeStatusQuery, d
             'oid': telescope.oid,
             'name': telescope.name,
             'connection_state': _status_connection_state(telescope, live),
-            'tracking_enabled': telescope.tracking_enabled,
+            'tracking_enabled': _status_tracking_enabled(telescope, live),
             'created_at': telescope.created_at.isoformat(),
             'alpaca_live': alpaca_live,
             'capabilities': capabilities,

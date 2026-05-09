@@ -112,3 +112,64 @@ async def test_status_connection_state_disconnected_when_alpaca_unreachable():
     )
     payload = await handler.handle(GetTelescopeStatusQuery())
     assert payload['connection_state'] == 'disconnected'
+
+
+@pytest.mark.asyncio
+async def test_status_tracking_enabled_follows_live_alpaca_when_connected():
+    telescope = Telescope()
+    telescope.set_tracking_enabled(True)
+    handler = GetTelescopeStatusQueryHandler(
+        telescope_repository=FakeRepo(telescope),
+        alpaca_client=FakeAlpacaClient(
+            AlpacaLiveSnapshot(
+                reachable=True,
+                connected=True,
+                tracking=False,
+                supports_slew=True,
+                supports_sync=True,
+                supports_tracking=True,
+                device_name='HW',
+            ),
+        ),
+    )
+    payload = await handler.handle(GetTelescopeStatusQuery())
+    assert payload['tracking_enabled'] is False
+
+
+@pytest.mark.asyncio
+async def test_status_tracking_enabled_false_when_scope_not_connected():
+    telescope = Telescope()
+    telescope.set_tracking_enabled(True)
+    handler = GetTelescopeStatusQueryHandler(
+        telescope_repository=FakeRepo(telescope),
+        alpaca_client=FakeAlpacaClient(
+            AlpacaLiveSnapshot(
+                reachable=True,
+                connected=False,
+                tracking=None,
+                supports_slew=True,
+                supports_sync=True,
+                supports_tracking=True,
+                device_name='HW',
+            ),
+        ),
+    )
+    payload = await handler.handle(GetTelescopeStatusQuery())
+    assert payload['tracking_enabled'] is False
+
+
+@pytest.mark.asyncio
+async def test_status_tracking_enabled_keeps_persisted_when_alpaca_unreachable():
+    telescope = Telescope()
+    telescope.set_tracking_enabled(True)
+    handler = GetTelescopeStatusQueryHandler(
+        telescope_repository=FakeRepo(telescope),
+        alpaca_client=FakeAlpacaClient(
+            AlpacaLiveSnapshot(
+                reachable=False,
+                error_hint='timeout',
+            ),
+        ),
+    )
+    payload = await handler.handle(GetTelescopeStatusQuery())
+    assert payload['tracking_enabled'] is True
