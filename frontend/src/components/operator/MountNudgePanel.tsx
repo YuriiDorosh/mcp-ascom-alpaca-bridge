@@ -195,6 +195,8 @@ export function MountNudgePanel(props: Props) {
   )
 
   const { raSec, decArcsec } = step
+  const hasRaStep = Math.abs(raSec) > 1e-9
+  const hasDecStep = Math.abs(decArcsec) > 1e-9
 
   return (
     <div className="panel panel--full mount-nudge-panel">
@@ -237,14 +239,31 @@ export function MountNudgePanel(props: Props) {
         </button>
       </div>
 
+      {!hasRaStep ? (
+        <p className="hint hint--callout mount-nudge-axis-gate">
+          This preset fixes <strong>ΔRA = 0</strong> (declination-only). <strong>E / W</strong> are inactive — switch to any
+          combined row or <strong>RA-only (~60° Eq)</strong> etc. East increases RA by the preset sidereal-second amount.
+        </p>
+      ) : null}
+      {!hasDecStep ? (
+        <p className="hint hint--callout mount-nudge-axis-gate">
+          This preset fixes <strong>ΔDec = 0</strong> (right-ascension only). <strong>N / S</strong> are inactive — pick a
+          combined or Declination preset for latitude bumps.
+        </p>
+      ) : null}
+
       <div className="mount-nudge-pad" aria-label="Equatorial jog pad">
         <div className="mount-nudge-grid">
           <span className="mount-nudge-spacer" />
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`North on Dec axis: +${decArcsec}″ declination`}
+            disabled={busy || !hasDecStep}
+            title={
+              hasDecStep
+                ? `North on Dec axis: +${decArcsec}″ declination`
+                : 'Preset has ΔDec=0 — choose a preset with ΔDec≠0'
+            }
             onClick={() => void nudge(0, decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -258,8 +277,10 @@ export function MountNudgePanel(props: Props) {
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`West: −${raSec}s sidereal RA`}
+            disabled={busy || !hasRaStep}
+            title={
+              hasRaStep ? `West: −${raSec}s sidereal RA` : 'Preset has ΔRA=0 — choose RA or combined preset for ~° east/west'
+            }
             onClick={() => void nudge(-raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -268,7 +289,7 @@ export function MountNudgePanel(props: Props) {
             <span className="mount-nudge-letter">W</span>
             <span className="mount-nudge-axis">−RA</span>
           </button>
-          <div className="mount-nudge-center" aria-hidden>
+          <div className="mount-nudge-center">
             <span className="mount-nudge-step-label">
               ΔRA {fmtRaSec(raSec)}
               <br />
@@ -279,8 +300,10 @@ export function MountNudgePanel(props: Props) {
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`East: +${raSec}s sidereal RA`}
+            disabled={busy || !hasRaStep}
+            title={
+              hasRaStep ? `East: +${raSec}s sidereal RA` : 'Preset has ΔRA=0 — choose RA or combined preset for ~° east/west'
+            }
             onClick={() => void nudge(raSec, 0)}
           >
             <span className="mount-nudge-arrow" aria-hidden>
@@ -294,8 +317,12 @@ export function MountNudgePanel(props: Props) {
           <button
             type="button"
             className="mount-nudge-btn mount-nudge-btn--dir"
-            disabled={busy}
-            title={`South on Dec axis: −${decArcsec}″ declination`}
+            disabled={busy || !hasDecStep}
+            title={
+              hasDecStep
+                ? `South on Dec axis: −${decArcsec}″ declination`
+                : 'Preset has ΔDec=0 — choose a preset with ΔDec≠0'
+            }
             onClick={() => void nudge(0, -decArcsec)}
           >
             <span className="mount-nudge-arrow" aria-hidden>

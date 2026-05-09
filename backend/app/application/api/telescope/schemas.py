@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic import model_validator
 
 
 class AlpacaLiveStatusSchema(BaseModel):
@@ -99,6 +100,16 @@ class NudgeEquatorialRequestSchema(BaseModel):
             '|Δ|≤648000″ allows up to ±180° before clamping prevents impossible latitudes.'
         ),
     )
+
+    @model_validator(mode='after')
+    def deltas_not_all_zero(self) -> 'NudgeEquatorialRequestSchema':
+        """Reject no-op payloads (common when SPA preset is ΔRA-only or ΔDec-only and user presses mixed axes)."""
+
+        if abs(float(self.delta_ra_sidereal_seconds)) < 1e-12 and abs(float(self.delta_dec_arcseconds)) < 1e-12:
+            raise ValueError(
+                'Both deltas are zero; use a preset with ΔRA≠0 before East/West or ΔDec≠0 before North/South.',
+            )
+        return self
 
 
 class NudgeEquatorialAckSchema(BaseModel):

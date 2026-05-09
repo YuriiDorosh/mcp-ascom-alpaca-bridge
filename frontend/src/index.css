@@ -134,6 +134,11 @@ textarea:focus-visible,
   flex-wrap: wrap;
 }
 
+.mount-nudge-axis-gate {
+  margin: 0 0 0.45rem;
+  font-size: 0.8rem;
+}
+
 .mount-nudge-orientation {
   margin: 0 0 0.45rem;
   padding: 0.52rem 0.65rem;

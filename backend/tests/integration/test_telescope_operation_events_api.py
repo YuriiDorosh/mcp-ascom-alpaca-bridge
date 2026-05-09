@@ -269,6 +269,18 @@ def test_nudge_equatorial_accepts_ra_twelve_sidereal_hours(monkeypatch):
     assert body['delta_ra_sidereal_seconds'] == 43_200.0
 
 
+def test_nudge_equatorial_validation_rejects_both_axes_zero(monkeypatch):
+    broker = RecordingBroker()
+    app = _build_test_app(broker, monkeypatch)
+    client = TestClient(app)
+
+    r = client.post(
+        '/telescopes/commands/nudge-equatorial',
+        json={'delta_ra_sidereal_seconds': 0.0, 'delta_dec_arcseconds': 0.0},
+    )
+    assert r.status_code == 422
+
+
 def test_nudge_equatorial_validation_rejects_ra_over_ceiling(monkeypatch):
     broker = RecordingBroker()
     app = _build_test_app(broker, monkeypatch)
