@@ -30,6 +30,19 @@ function headersJson(token?: string): Record<string, string> {
   }
 }
 
+/** Unauthenticated GET for system routes (`/health`, `/ready`) and similar. */
+export async function apiGet(path: string): Promise<unknown> {
+  const base = getApiBase()
+  const res = await fetch(`${base}${path}`, {
+    headers: { Accept: 'application/json' },
+  })
+  const text = await res.text()
+  if (!res.ok) {
+    throw new Error(`${res.status}: ${text || res.statusText}`)
+  }
+  return text ? JSON.parse(text) : null
+}
+
 export async function telescopeGet(path: string, token?: string): Promise<unknown> {
   const base = getApiBase()
   const res = await fetch(`${base}${path}`, {
