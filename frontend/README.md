@@ -18,6 +18,8 @@ The SPA can load **hardware readiness / overview** (`GET /telescopes/hardware/*`
 
 Use **Connect** under *Operator WebSocket* for pushed `telescope_status` updates (same payload shape as `GET /telescopes/status`). Use **Live view** to fetch `GET /telescopes/operator/live-view`; when the backend fills in `image_url`, the UI shows the frame (placeholder until Seestar/Alpaca camera integration lands).
 
+**MCP bootstrap & planning** load `/telescopes/tools/mcp-bootstrap` and `/telescopes/tools/mcp-planning-guide`. **MCP context** calls `/telescopes/context/mcp` with optional SIMBAD designation and ephemeris body. **ICRS → Alt/Az** uses `/telescopes/coordinates/radec-to-altaz` with observer latitude/longitude/elevation — set real site coordinates for meaningful horizons.
+
 Stop: `make down`.
 
 ## Full stack from repo root
