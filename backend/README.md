@@ -43,6 +43,7 @@ Prefer short-lived **`feature/<topic>` branches** merged into `main` via GitHub 
 - `make test-local` - run full suite in ephemeral Python 3.12 container (no running app container needed)
 - `make test-unit-local` - run unit tests in ephemeral Python 3.12 container
 - `make test-integration-local` - run integration tests in ephemeral Python 3.12 container
+- `make test-backend-local` - run unit + integration pytest in one ephemeral container (matches GitHub Actions CI; one Poetry install)
 - `make postman-smoke-local` - run Postman smoke collection via Newman (Docker, host network)
 - `make postman-smoke-up` - start backend + Kafka + model-service and run Newman smoke checks
 - `make postman-smoke-up-clean` - same as above, then stop stack (`down-dev-with-model`)
@@ -137,9 +138,8 @@ Recommended flows:
    - `make test-integration`
    - `make test-all`
 2. If app container is not running (CI-like local run):
-   - `make test-unit-local`
-   - `make test-integration-local`
-   - `make test-local`
+   - `make test-backend-local` — same footprint as CI (unit + integration, one Poetry install)
+   - or separately: `make test-unit-local` / `make test-integration-local`; full tree: `make test-local`
 
 The project is intentionally testable without telescope hardware while `ALPACA_ENABLED=false`.
 
